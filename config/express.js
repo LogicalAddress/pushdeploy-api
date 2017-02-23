@@ -12,7 +12,7 @@ module.exports = function(app, config) {
 	app.use(bodyParser.urlencoded({extended: true}));
 	app.use(compress());
 	
-	var middlewares = glob.sync(config.AppRoot + '/middlewares/*.js');
+	var middlewares = glob.sync(config.AppRoot + '/middlewares/**/*.js');
 	middlewares.forEach(function (middleware) {
 		require(middleware)(app);
 	});
