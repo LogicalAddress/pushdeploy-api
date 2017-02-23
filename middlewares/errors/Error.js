@@ -6,7 +6,8 @@ module.exports = function (app) {
 			res.status(500);
 			return res.render('505', {message: 'Martian Packet!'});
 		}else{
-			// return next(err);
+			console.log(err);
+			return next(err);
 		}
 	});
 };

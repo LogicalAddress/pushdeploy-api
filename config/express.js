@@ -22,7 +22,7 @@ module.exports = function(app, config) {
 		require(listener)(app);
 	});
 	
-	var controllers = glob.sync(config.AppRoot + '/routes/*/*.js');
+	var controllers = glob.sync(config.AppRoot + '/routes/**/*.js');
 	controllers.forEach(function (controller) { 
 		require(controller)(app);
 	});
