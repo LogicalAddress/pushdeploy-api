@@ -1,4 +1,5 @@
 var Domain = require('../../lib/whois/lib.js');
+var _ = require('underscore');
 
 	/*
 	* Whois Search (Using Enom)
@@ -15,12 +16,14 @@ module.exports = function (app) {
 		Domain.getCurrentNameServers({sld: domain[0], tld: domain[1] || 'com'}).then((result)=>{
     		res.status(200).json(result);
     	}).catch((error)=>{
-    		res.status(500).json(error);	
+    		res.status(500).json(error);
     	});
 	});
 	
 	app.put('/v1/whois/nameserver/:domain', (req, res, next) => {
-		Domain.setCustomNameServer({}).then((result)=>{
+		var domain = req.params.domain.split('.');
+		_.extend(req.body, {sld: domain[0], tld: domain[1]});
+		Domain.setCustomNameServer(req.body).then((result)=>{
     		res.status(200).json(result);
     	}).catch((error)=>{
     		res.status(500).json(error);	
@@ -29,6 +32,7 @@ module.exports = function (app) {
 	
 	app.get('/v1/whois/nameserver/ng/:domain', (req, res, next) => {
 		var domain = req.params.domain.split('.');
+		// Things to ponder about: ".com.ng" split would fail
 		res.status(200).json({message: "Not Implemented"});
 	});
 	
