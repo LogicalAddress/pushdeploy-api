@@ -4,9 +4,14 @@ var AppRoot = path.normalize(__dirname + '/..');
 
 var config = {
   development: {
+    AppName: 'TechPool',
+    AppDomain: "csc-dretnan.c9users.io",
     AppRoot: AppRoot,
     port: 3000,
-    storage: {
+    mongoStorage: {
+      url: 'mongodb://localhost:27017/techpool',
+    },
+    mysqlStorage: {
       url: 'mysql://root:@localhost/c9',
     },
     redis: {
@@ -15,10 +20,15 @@ var config = {
     }
   },
   test: {
+    AppName: 'TechPool',
+    AppDomain: "api.cargospace.co",
     AppRoot: AppRoot,
     port: 3000,
-    storage: {
-      url: 'mongodb://localhost:27017/nairabit',
+    mongoStorage: {
+      url: 'mongodb://localhost:27017/techpool',
+    },
+    mysqlStorage: {
+      url: 'mysql://root:@localhost/c9',
     },
     redis: {
       port: 6379,
@@ -26,10 +36,15 @@ var config = {
     }
   },
   production: {
+    AppName: 'TechPool',
+    AppDomain: "api.cargospace.co",
     AppRoot: AppRoot,
     port: 8080,
-    storage: {
-      url: process.env.DB_CONNECTION,
+    mongoStorage: {
+      url: process.env.MONGODB_URL,
+    },
+    mysqlStorage: {
+      url: process.env.MYSQL_URL,
     },
     redis: {
       port: 6379,
@@ -37,9 +52,6 @@ var config = {
     }
   }
 };
-
-config[env].AppName = 'LogicalMail';
-config[env].AppDomain = config[env].AppDomain || "logicalmail.ng";
 
 
 module.exports = config[env];

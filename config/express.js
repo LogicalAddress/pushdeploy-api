@@ -17,7 +17,7 @@ module.exports = function(app, config) {
 		require(middleware)(app);
 	});
 	
-	var listeners = glob.sync(config.AppRoot + '/listeners/*.js');
+	var listeners = glob.sync(config.AppRoot + '/listeners/**/*.js');
 	listeners.forEach(function (listener) {
 		require(listener)(app);
 	});

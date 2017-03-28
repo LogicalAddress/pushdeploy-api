@@ -1,7 +1,7 @@
 {
-  "name": "LogicalMail",
+  "name": "TechPool",
   "version": "0.0.0",
-  "description": "Mail API",
+  "description": "Various Tech Integration",
   "main": "server.js",
   "repository": "",
   "author": "Logical Address Ltd. <hello@logicaladdress.com>",

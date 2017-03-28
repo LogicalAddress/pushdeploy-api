@@ -30,7 +30,7 @@ module.exports = function (grunt) {
         multistr: true,
         esnext: true
       },
-      all: ['routes/**/*', 'lib/**/*', 'models', 'middlewares/**/*', 'config/*','listeners/*','spec/**/*.js']
+      all: ['routes/**/*js', 'lib/**/*.js', 'models/**/*.js', 'middlewares/**/*.js', 'config/**/*.js','listeners/**/*.js','spec/**/*.js']
     },
     watch: {
       options: {
@@ -41,10 +41,10 @@ module.exports = function (grunt) {
         files: [
           'server.js',
           'routes/**/*.js',
-          'config/*.js',
+          'config/**/*.js',
           'listeners/**/*.js',
           'lib/**/*.js',
-          'models/*.js',
+          'models/**/*.js',
           'spec/**/*.js',
           'middlewares/**/*.js'
         ],
