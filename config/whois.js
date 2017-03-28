@@ -4,13 +4,13 @@ var config = {
   development: {
     enom: {
         API_KEY: "API_KEY",
-        END_POINT: "https://resellertest.enom.com/interface.asp?uid=resellid&pw=resellpw&responsetype=json",
+        END_POINT: "https://resellertest.enom.com/interface.asp?uid=resellid&pw=resellpw&responsetype=xml",
     },
   },
   test: {
     enom: {
         API_KEY: "API_KEY",
-        END_POINT: "https://resellertest.enom.com/interface.asp?uid=resellid&pw=resellpw&responsetype=json",
+        END_POINT: "https://resellertest.enom.com/interface.asp?uid=resellid&pw=resellpw&responsetype=xml",
     },
   },
   production: {
