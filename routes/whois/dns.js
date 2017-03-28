@@ -19,6 +19,23 @@ module.exports = function (app) {
     	});
 	});
 	
+	app.put('/v1/whois/nameserver/:domain', (req, res, next) => {
+		Domain.setCustomNameServer({}).then((result)=>{
+    		res.status(200).json(result);
+    	}).catch((error)=>{
+    		res.status(500).json(error);	
+    	});
+	});
+	
+	app.get('/v1/whois/nameserver/ng/:domain', (req, res, next) => {
+		var domain = req.params.domain.split('.');
+		res.status(200).json({message: "Not Implemented"});
+	});
+	
+	app.put('/v1/whois/nameserver/ng/:domain', (req, res, next) => {
+    		res.status(200).json({message: "Not Implemented"});
+	});
+	
 	app.get('/v1/whois/configs', (req, res, next) => {
 		Domain.getDefaultConfigs().then((result)=>{
     		res.status(200).json(result);
