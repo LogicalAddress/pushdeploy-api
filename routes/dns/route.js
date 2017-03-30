@@ -2,7 +2,8 @@ var NameServer = require('../../lib/dns/lib.js');
 var _ = require('underscore');
 var checkCreateZone = require("../../validation/dns/CreateZone");
 var checkImportZone = require("../../validation/dns/ImportZone");
-var checkEditZone = require("../../validation/dns/EditZone");
+var checkEditZoneEntry = require("../../validation/dns/EditZoneEntry");
+var checkAddZoneEntry = require("../../validation/dns/AddZoneEntry");
 
 	/*
 	* NAME SERVERS with atomiadns
@@ -102,8 +103,20 @@ module.exports = function (app) {
 	* Edit a DNS record of a zone (Admin)
 	*/
 	
-	app.put('/v1/dns/zone/:zone/:id', checkEditZone, (req, res, next) => {
+	app.put('/v1/dns/zone/:zone/:id', checkEditZoneEntry, (req, res, next) => {
 		NameServer.EditDnsRecord(req.body).then((result)=>{
+    		res.status(200).json(result);
+    	}).catch((error)=>{
+    		res.status(500).json(error);
+    	});
+	});
+	
+	/*
+	* Add a single DNS record to a zone (Admin)
+	*/
+	
+	app.post('/v1/dns/zone/:zone', checkAddZoneEntry, (req, res, next) => {
+		NameServer.AddDnsRecord(req.body).then((result)=>{
     		res.status(200).json(result);
     	}).catch((error)=>{
     		res.status(500).json(error);

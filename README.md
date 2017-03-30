@@ -14,3 +14,5 @@ curl -H "Content-Type: application/json" -X POST -d '{"name":"plateauunited.net"
 curl -X "DELETE" http://techpool-dretnan.c9users.io/v1/dns/zone/gorilla.net
 
 curl -X PUT -H "Content-Type: application/json" -d '{"name":"plateauunited.net", "rdata": "ns1.cargospace.co admin.ns1.cargospace.co %serial 10800 3600 604800 86400", "id": "18", "type":"SOA","class":"IN","ttl":"3600","label":"@"}' techpool-dretnan.c9users.io/v1/dns/zone/plateauunited.net/18
+
+curl -X POST -H "Content-Type: application/json" -d '{"name":"plateauunited.net", "rdata": "192.168.50.1", "type":"A","class":"IN","ttl":"3600","label":"plateauunited.net"}' techpool-dretnan.c9users.io/v1/dns/zone/plateauunited.net
