@@ -7,12 +7,13 @@ var config = {
     AppName: 'TechPool',
     AppDomain: "csc-dretnan.c9users.io",
     AppRoot: AppRoot,
+    PoolSize: 1000000000,
     port: 3000,
     mongoStorage: {
       url: 'mongodb://localhost:27017/techpool',
     },
     mysqlStorage: {
-      url: 'mysql://root:@localhost/c9',
+      url: 'mysql://dretnan:@localhost/c9',
     },
     redis: {
       port: 6379,
@@ -23,12 +24,13 @@ var config = {
     AppName: 'TechPool',
     AppDomain: "api.cargospace.co",
     AppRoot: AppRoot,
+    PoolSize: 1000000000,
     port: 3000,
     mongoStorage: {
       url: 'mongodb://localhost:27017/techpool',
     },
     mysqlStorage: {
-      url: 'mysql://root:@localhost/c9',
+      url: 'mysql://dretnan:@localhost/c9',
     },
     redis: {
       port: 6379,
@@ -39,6 +41,7 @@ var config = {
     AppName: 'TechPool',
     AppDomain: "api.cargospace.co",
     AppRoot: AppRoot,
+    PoolSize: 1000000000,
     port: 8080,
     mongoStorage: {
       url: process.env.MONGODB_URL,
