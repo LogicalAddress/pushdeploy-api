@@ -82,6 +82,21 @@ module.exports = function (app) {
     	});
 	});
 	
+	/*
+	* Delete a DNS record (Admin)
+	*/
+	
+	app.delete('/v1/dns/zone/:zone/:id', (req, res, next) => {
+		NameServer.DeleteDnsRecord({
+			name: req.params.zone,
+			id: req.params.id
+		}).then((result)=>{
+    		res.status(200).json(result);
+    	}).catch((error)=>{
+    		res.status(500).json(error);
+    	});
+	});
+	
 	
 	/*
 	* User Owned Root zone
