@@ -1,6 +1,7 @@
 var NameServer = require('../../lib/dns/lib.js');
 var _ = require('underscore');
 var checkCreateZone = require("../../validation/dns/CreateZone");
+var checkImportZone = require("../../validation/dns/ImportZone");
 
 	/*
 	* NAME SERVERS with atomiadns
@@ -56,6 +57,31 @@ module.exports = function (app) {
     		res.status(500).json(error);
     	});
 	});
+	
+	/*
+	* Export zone (Admin)
+	*/
+	
+	app.get('/v1/dns/zone/export/:zone', (req, res, next) => {
+		NameServer.GetZoneBinary(req.params.zone).then((result)=>{
+    		res.status(200).json(result);
+    	}).catch((error)=>{
+    		res.status(500).json(error);
+    	});
+	});
+	
+	/*
+	* Import zone (Admin)
+	*/
+	
+	app.post('/v1/dns/zone/import', checkImportZone, (req, res, next) => {
+		NameServer.RestoreZoneBinary(req.body).then((result)=>{
+    		res.status(200).json(result);
+    	}).catch((error)=>{
+    		res.status(500).json(error);
+    	});
+	});
+	
 	
 	/*
 	* User Owned Root zone
