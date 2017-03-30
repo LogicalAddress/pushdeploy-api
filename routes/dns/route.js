@@ -2,6 +2,7 @@ var NameServer = require('../../lib/dns/lib.js');
 var _ = require('underscore');
 var checkCreateZone = require("../../validation/dns/CreateZone");
 var checkImportZone = require("../../validation/dns/ImportZone");
+var checkEditZone = require("../../validation/dns/EditZone");
 
 	/*
 	* NAME SERVERS with atomiadns
@@ -91,6 +92,18 @@ module.exports = function (app) {
 			name: req.params.zone,
 			id: req.params.id
 		}).then((result)=>{
+    		res.status(200).json(result);
+    	}).catch((error)=>{
+    		res.status(500).json(error);
+    	});
+	});
+	
+	/*
+	* Edit a DNS record of a zone (Admin)
+	*/
+	
+	app.put('/v1/dns/zone/:zone/:id', checkEditZone, (req, res, next) => {
+		NameServer.EditDnsRecord(req.body).then((result)=>{
     		res.status(200).json(result);
     	}).catch((error)=>{
     		res.status(500).json(error);
