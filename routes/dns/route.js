@@ -46,6 +46,18 @@ module.exports = function (app) {
 	});
 	
 	/*
+	* Delete zone (Admin)
+	*/
+	
+	app.delete('/v1/dns/zone/:zone', (req, res, next) => {
+		NameServer.DeleteZone(req.params.zone).then((result)=>{
+    		res.status(200).json(result);
+    	}).catch((error)=>{
+    		res.status(500).json(error);
+    	});
+	});
+	
+	/*
 	* User Owned Root zone
 	*/
 	
