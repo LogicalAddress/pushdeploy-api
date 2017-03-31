@@ -8,6 +8,7 @@ var Transaction = sequelize.import(config.AppRoot + "/models/mysql/Transaction")
 User.sync({force: true});
 Account.sync({force: true});
 Transaction.sync({force: true});
+
 sequelize.sync({force: true}).then(() =>{
     setTimeout(()=>{
         require("../lib/scripts/VirtualUser")();    

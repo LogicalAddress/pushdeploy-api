@@ -5,7 +5,7 @@ var AppRoot = path.normalize(__dirname + '/..');
 var config = {
   development: {
     AppName: 'TechPool',
-    AppDomain: "csc-dretnan.c9users.io",
+    AppDomain: "http://techpool-dretnan.c9users.io",
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: 3000,
@@ -22,7 +22,7 @@ var config = {
   },
   test: {
     AppName: 'TechPool',
-    AppDomain: "api.cargospace.co",
+    AppDomain: "http://techpool-dretnan.c9users.io",
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: 3000,
