@@ -6,7 +6,7 @@ module.exports = function(){
     process.on('user_created', function(user){
     	Account.create({
             userId: user.id,
-            accountType: AccountCode.SECONDARY,
+            accountType: AccountCode.USD,
             previousBalance: 0,
             currentBalance: user.userType == "virtual" ? AppConfig.PoolSize : 0,
         }).then(function(result){

@@ -1,6 +1,6 @@
 var Account = require('../../lib/Account');
 var Transaction = require('../../lib/Transaction');
-var AppLib = require('../../lib/AppLib');
+var AppLib = require('../../lib/account/helper');
 
 module.exports = function(){
     process.on('fundAccount', function(data){

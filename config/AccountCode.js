@@ -1,4 +1,6 @@
 module.exports = {
-    PRIMARY: '001',
-    SECONDARY: '002',
+    NGN: '001',
+    USD: '002',
+    GBP: '003',
+    EUR: '004',
 };

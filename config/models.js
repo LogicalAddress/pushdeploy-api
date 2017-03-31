@@ -5,9 +5,9 @@ var User = sequelize.import(config.AppRoot + "/models/mysql/User");
 var Account = sequelize.import(config.AppRoot + "/models/mysql/Account");
 var Transaction = sequelize.import(config.AppRoot + "/models/mysql/Transaction");
 
-User.sync({force: true});
-Account.sync({force: true});
-Transaction.sync({force: true});
+// User.sync({force: true});
+// Account.sync({force: true});
+// Transaction.sync({force: true});
 
 sequelize.sync({force: true}).then(() =>{
     setTimeout(()=>{

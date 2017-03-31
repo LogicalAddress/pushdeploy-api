@@ -1,4 +1,4 @@
-var AppLib = require('../../lib/AppLib');
+var AppLib = require('../../lib/account/helper');
 var AccountCode = require("../../config/AccountCode");
 
 module.exports = function (context, DataTypes) {
@@ -32,15 +32,24 @@ module.exports = function (context, DataTypes) {
         paranoid: true, // Allow Cascade Delete
     });
     Account.beforeCreate(function(account, options) {
-        if(account.accountType == AccountCode.PRIMARY){
-            return AppLib.generatePrimaryAccountNumber().then(function (accountNumber) {
+        if(account.accountType == AccountCode.NGN){
+            return AppLib.generateNairaAccountNumber().then(function (accountNumber) {
                 account.accountNumber = accountNumber;
             });
-        }else if(account.accountType == AccountCode.SECONDARY){
-            return AppLib.getSecondaryAccount().then(function (accountNumber) {
+        }else if(account.accountType == AccountCode.USD){
+            return AppLib.generateDollarAccountNumber().then(function (accountNumber) {
+                account.accountNumber = accountNumber;
+            });
+        }else if(account.accountType == AccountCode.GBP){
+            return AppLib.generatePoundAccountNumber().then(function (accountNumber) {
+                account.accountNumber = accountNumber;
+            });
+        }else if(account.accountType == AccountCode.EUR){
+            return AppLib.generateEuroAccountNumber().then(function (accountNumber) {
                 account.accountNumber = accountNumber;
             });
         }else{
+            if(account.accountNumber) return; //support for other currencies
             throw new Error("Invalid AccountType");
         }
     });

@@ -9,6 +9,14 @@ module.exports = function (context, DataTypes) {
             type: DataTypes.STRING,
             unique: true  
         },
+        userType: {
+            type: DataTypes.STRING,
+            default: 'customer',
+        },
+        currency: {
+            type: DataTypes.STRING,
+            default: 'NGN',
+        },
         credit_card_number: {
             type: DataTypes.STRING,
             default: '',
@@ -28,10 +36,6 @@ module.exports = function (context, DataTypes) {
         credit_card_cvv: {
             type: DataTypes.STRING,
             default: '',
-        },
-        currency: {
-            type: DataTypes.STRING,
-            default: 'NGN',
         },
     }, {
         paranoid: true, // Allow Cascade Delete
