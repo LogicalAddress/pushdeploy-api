@@ -1,4 +1,4 @@
-var Domain = require('../../lib/whois/lib.js');
+var Domain = require('../../lib/whois/enom.js');
 
 	/*
 	* Whois Search (Using Enom)

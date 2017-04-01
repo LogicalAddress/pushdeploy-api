@@ -7,15 +7,29 @@ module.exports = function (context, DataTypes) {
         },
         uid: {
             type: DataTypes.STRING,
-            unique: true  
+            unique: true   //not changeable, would be used across DBs/Servers (mongo) as this user's identifier
         },
         userType: {
             type: DataTypes.STRING,
             default: 'customer',
         },
+        mobileNumber: {
+            type: DataTypes.STRING,
+            unique: true  //could change
+        },
+        email: {
+            type: DataTypes.STRING,
+            unique: true  //could change
+        },
+        password: {
+            type:DataTypes.STRING,
+        },
+        name: {
+            type: DataTypes.STRING,
+        },
         currency: {
             type: DataTypes.STRING,
-            default: 'NGN',
+            default: 'NGN', //see config/AccountCode.js to see what i mean.
         },
         credit_card_number: {
             type: DataTypes.STRING,

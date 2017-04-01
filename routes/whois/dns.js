@@ -1,4 +1,4 @@
-var Domain = require('../../lib/whois/lib.js');
+var Domain = require('../../lib/whois/enom.js');
 var _ = require('underscore');
 
 	/*
