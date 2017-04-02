@@ -1,0 +1,10 @@
+{
+  "spec_dir": "spec",
+  "spec_files": [
+    "unit/**/*.js",
+    "integration/**/*.js"
+  ],
+  "helpers": [
+    "../server.js"
+  ]
+}
