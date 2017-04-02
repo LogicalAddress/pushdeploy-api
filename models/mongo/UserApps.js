@@ -8,6 +8,7 @@ var UserAppSchema = new Schema({
 		index: true,
 		required : true
 	},
+	server: { type: Schema.ObjectId, ref: 'user_server', required : true, index: true},
 	// for managing nodejs's template variation see: https://pypi.python.org/pypi/nodeenv/
 	app_name: { type: String, default: 'default'},
 	port: { type: String, default: '3000'}, //as more nodejs apps are addded, we port++

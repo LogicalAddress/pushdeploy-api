@@ -23,4 +23,4 @@ var UserServerSchema = new Schema({
 
 UserServerSchema.set('autoIndex', true);
 
-module.exports.UserServerModel = mongoose.model('user_server', UserServerSchema);
+module.exports = mongoose.model('user_server', UserServerSchema);
