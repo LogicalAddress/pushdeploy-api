@@ -13,14 +13,16 @@
     "glob": "^7.1.1",
     "hat": "0.0.3",
     "method-override": "^2.3.7",
+    "mongoose": "^4.9.2",
     "morgan": "^1.8.1",
     "mysql": "^2.13.0",
+    "namecheap-api": "^1.0.5",
     "pg": "^6.1.2",
     "redis": "^2.6.5",
-    "underscore": "^1.8.3",
-    "xml2json": "^0.11.0",
     "sequelize": "^3.30.2",
-    "sequelize-cli": "^2.5.1"
+    "sequelize-cli": "^2.5.1",
+    "underscore": "^1.8.3",
+    "xml2json": "^0.11.0"
   },
   "devDependencies": {
     "grunt": "~0.4.5",

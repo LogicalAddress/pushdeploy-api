@@ -1,3 +1,9 @@
+## Start Mysql
+`sudo service mysql start
+
+## Start Mongodb
+`./mongod
+
 // http://ns1.cargospace.co/wsdl-atomiadns.wsdl
 // http://atomia.github.io/atomiadns/apidocs.html
 
