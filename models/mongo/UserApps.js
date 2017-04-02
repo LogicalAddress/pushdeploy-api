@@ -25,4 +25,4 @@ var UserAppSchema = new Schema({
 
 UserAppSchema.set('autoIndex', true);
 
-module.exports.UserAppModel = mongoose.model('user_app', UserAppSchema);
+module.exports = mongoose.model('user_app', UserAppSchema);
