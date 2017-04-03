@@ -3,7 +3,7 @@ var UserApp = require("../../lib/userspace/UserApps");
 var userserver1 = null;
 var userserver2 = null;
 
-describe("UserServer", () => {
+describe("UserServer1", () => {
     
     describe("Create", () => {
         var record;
@@ -29,7 +29,37 @@ describe("UserServer", () => {
         });
         it(":", (done)=>{
             expect(record).not.toBe(null);
+            expect(record.uid).not.toBe(null);
+            expect(record.uid).toEqual("gorilla");
             expect(record.server_name).toEqual("gorilla");
+            done();
+        });
+    });
+    
+    
+    describe("Create with UID Missing", () => {
+        var record;
+        beforeEach((done) => {
+            setTimeout(()=>{
+                UserServer.create({
+                    server_name: "gorilla",
+                    private_key: 'priv',
+                    public_key: 'pub',
+                    provider: 'cargohost',
+                }).then((response)=>{
+                   record = response;
+                   userserver1 = response;
+                   done();
+                }).catch((err)=>{
+                    done();
+                });
+            }, 2000);
+        });
+        afterEach(()=>{
+            record = null;
+        });
+        it(":", (done)=>{
+            expect(record).toBe(null);
             done();
         });
     });
@@ -60,14 +90,14 @@ describe("UserServer", () => {
     describe("FindOne", () => {
         var record;
         beforeEach((done) => {
-            setTimeout(()=>{
+            // setTimeout(()=>{
                 UserServer.findOne({server_name: 'gorilla'}).then((response)=>{
                    record = response;
                    done();
                 }).catch((err)=>{
                     done();
                 });
-            }, 2000);
+            // }, 2000);
         });
         afterEach(()=>{
             record = null;
@@ -75,6 +105,27 @@ describe("UserServer", () => {
         it(":", (done)=>{
             expect(record).not.toBe(null);
             expect(record.server_name).toEqual("gorilla");
+            done();
+        });
+    });
+    
+    describe("FindOne", () => {
+        var record;
+        beforeEach((done) => {
+            // setTimeout(()=>{
+                UserServer.findOne({server_name: 'gorillax'}).then((response)=>{
+                   record = response;
+                   done();
+                }).catch((err)=>{
+                    done();
+                });
+            // }, 2000);
+        });
+        afterEach(()=>{
+            record = null;
+        });
+        it(":", (done)=>{
+            expect(record).toBe(null);
             done();
         });
     });
