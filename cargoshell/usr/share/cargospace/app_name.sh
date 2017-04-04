@@ -1,6 +1,8 @@
 #!/bin/sh
-export PORT="8000"
 
+# load user provided environment variable first, so we can overite bad onces.
+
+export PORT="8000"
 # Call node directly or use forever
 # Also ensure that this script has a 755 permission
 # /usr/bin/nodejs /usr/lib/atomiadns/webapp/atomiadns.js
