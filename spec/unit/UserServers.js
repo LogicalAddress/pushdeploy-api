@@ -47,9 +47,9 @@ describe("UserServer1", () => {
                     public_key: 'pub',
                     provider: 'cargohost',
                 }).then((response)=>{
-                   record = response;
-                   userserver1 = response;
-                   done();
+                  record = response;
+                  userserver1 = response;
+                  done();
                 }).catch((err)=>{
                     done();
                 });

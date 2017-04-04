@@ -24,8 +24,9 @@ describe("UserApp", () => {
                 });
             }, 2000);
         });
-        afterEach(()=>{
+        afterEach((done)=>{
             record = null;
+            done();
         });
         it(":", (done)=>{
             expect(record).not.toBe(null);
@@ -43,9 +44,9 @@ describe("UserApp", () => {
                     app_name: "monkey",
                     server: userserver1._id,
                 }).then((response)=>{
-                   record = response;
-                   userapp1 = response;
-                   done();
+                  record = response;
+                  userapp1 = response;
+                  done();
                 }).catch((err)=>{
                     done();
                 });
@@ -70,8 +71,8 @@ describe("UserApp", () => {
         beforeEach((done) => {
             setTimeout(()=>{
                 UserApp.findAll().then((response)=>{
-                   record = response;
-                   done();
+                  record = response;
+                  done();
                 }).catch((err)=>{
                     done();
                 });
@@ -94,8 +95,8 @@ describe("UserApp", () => {
         beforeEach((done) => {
             setTimeout(()=>{
                 UserApp.findOne({app_name: 'monkey'}).then((response)=>{
-                   record = response;
-                   done();
+                  record = response;
+                  done();
                 }).catch((err)=>{
                     done();
                 });
@@ -116,8 +117,8 @@ describe("UserApp", () => {
         beforeEach((done) => {
             setTimeout(()=>{
                 UserApp.findById(userapp1._id).then((response)=>{
-                   record = response;
-                   done();
+                  record = response;
+                  done();
                 }).catch((err)=>{
                     done();
                 });
@@ -143,8 +144,8 @@ describe("Delete UserServers", () => {
         beforeEach((done) => {
             setTimeout(()=>{
                 UserServer.delete({_id: userserver1._id}).then((response)=>{
-                   record = response;
-                   done();
+                  record = response;
+                  done();
                 }).catch((err)=>{
                     done();
                 });
@@ -165,8 +166,8 @@ describe("Delete UserServers", () => {
         beforeEach((done) => {
             setTimeout(()=>{
                 UserApp.delete({_id: userapp1._id}).then((response)=>{
-                   record = response;
-                   done();
+                  record = response;
+                  done();
                 }).catch((err)=>{
                     done();
                 });
