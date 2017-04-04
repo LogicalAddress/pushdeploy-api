@@ -85,7 +85,6 @@ describe("UserApp", () => {
             expect(record.length).toEqual(1);
             expect(record[0].app_name).toEqual("monkey");
             expect(record[0].server.server_name).toEqual('gorilla');
-            console.log(record);
             done();
         });
     });
