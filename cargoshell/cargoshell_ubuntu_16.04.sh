@@ -1,7 +1,8 @@
 #!/bin/bash
 
-SCRIPT_DIR=pwd
+SCRIPT_DIR=pwd                  #TODO: This is so wrong
 GUSER="userspace"				#sudoer
+LTS_NODE_VERSION="6.10.2"           # LTS
 
 
 # Called at the end of every function
@@ -22,7 +23,7 @@ function _install_sshd {
 }
 
 function _create_user {
-    useradd --groups sudo,www-data --shell /bin/bash --user-group --create-home --home-dir /home/$GUSER $GUSER
+    useradd --groups sudo,www-data --password="" --shell /bin/bash --user-group --create-home --home-dir /home/$GUSER $GUSER
     if [ $? == 0 ]; then
 	    echo "Successfully created user $GUSER"
 	fi
@@ -30,6 +31,7 @@ function _create_user {
 	touch /home/$GUSER/.cargospace/$APP_NAME.sh
 	touch /home/$GUSER/.cargospace/$APP_NAME.log
 	mkdir -p /usr/share/cargospace/startups
+	mkdir -p /usr/share/cargospace/venv/$TEMPLATE
 	
 	
 	chmod +x /home/$GUSER/.cargospace/$APP_NAME.sh && chmod 777 /home/$GUSER/.cargospace/$APP_NAME.sh  # User exported variables
@@ -41,6 +43,7 @@ function _create_user {
 	# Storage Path for CargSpace Files
 	chown -R $GUSER:$GUSER /home/$GUSER/.cargospace && chmod -R 777 /home/$GUSER/.cargospace
 	chown -R $GUSER:$GUSER /usr/share/cargospace/startups && chmod 777 /usr/share/cargospace/startups
+	chown -R $GUSER:$GUSER /usr/share/cargospace/venv/$TEMPLATE && chmod 777 /usr/share/cargospace/venv/$TEMPLATE
 	
 	# Create Key-Pair for this user
 	mkdir -p /home/$GUSER/.ssh && ssh-keygen -t rsa -C "$USER@`hostname`" -N "" -f /home/$GUSER/.ssh/id_rsa && chown -R $GUSER:$GUSER /home/$GUSER/.ssh
@@ -76,17 +79,31 @@ function _restart_nginx {
 
 # template_setup family of functions
 function nodejs_setup {
-    cd $HOME
-    git clone $REPOSITORY $APP_NAME
-    cd $APP_NAME
+    
+    cd /usr/share/cargospace/venv/$TEMPLATE
+    pip install nodeenv # install node virtual environment manager
+    local VERSION=''
+    if [ "$NODE_VERSION" = "" ]
+    then
+       VERSION=$LTS_NODE_VERSION
+    else
+       VERSION=$NODE_VERSION
+    fi
+    
+    nodeenv --node=$VERSION $APP_NAME # Every App with its virtual environment
+    . $APP_NAME/bin/activate
+    cd /home/$GUSER && git clone $REPOSITORY $APP_NAME #TODO Run this command as $GUSER
+    cd $APP_NAME && git checkout $BRANCH
     npm install
+    deactivate_node
+    
 echo -e "#!/bin/sh
 # load user provided environment variable first, so we can overite bad onces.
 source /home/$GUSER/.cargospace/$APP_NAME.sh
 export PORT="$PORT"
 export IP="0.0.0.0"
-# TODO Call node directly or use forever
-/usr/bin/nodejs /usr/lib/atomiadns/webapp/atomiadns.js
+# Call node directly or use foreverjs
+/usr/share/cargospace/venv/$TEMPLATE/$APP_NAME/bin/shim /home/$GUSER/$APP_NAME/$SERVER_ENTRY_POINT
 " > /usr/share/cargospace/startups/$APP_NAME.sh && chmod 755 /usr/share/cargospace/startups/$APP_NAME.sh
 
 echo -e "[Unit]
