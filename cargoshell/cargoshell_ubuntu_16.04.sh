@@ -61,7 +61,8 @@ function nodejs_runserver {
 
 # template_create_nginx_entry family of functions
 function nodejs_create_nginx_entry {
-    appConfig="/etc/nginx/sites-available/$APP_NAME"
+    local appConfig="/etc/nginx/sites-available/$APP_NAME"
+    local SERVER_INFO=""
     if [ $APP_NAME == 'default' ]; then
         SERVER_INFO=`echo -e "
         listen 80 default_server;
@@ -115,8 +116,8 @@ function nodejs_create_nginx_entry {
 
 # template_add_nginx_entry_for_socket family of functions
 function nodejs_add_nginx_entry_for_socket {
-    tmpFile="/etc/nginx/sites-available/qtmp"
-    appConfig="/etc/nginx/sites-available/$APP_NAME"
+    local tmpFile="/etc/nginx/sites-available/qtmp"
+    local appConfig="/etc/nginx/sites-available/$APP_NAME"
     echo -e "
     map \$http_upgrade \$connection_upgrade {
         default upgrade;
@@ -135,7 +136,7 @@ function nodejs_add_nginx_entry_for_socket {
 
 # template_delete_nginx_entry_for_socket family of functions
 function nodejs_delete_nginx_entry_for_socket {
-    appConfig="/etc/nginx/sites-available/$APP_NAME"
+    local appConfig="/etc/nginx/sites-available/$APP_NAME"
     sed -i '1,9d' /etc/nginx/sites-available/$APP_NAME
     sed -i 's/\(proxy_http_version\)/# &/' $appConfig
     sed -i 's/\(proxy_set_header Upgrade\)/# &/' $appConfig
@@ -147,7 +148,7 @@ function nodejs_delete_nginx_entry_for_socket {
 # template_add_nginx_entry_with_ssl family of functions
 function nodejs_add_nginx_entry_with_ssl {
     # Redirect all http to https
-    appConfig="/etc/nginx/sites-available/$APP_NAME"
+    local appConfig="/etc/nginx/sites-available/$APP_NAME"
     if [ $APP_NAME == 'default' ]; then
         exit 1 #Sorry, only for valid domain names ssl is allocated.
     fi
@@ -156,8 +157,8 @@ function nodejs_add_nginx_entry_with_ssl {
     # ssl_certificate /etc/letsencrypt/live/cargospace.ng/fullchain.pem;
     # ssl_certificate_key /etc/letsencrypt/live/cargospace.ng/privkey.pem;
     # TODO: write a function to generate a certificate 
-    sslCertificate="/etc/letsencrypt/live/$APP_NAME/fullchain.pem;"
-    $sslCertificateKey="/etc/letsencrypt/live/$APP_NAME/privkey.pem;"
+    local sslCertificate="/etc/letsencrypt/live/$APP_NAME/fullchain.pem;"
+    local $sslCertificateKey="/etc/letsencrypt/live/$APP_NAME/privkey.pem;"
     sed -i 's/listen 80/listen 443 ssl/' $appConfig # listen 443 ssl;
     sed -i 's/\(listen \[\:\:\]\:80\)/# &/' $appConfig # Comment out this line. Not Needed
     # sed -i "s/\(server_name\) \($APP_NAME\)/\1 \2 www.$APP_NAME/" $appConfig
@@ -178,7 +179,7 @@ function nodejs_add_nginx_entry_with_ssl {
 
 # template_delete_nginx_entry_with_ssl family of functions
 function nodejs_delete_nginx_entry_with_ssl {
-    appConfig="/etc/nginx/sites-available/$APP_NAME"
+    local appConfig="/etc/nginx/sites-available/$APP_NAME"
     sed -i 's/listen 443 ssl/listen 80/' $appConfig
     sed -i 's/\(#\) \(listen \[\:\:\]\:80\)/\2/' $appConfig
     sed -i 's/ssl_certificate \/.*$/ssl_certificate;/' $appConfig
@@ -189,4 +190,16 @@ function nodejs_delete_nginx_entry_with_ssl {
     sed -i -n -e :a -e '1,7!{P;N;D;};N;ba' $appConfig
     
     restart_nginx
+}
+
+function _create_ssl {
+    if [ $CERT_TYPE == "letsencrypt" ]; then
+        certbot certonly -d $APP_NAME -d www.$APP_NAME
+        # TODO: Create a Crontab to renew certificate at least ones a weak for those due
+        return $CERT_TYPE
+    else
+        echo "Invalid CERT_TYPE $CERT_TYPE"
+        exit 1
+    fi
+    
 }

@@ -1,0 +1,8 @@
+[Unit]
+Description=nodejs-APP_NAME Server
+[Service]
+ExecStart=/bin/sh -c '/usr/share/cargospace/app_name.sh >> /var/log/app_name.log 2>&1'
+Restart=on-failure
+RestartSec=60s
+[Install]
+WantedBy=multi-user.target
