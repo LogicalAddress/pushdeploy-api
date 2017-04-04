@@ -1,36 +1,77 @@
 #!/bin/bash
 
 SCRIPT_DIR=pwd
-USER="userspace"				#sudoer
+GUSER="userspace"				#sudoer
+
+
+# Called at the end of every function
+function _return_to_script_dir {
+    cd $SCRIPT_DIR #return to script dir
+}
+
+
+function _install_nginx {
+    apt-get install nginx
+	update-rc.d nginx defaults
+	rm /etc/nginx/sites-enabled/default 2> /dev/null
+	ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+}
+
+function _install_sshd {
+    apt install openssh-server
+}
+
+function _create_user {
+    useradd --groups sudo,www-data --shell /bin/bash --user-group --create-home --home-dir /home/$GUSER $GUSER
+    if [ $? == 0 ]; then
+	    echo "Successfully created user $GUSER"
+	fi
+	mkdir -p /home/$GUSER/.cargospace
+	touch /home/$GUSER/.cargospace/$APP_NAME.sh
+	touch /home/$GUSER/.cargospace/$APP_NAME.log
+	mkdir -p /usr/share/cargospace/startups
+	
+	
+	chmod +x /home/$GUSER/.cargospace/$APP_NAME.sh && chmod 777 /home/$GUSER/.cargospace/$APP_NAME.sh  # User exported variables
+	chown $GUSER:$GUSER /home/$GUSER/.cargospace/$APP_NAME.sh
+	
+	chmod 777 /home/$GUSER/.cargospace/$APP_NAME.log
+	chown $GUSER:$GUSER /home/$GUSER/.cargospace/$APP_NAME.log
+	
+	# Storage Path for CargSpace Files
+	chown -R $GUSER:$GUSER /home/$GUSER/.cargospace && chmod -R 777 /home/$GUSER/.cargospace
+	chown -R $GUSER:$GUSER /usr/share/cargospace/startups && chmod 777 /usr/share/cargospace/startups
+	
+	# Create Key-Pair for this user
+	mkdir -p /home/$GUSER/.ssh && ssh-keygen -t rsa -C "$USER@`hostname`" -N "" -f /home/$GUSER/.ssh/id_rsa && chown -R $GUSER:$GUSER /home/$GUSER/.ssh
+	# worker@cargospace.co's public key to be entered in /home/$GUSER/ssh/autoriz... from our nodejs server
+}
+
+function _create_ssl {
+    if [ $CERT_TYPE == "letsencrypt" ]; then
+        certbot certonly -d $APP_NAME -d www.$APP_NAME
+        # TODO: Create a Crontab to renew certificate at least ones a weak for those due
+        return $CERT_TYPE
+    else
+        echo "Invalid CERT_TYPE $CERT_TYPE"
+        exit 1
+    fi
+}
 
 # create a user with super cow powers (First Time Execution)
 function setup_server {
     apt-get update
-    adduser $USER
-    if [ $? == 0 ]; then
-	echo "Successfully created user $USER"
-	fi
-	usermod -G admin $USER
-	if [ $? == 0 ]; then
-	echo "Successfully added $USER to sudoer"
-	fi
 	# todo: Copy public key to user's directory
-	apt-get install nginx
-	update-rc.d nginx defaults
-	rm /etc/nginx/sites-enabled/default 2> /dev/null
-	ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+	_install_nginx
+	_install_sshd
 	openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+	_create_user
+# 	echo "" | sudo -S service php5.6-fpm reload
 }
 
-# Called at the end of every function
-function return_to_script_dir {
-    cd $SCRIPT_DIR #return to script dir
-}
-
-function restart_nginx {
-    # TODO how to run this command without reading password from stdin
-    sudo service nginx reload
-    sudo service nginx restart
+function _restart_nginx {
+    service nginx reload
+    service nginx restart
 }
 
 # template_setup family of functions
@@ -39,7 +80,28 @@ function nodejs_setup {
     git clone $REPOSITORY $APP_NAME
     cd $APP_NAME
     npm install
-    return_to_script_dir
+echo -e "#!/bin/sh
+# load user provided environment variable first, so we can overite bad onces.
+source /home/$GUSER/.cargospace/$APP_NAME.sh
+export PORT="$PORT"
+export IP="0.0.0.0"
+# TODO Call node directly or use forever
+/usr/bin/nodejs /usr/lib/atomiadns/webapp/atomiadns.js
+" > /usr/share/cargospace/startups/$APP_NAME.sh && chmod 755 /usr/share/cargospace/startups/$APP_NAME.sh
+
+echo -e "[Unit]
+Description=$TEMPLATE-$APP_NAME Service
+[Service]
+ExecStart=/bin/sh -c '/usr/share/cargospace/startups/$APP_NAME.sh >> /home/$GUSER/.cargospace/$APP_NAME.log 2>&1'
+Restart=on-failure
+RestartSec=60s
+[Install]
+WantedBy=multi-user.target
+" > /lib/systemd/system/$TEMPLATE-$APP_NAME.service && chmod 755 /lib/systemd/system/$TEMPLATE-$APP_NAME.service
+
+    systemctl enable $TEMPLATE-$APP_NAME.service
+    systemctl start $TEMPLATE-$APP_NAME.service
+    _return_to_script_dir
 }
 
 # template_deploy family of functions
@@ -47,7 +109,7 @@ function nodejs_deploy {
     cd $HOME
     cd $APP_NAME
     git pull
-    return_to_script_dir
+    _return_to_script_dir
 }
 
 # template_runserver family of functions
@@ -56,7 +118,7 @@ function nodejs_runserver {
     cd $APP_NAME
     git checkout $APP_BRANCH #just incase
     # TODO run or restart forever here
-    return_to_script_dir
+    _return_to_script_dir
 }
 
 # template_create_nginx_entry family of functions
@@ -111,7 +173,7 @@ function nodejs_create_nginx_entry {
     }
     " > $appConfig
     
-    restart_nginx
+    _restart_nginx
 }
 
 # template_add_nginx_entry_for_socket family of functions
@@ -131,7 +193,7 @@ function nodejs_add_nginx_entry_for_socket {
     sed -i 's/\(#\) \(proxy_http_version\)/\2/' $appConfig
     sed -i 's/\(#\) \(proxy_set_header\)/\2/' $appConfig
     
-    restart_nginx
+    _restart_nginx
 }
 
 # template_delete_nginx_entry_for_socket family of functions
@@ -142,7 +204,7 @@ function nodejs_delete_nginx_entry_for_socket {
     sed -i 's/\(proxy_set_header Upgrade\)/# &/' $appConfig
     sed -i 's/\(proxy_set_header Connection\)/# &/' $appConfig
     
-    restart_nginx
+    _restart_nginx
 }
 
 # template_add_nginx_entry_with_ssl family of functions
@@ -156,9 +218,13 @@ function nodejs_add_nginx_entry_with_ssl {
     # server_name cargospace.ng www.cargospace.ng;
     # ssl_certificate /etc/letsencrypt/live/cargospace.ng/fullchain.pem;
     # ssl_certificate_key /etc/letsencrypt/live/cargospace.ng/privkey.pem;
-    # TODO: write a function to generate a certificate 
-    local sslCertificate="/etc/letsencrypt/live/$APP_NAME/fullchain.pem;"
-    local $sslCertificateKey="/etc/letsencrypt/live/$APP_NAME/privkey.pem;"
+    local sslCertificate=''
+    local $sslCertificateKey=''
+    _create_ssl
+    if [ $CERT_TYPE == "letsencrypt" ]; then
+        sslCertificate="/etc/letsencrypt/live/$APP_NAME/fullchain.pem;"
+        $sslCertificateKey="/etc/letsencrypt/live/$APP_NAME/privkey.pem;"
+    fi
     sed -i 's/listen 80/listen 443 ssl/' $appConfig # listen 443 ssl;
     sed -i 's/\(listen \[\:\:\]\:80\)/# &/' $appConfig # Comment out this line. Not Needed
     # sed -i "s/\(server_name\) \($APP_NAME\)/\1 \2 www.$APP_NAME/" $appConfig
@@ -173,7 +239,7 @@ function nodejs_add_nginx_entry_with_ssl {
     }
     " >> $appConfig
     
-    restart_nginx
+    _restart_nginx
 }
 
 
@@ -189,17 +255,5 @@ function nodejs_delete_nginx_entry_with_ssl {
     # http://stackoverflow.com/questions/13380607/how-to-use-sed-to-remove-the-last-n-lines-of-a-file
     sed -i -n -e :a -e '1,7!{P;N;D;};N;ba' $appConfig
     
-    restart_nginx
-}
-
-function _create_ssl {
-    if [ $CERT_TYPE == "letsencrypt" ]; then
-        certbot certonly -d $APP_NAME -d www.$APP_NAME
-        # TODO: Create a Crontab to renew certificate at least ones a weak for those due
-        return $CERT_TYPE
-    else
-        echo "Invalid CERT_TYPE $CERT_TYPE"
-        exit 1
-    fi
-    
+    _restart_nginx
 }
