@@ -61,6 +61,7 @@ function nodejs_runserver {
 
 # template_create_nginx_entry family of functions
 function nodejs_create_nginx_entry {
+    appConfig="/etc/nginx/sites-available/$APP_NAME"
     if [ $APP_NAME == 'default' ]; then
         SERVER_INFO=`echo -e "
         listen 80 default_server;
@@ -71,7 +72,7 @@ function nodejs_create_nginx_entry {
         listen [::]:80;
         server_name $APP_NAME;"`
         touch /etc/nginx/sites-available/$APP_NAME
-        ln -s /etc/nginx/sites-available/$APP_NAME /etc/nginx/sites-enabled/$APP_NAME
+        ln -s $appConfig /etc/nginx/sites-enabled/$APP_NAME
     fi
     echo -e "
     server{
@@ -107,7 +108,7 @@ function nodejs_create_nginx_entry {
             # proxy_set_header Connection \$connection_upgrade;
         }
     }
-    " > /etc/nginx/sites-available/$APP_NAME
+    " > $appConfig
     
     restart_nginx
 }
@@ -134,10 +135,11 @@ function nodejs_add_nginx_entry_for_socket {
 
 # template_delete_nginx_entry_for_socket family of functions
 function nodejs_delete_nginx_entry_for_socket {
+    appConfig="/etc/nginx/sites-available/$APP_NAME"
     sed -i '1,9d' /etc/nginx/sites-available/$APP_NAME
-    sed -i 's/\(proxy_http_version\)/# &/' /etc/nginx/sites-available/$APP_NAME
-    sed -i 's/\(proxy_set_header Upgrade\)/# &/' /etc/nginx/sites-available/$APP_NAME
-    sed -i 's/\(proxy_set_header Connection\)/# &/' /etc/nginx/sites-available/$APP_NAME
+    sed -i 's/\(proxy_http_version\)/# &/' $appConfig
+    sed -i 's/\(proxy_set_header Upgrade\)/# &/' $appConfig
+    sed -i 's/\(proxy_set_header Connection\)/# &/' $appConfig
     
     restart_nginx
 }
@@ -153,9 +155,14 @@ function nodejs_add_nginx_entry_with_ssl {
     # server_name cargospace.ng www.cargospace.ng;
     # ssl_certificate /etc/letsencrypt/live/cargospace.ng/fullchain.pem;
     # ssl_certificate_key /etc/letsencrypt/live/cargospace.ng/privkey.pem;
+    # TODO: write a function to generate a certificate 
+    sslCertificate="/etc/letsencrypt/live/$APP_NAME/fullchain.pem;"
+    $sslCertificateKey="/etc/letsencrypt/live/$APP_NAME/privkey.pem;"
     sed -i 's/listen 80/listen 443 ssl/' $appConfig # listen 443 ssl;
     sed -i 's/\(listen \[\:\:\]\:80\)/# &/' $appConfig # Comment out this line. Not Needed
     sed -i "s/\(server_name\) \($APP_NAME\)/\1 \2 www.$APP_NAME/" $appConfig
+    sed -i "s/# ssl_certificate;/ssl_certificate $sslCertificate;/" $appConfig
+    sed -i "s/# ssl_certificate_key;/ssl_certificate_key $sslCertificateKey;/" $appConfig
     
     echo -e "
     server {
@@ -164,6 +171,20 @@ function nodejs_add_nginx_entry_with_ssl {
         return 301 https://\$host\$request_uri;
     }
     " >> $appConfig
+    
+    restart_nginx
+}
+
+
+# template_delete_nginx_entry_with_ssl family of functions
+function nodejs_delete_nginx_entry_with_ssl {
+    appConfig="/etc/nginx/sites-available/$APP_NAME"
+    sed -i 's/ssl_certificate \/.*$/ssl_certificate;/' $appConfig
+    sed -i 's/ssl_certificate_key \/.*$/ssl_certificate_key;/' $appConfig
+    # I obviously didn't cast the below spell
+    # del last 7 lines http://www.unixguide.net/unix/sedoneliner.shtml
+    # http://stackoverflow.com/questions/13380607/how-to-use-sed-to-remove-the-last-n-lines-of-a-file
+    sed -i -n -e :a -e '1,7!{P;N;D;};N;ba' $appConfig 
     
     restart_nginx
 }
