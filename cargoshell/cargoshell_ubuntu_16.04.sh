@@ -70,7 +70,7 @@ function nodejs_create_nginx_entry {
         SERVER_INFO=`echo -e "
         listen 80;
         listen [::]:80;
-        server_name $APP_NAME;"`
+        server_name $APP_NAME www.$APP_NAME;"`
         touch /etc/nginx/sites-available/$APP_NAME
         ln -s $appConfig /etc/nginx/sites-enabled/$APP_NAME
     fi
@@ -160,7 +160,7 @@ function nodejs_add_nginx_entry_with_ssl {
     $sslCertificateKey="/etc/letsencrypt/live/$APP_NAME/privkey.pem;"
     sed -i 's/listen 80/listen 443 ssl/' $appConfig # listen 443 ssl;
     sed -i 's/\(listen \[\:\:\]\:80\)/# &/' $appConfig # Comment out this line. Not Needed
-    sed -i "s/\(server_name\) \($APP_NAME\)/\1 \2 www.$APP_NAME/" $appConfig
+    # sed -i "s/\(server_name\) \($APP_NAME\)/\1 \2 www.$APP_NAME/" $appConfig
     sed -i "s/# ssl_certificate;/ssl_certificate $sslCertificate;/" $appConfig
     sed -i "s/# ssl_certificate_key;/ssl_certificate_key $sslCertificateKey;/" $appConfig
     
@@ -179,12 +179,14 @@ function nodejs_add_nginx_entry_with_ssl {
 # template_delete_nginx_entry_with_ssl family of functions
 function nodejs_delete_nginx_entry_with_ssl {
     appConfig="/etc/nginx/sites-available/$APP_NAME"
+    sed -i 's/listen 443 ssl/listen 80/' $appConfig
+    sed -i 's/\(#\) \(listen \[\:\:\]\:80\)/\2/' $appConfig
     sed -i 's/ssl_certificate \/.*$/ssl_certificate;/' $appConfig
     sed -i 's/ssl_certificate_key \/.*$/ssl_certificate_key;/' $appConfig
     # I obviously didn't cast the below spell
     # del last 7 lines http://www.unixguide.net/unix/sedoneliner.shtml
     # http://stackoverflow.com/questions/13380607/how-to-use-sed-to-remove-the-last-n-lines-of-a-file
-    sed -i -n -e :a -e '1,7!{P;N;D;};N;ba' $appConfig 
+    sed -i -n -e :a -e '1,7!{P;N;D;};N;ba' $appConfig
     
     restart_nginx
 }
