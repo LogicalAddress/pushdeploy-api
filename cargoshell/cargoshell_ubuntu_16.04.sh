@@ -447,6 +447,6 @@ elif [ $ACTION == 'app_failed' ]; then
     # TEMPLATE and APP_NAME is required
     ${TEMPLATE}_app_failed
 else
-    echo "Not Implemented"
+    echo "Invalid Action Sent"
     exit 1
 fi
