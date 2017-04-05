@@ -124,6 +124,16 @@ function nodejs_app_is_running {
 	systemctl status $TEMPLATE-$APP_NAME.service
 	exit 1
 }
+
+function nodejs_app_failed {
+    systemctl is-failed $TEMPLATE-$APP_NAME.service
+    if [ $? == 0 ]; then
+        systemctl status $TEMPLATE-$APP_NAME.service
+	    exit 0
+	fi
+	exit 1
+}
+
 # template_setup family of functions
 function nodejs_app_setup {
     
@@ -432,7 +442,10 @@ elif [ $ACTION == 'deploy' ]; then
     exit 0
 elif [ $ACTION == 'status' ]; then
     # TEMPLATE and APP_NAME is required
-    nodejs_app_is_running
+    ${TEMPLATE}_app_is_running
+elif [ $ACTION == 'app_failed' ]; then
+    # TEMPLATE and APP_NAME is required
+    ${TEMPLATE}_app_failed
 else
     echo "Not Implemented"
     exit 1
