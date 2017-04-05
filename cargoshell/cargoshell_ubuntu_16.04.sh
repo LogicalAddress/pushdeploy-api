@@ -4,6 +4,9 @@ SCRIPT_DIR=pwd                  #TODO: This is so wrong
 HOST_USER="cargospace"				#sudoer
 LTS_NODE_VERSION="6.10.2"           # use LTS if NODE_VERSION is not set
 PROJECT="cargospace"
+GITHUB_REGEX="github"
+BITBUCKET_REGEX="bitbucket"
+GITLAB_REGEX="gitlab"
 
 # VARS TO BE EXPORTED: $ACTION (not used yet), $APP_NAME, $TEMPLATE, $CERT_TYPE, $NODE_VERSION
 # $REPOSITORY, $BRANCH, $PORT, $SERVER_ENTRY_POINT
@@ -15,10 +18,29 @@ export NODE_VERSION=""
 export REPOSITORY=""
 export PORT="3000"
 export SERVER_ENTRY_POINT="server.js"
+export APP_GIT="git@github.com:CargoSpace/CargoSpaceChallenge.git"
+export USER_OAUTH_TOKEN=""
+export BITBUCKET_ACCOUNT_NAME=""
 
 # Called at the end of every function
 function _return_to_script_dir {
     cd $SCRIPT_DIR #return to script dir
+}
+
+function _restart_nginx {
+    service nginx reload
+    service nginx restart
+}
+
+function _create_ssl {
+    if [ $CERT_TYPE == "letsencrypt" ]; then
+        certbot certonly -d $APP_NAME -d www.$APP_NAME
+        # TODO: Create a Crontab to renew certificate at least ones a weak for those due
+        return $CERT_TYPE
+    else
+        echo "Invalid CERT_TYPE $CERT_TYPE"
+        exit 1
+    fi
 }
 
 function install_nginx {
@@ -32,6 +54,28 @@ function install_nginx {
 function install_sshd {
     apt install openssh-server -y
     return 0
+}
+
+function upload_ssh_key {
+    local KEY=$( cat /home/$HOST_USER/.ssh/id_rsa.pub )
+    local TITLE=${KEY/* } # the '/* ' above deletes every character in $KEY up to and including the last space.
+    if [[ $APP_GIT =~ $GITHUB_REGEX ]];
+    then
+        # https://developer.github.com/v3/users/keys/#create-a-public-key
+        local JSON=$( printf '{"title": "%s", "key": "%s"}' "$TITLE" "$KEY" )
+        curl -s -d "$JSON" "https://api.github.com/user/keys/?access_token=$USER_OAUTH_TOKEN"
+    elif [[ $APP_GIT =~ $BITBUCKET_REGEX ]];
+    then
+        local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
+        curl -s $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
+    elif [[ $APP_GIT =~ $GITLAB_REGEX ]];
+    then
+        local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "private_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
+        curl -s $data "https://gitlabserver/api/v3/user/keys?private_token==$USER_OAUTH_TOKEN"
+    else
+        echo "Project Hosting Not Supported"
+        exit 1
+    fi
 }
 
 function create_user_and_project_directories {
@@ -64,29 +108,14 @@ function create_user_and_project_directories {
 	return 0
 }
 
-function _create_ssl {
-    if [ $CERT_TYPE == "letsencrypt" ]; then
-        certbot certonly -d $APP_NAME -d www.$APP_NAME
-        # TODO: Create a Crontab to renew certificate at least ones a weak for those due
-        return $CERT_TYPE
-    else
-        echo "Invalid CERT_TYPE $CERT_TYPE"
-        exit 1
-    fi
-}
-
 # create a user with super cow powers (First Time Execution)
 function setup_server {
     apt-get update -y
+    apt-get install curl -y
 	# todo: Copy public key to user's directory
 	openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
     # echo "" | sudo -S service php5.6-fpm reload
     return 0
-}
-
-function _restart_nginx {
-    service nginx reload
-    service nginx restart
 }
 ##############NODEJS TEMPLATE########################
 # Implement the hooks for other templates in v2
@@ -380,7 +409,7 @@ function nodejs_delete_nginx_entry_with_ssl {
     
     _restart_nginx
 }
-
+##############END NODEJS TEMPLATE########################
 
 
 if [ $ACTION == 'init_with_default_app' ]; then
