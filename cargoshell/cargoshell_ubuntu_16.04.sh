@@ -27,20 +27,30 @@ function install_nginx {
 	update-rc.d nginx defaults
 	rm /etc/nginx/sites-enabled/default 2> /dev/null
 	ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+	return 0
 }
 
 function install_sshd {
     apt install openssh-server -y
+    return 0
 }
 
 function create_user_and_project_directories {
     useradd --groups sudo,www-data --password="" --shell /bin/bash --user-group --create-home --home-dir /home/$HOST_USER $HOST_USER
-    if [ $? == 0 ]; then
-	    echo "Successfully created user $HOST_USER"
+    if [ $? != 0 ]; then
+	    echo "useradd failed"
+	    return 1
 	fi
 	mkdir -p /home/$HOST_USER/.$PROJECT
+	if [ $? != 0 ]; then
+	    echo "mkdir /home/$HOST_USER/.$PROJECT"
+	    return 1
+	fi
 	mkdir -p /usr/share/$PROJECT/startup_scripts
-	
+	if [ $? != 0 ]; then
+	    echo "mkdir /usr/share/$PROJECT/startup_scripts"
+	    return 1
+	fi
 	# Storage Path for CargSpace Files
 	chown -R $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT && chmod -R 777 /home/$HOST_USER/.$PROJECT
 	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/startup_scripts && chmod 777 /usr/share/$PROJECT/startup_scripts
@@ -48,12 +58,28 @@ function create_user_and_project_directories {
 	# Create Key-Pair for this user
 	mkdir -p /home/$HOST_USER/.ssh && ssh-keygen -t rsa -C "$USER@`hostname`" -N "" -f /home/$HOST_USER/.ssh/id_rsa && chown -R $HOST_USER:$HOST_USER /home/$HOST_USER/.ssh
 	# worker@cargospace.co's public key to be entered in /home/$HOST_USER/ssh/autoriz... from our nodejs server
+	if [ $? != 0 ]; then
+	    echo "mkdir and ssh generation at /home/$HOST_USER/.ssh failed"
+	    return 1
+	fi
+	return 0
 }
 # All templates must implement this function too
 function nodejs_create_app {
     touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+    
+    if [ $? != 0 ]; then
+	    echo "touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh failed"
+	    return 1
+	fi
+	
 	touch /home/$HOST_USER/.$PROJECT/$APP_NAME.log
 	mkdir -p /usr/share/$PROJECT/venv/$TEMPLATE
+	
+	if [ $? != 0 ]; then
+	    echo "mkdir /usr/share/$PROJECT/venv/$TEMPLATE failed"
+	    return 1
+	fi
 	
 	chmod +x /home/$HOST_USER/.$PROJECT/$APP_NAME.sh && chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.sh  # User exported variables
 	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
@@ -62,6 +88,15 @@ function nodejs_create_app {
 	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.log
 	
 	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/venv/$TEMPLATE && chmod 777 /usr/share/$PROJECT/venv/$TEMPLATE
+}
+
+function nodejs_app_is_running {
+    systemctl is-active $TEMPLATE-$APP_NAME.service
+    if [ $? == 0 ]; then
+	    exit 0
+	fi
+	systemctl status $TEMPLATE-$APP_NAME.service
+	exit 1
 }
 
 function _create_ssl {
@@ -80,7 +115,8 @@ function setup_server {
     apt-get update -y
 	# todo: Copy public key to user's directory
 	openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
-# 	echo "" | sudo -S service php5.6-fpm reload
+    # echo "" | sudo -S service php5.6-fpm reload
+    return 0
 }
 
 function _restart_nginx {
@@ -93,6 +129,10 @@ function nodejs_app_setup {
     
     cd /usr/share/$PROJECT/venv/$TEMPLATE
     pip install nodeenv # install node virtual environment manager
+    if [ $? != 0 ]; then
+	    echo "pip install nodeenv manager failed"
+	    return 1
+	fi
     local VERSION=''
     if [ "$NODE_VERSION" = "" ]
     then
@@ -102,10 +142,22 @@ function nodejs_app_setup {
     fi
     
     nodeenv --node=$VERSION $APP_NAME # Every App with its virtual environment
+    if [ $? != 0 ]; then
+	    echo "Setting up node environment for this user's selected configuration $TEMPLATE-$VERSION failed"
+	    return 1
+	fi
     . $APP_NAME/bin/activate
     cd /home/$HOST_USER && git clone $REPOSITORY $APP_NAME #TODO Run this command as $HOST_USER
+    if [ $? != 0 ]; then
+	    echo "cloning user repository failed. Did you set public key"
+	    return 1
+	fi
     cd $APP_NAME && git checkout $BRANCH
     npm install
+    if [ $? != 0 ]; then
+	    echo "npm install failed"
+	    return 1
+	fi
     deactivate_node
     
 echo -e "#!/bin/sh
@@ -118,6 +170,11 @@ export IP="0.0.0.0"
 /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim /home/$HOST_USER/$APP_NAME/$SERVER_ENTRY_POINT
 " > /usr/share/$PROJECT/startup_scripts/$APP_NAME.sh && chmod 755 /usr/share/$PROJECT/startup_scripts/$APP_NAME.sh
 
+    if [ $? != 0 ]; then
+	    echo "creating shell file for systemd /usr/share/$PROJECT/startup_scripts/$APP_NAME.sh failed"
+	    return 1
+	fi
+
 echo -e "[Unit]
 Description=$TEMPLATE-$APP_NAME Service
 [Service]
@@ -127,7 +184,12 @@ RestartSec=60s
 [Install]
 WantedBy=multi-user.target
 " > /lib/systemd/system/$TEMPLATE-$APP_NAME.service && chmod 755 /lib/systemd/system/$TEMPLATE-$APP_NAME.service
-
+    
+    if [ $? != 0 ]; then
+	    echo "creating systemd directive /lib/systemd/system/$TEMPLATE-$APP_NAME.service failed"
+	    return 1
+	fi
+	
     _return_to_script_dir
 }
 
@@ -135,15 +197,28 @@ WantedBy=multi-user.target
 function nodejs_deploy {
     cd /home/$HOST_USER/$APP_NAME
     git pull
+    if [ $? != 0 ]; then
+        echo "pulling changes.. failed"
+	    exit 1
+	fi
+    npm install
+    if [ $? != 0 ]; then
+        echo "npm install changes.. failed"
+	    exit 1
+	fi
     systemctl is-enabled $TEMPLATE-$APP_NAME.service
     if [ $? == 0 ]; then
+        echo "App already enabled"
         systemctl is-active $TEMPLATE-$APP_NAME.service
         if [ $? == 0 ]; then
+            echo "App is active, restarting the App.."
 	        systemctl reload-or-restart $TEMPLATE-$APP_NAME.service
 	    else
+	        echo "App is not active, starting the App.."
 	        systemctl start $TEMPLATE-$APP_NAME.service        
 	    fi
 	else
+	    echo "enabling and starting systemctl for this app"
 	    systemctl enable $TEMPLATE-$APP_NAME.service
         systemctl start $TEMPLATE-$APP_NAME.service    
 	fi
@@ -301,27 +376,63 @@ function nodejs_delete_nginx_entry_with_ssl {
 if [ $ACTION == 'init_with_default_app' ]; then
     # TODO: Validate Exported Variables
     setup_server
+    if [ $? != 0 ]; then
+        echo "setup_server failed"
+	    exit 1
+	fi
     install_nginx
+    if [ $? != 0 ]; then
+        echo "install_nginx failed"
+	    exit 1
+	fi
     install_sshd
+    if [ $? != 0 ]; then
+        echo "install_sshd failed"
+	    exit 1
+	fi
     create_user_and_project_directories
+    if [ $? != 0 ]; then
+        echo "create_user_and_project_directories failed"
+	    exit 1
+	fi
     ${TEMPLATE}_create_app
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_create_app failed"
+	    exit 1
+	fi
     ${TEMPLATE}_app_setup
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_app_setup failed"
+	    exit 1
+	fi
     exit 0
 elif [ $ACTION == 'add_app' ]; then
     # Check if app already exists and exit 1 with reason
     # Check if the chosen template is supported by script
     # Check if APP_NAME is set and that it matches a standard domain name
     ${TEMPLATE}_create_app
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_create_app failed"
+	    exit 1
+	fi
     ${TEMPLATE}_app_setup
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_app_setup failed"
+	    exit 1
+	fi
     exit 0
 elif [ $ACTION == 'deploy' ]; then
     # Check if template is set or fire an error. This shellscript doesn't remember and the server had better send a correct one
     # Check if APP_NAME is set and that it exists on the filesystem
     ${TEMPLATE}_deploy
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_deploy failed"
+	    exit 1
+	fi
     exit 0
-elif [ $ACTION == '' ]; then
-    echo "Not Implemented"
-    exit 1
+elif [ $ACTION == 'status' ]; then
+    # TEMPLATE and APP_NAME is required
+    nodejs_app_is_running
 else
     echo "Not Implemented"
     exit 1
