@@ -21,7 +21,6 @@ function _return_to_script_dir {
     cd $SCRIPT_DIR #return to script dir
 }
 
-
 function install_nginx {
     apt-get install nginx -y
 	update-rc.d nginx defaults
@@ -64,6 +63,33 @@ function create_user_and_project_directories {
 	fi
 	return 0
 }
+
+function _create_ssl {
+    if [ $CERT_TYPE == "letsencrypt" ]; then
+        certbot certonly -d $APP_NAME -d www.$APP_NAME
+        # TODO: Create a Crontab to renew certificate at least ones a weak for those due
+        return $CERT_TYPE
+    else
+        echo "Invalid CERT_TYPE $CERT_TYPE"
+        exit 1
+    fi
+}
+
+# create a user with super cow powers (First Time Execution)
+function setup_server {
+    apt-get update -y
+	# todo: Copy public key to user's directory
+	openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+    # echo "" | sudo -S service php5.6-fpm reload
+    return 0
+}
+
+function _restart_nginx {
+    service nginx reload
+    service nginx restart
+}
+##############NODEJS TEMPLATE########################
+# Implement the hooks for other templates in v2
 # All templates must implement this function too
 function nodejs_create_app {
     touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
@@ -98,32 +124,6 @@ function nodejs_app_is_running {
 	systemctl status $TEMPLATE-$APP_NAME.service
 	exit 1
 }
-
-function _create_ssl {
-    if [ $CERT_TYPE == "letsencrypt" ]; then
-        certbot certonly -d $APP_NAME -d www.$APP_NAME
-        # TODO: Create a Crontab to renew certificate at least ones a weak for those due
-        return $CERT_TYPE
-    else
-        echo "Invalid CERT_TYPE $CERT_TYPE"
-        exit 1
-    fi
-}
-
-# create a user with super cow powers (First Time Execution)
-function setup_server {
-    apt-get update -y
-	# todo: Copy public key to user's directory
-	openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
-    # echo "" | sudo -S service php5.6-fpm reload
-    return 0
-}
-
-function _restart_nginx {
-    service nginx reload
-    service nginx restart
-}
-
 # template_setup family of functions
 function nodejs_app_setup {
     
