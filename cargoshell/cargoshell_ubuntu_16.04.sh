@@ -1,9 +1,20 @@
 #!/bin/bash
 
 SCRIPT_DIR=pwd                  #TODO: This is so wrong
-GUSER="userspace"				#sudoer
-LTS_NODE_VERSION="6.10.2"           # LTS
+HOST_USER="cargospace"				#sudoer
+LTS_NODE_VERSION="6.10.2"           # use LTS if NODE_VERSION is not set
+PROJECT="cargospace"
 
+# VARS TO BE EXPORTED: $ACTION (not used yet), $APP_NAME, $TEMPLATE, $CERT_TYPE, $NODE_VERSION
+# $REPOSITORY, $BRANCH, $PORT, $SERVER_ENTRY_POINT
+
+export APP_NAME='default'
+export TEMPLATE="nodejs"
+export CERT_TYPE="letsencrypt"
+export NODE_VERSION=""
+export REPOSITORY=""
+export PORT="3000"
+export SERVER_ENTRY_POINT="server.js"
 
 # Called at the end of every function
 function _return_to_script_dir {
@@ -11,43 +22,46 @@ function _return_to_script_dir {
 }
 
 
-function _install_nginx {
-    apt-get install nginx
+function install_nginx {
+    apt-get install nginx -y
 	update-rc.d nginx defaults
 	rm /etc/nginx/sites-enabled/default 2> /dev/null
 	ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 }
 
-function _install_sshd {
-    apt install openssh-server
+function install_sshd {
+    apt install openssh-server -y
 }
 
-function _create_user {
-    useradd --groups sudo,www-data --password="" --shell /bin/bash --user-group --create-home --home-dir /home/$GUSER $GUSER
+function create_user_and_project_directories {
+    useradd --groups sudo,www-data --password="" --shell /bin/bash --user-group --create-home --home-dir /home/$HOST_USER $HOST_USER
     if [ $? == 0 ]; then
-	    echo "Successfully created user $GUSER"
+	    echo "Successfully created user $HOST_USER"
 	fi
-	mkdir -p /home/$GUSER/.cargospace
-	touch /home/$GUSER/.cargospace/$APP_NAME.sh
-	touch /home/$GUSER/.cargospace/$APP_NAME.log
-	mkdir -p /usr/share/cargospace/startups
-	mkdir -p /usr/share/cargospace/venv/$TEMPLATE
-	
-	
-	chmod +x /home/$GUSER/.cargospace/$APP_NAME.sh && chmod 777 /home/$GUSER/.cargospace/$APP_NAME.sh  # User exported variables
-	chown $GUSER:$GUSER /home/$GUSER/.cargospace/$APP_NAME.sh
-	
-	chmod 777 /home/$GUSER/.cargospace/$APP_NAME.log
-	chown $GUSER:$GUSER /home/$GUSER/.cargospace/$APP_NAME.log
+	mkdir -p /home/$HOST_USER/.$PROJECT
+	mkdir -p /usr/share/$PROJECT/startup_scripts
 	
 	# Storage Path for CargSpace Files
-	chown -R $GUSER:$GUSER /home/$GUSER/.cargospace && chmod -R 777 /home/$GUSER/.cargospace
-	chown -R $GUSER:$GUSER /usr/share/cargospace/startups && chmod 777 /usr/share/cargospace/startups
-	chown -R $GUSER:$GUSER /usr/share/cargospace/venv/$TEMPLATE && chmod 777 /usr/share/cargospace/venv/$TEMPLATE
+	chown -R $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT && chmod -R 777 /home/$HOST_USER/.$PROJECT
+	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/startup_scripts && chmod 777 /usr/share/$PROJECT/startup_scripts
 	
 	# Create Key-Pair for this user
-	mkdir -p /home/$GUSER/.ssh && ssh-keygen -t rsa -C "$USER@`hostname`" -N "" -f /home/$GUSER/.ssh/id_rsa && chown -R $GUSER:$GUSER /home/$GUSER/.ssh
-	# worker@cargospace.co's public key to be entered in /home/$GUSER/ssh/autoriz... from our nodejs server
+	mkdir -p /home/$HOST_USER/.ssh && ssh-keygen -t rsa -C "$USER@`hostname`" -N "" -f /home/$HOST_USER/.ssh/id_rsa && chown -R $HOST_USER:$HOST_USER /home/$HOST_USER/.ssh
+	# worker@cargospace.co's public key to be entered in /home/$HOST_USER/ssh/autoriz... from our nodejs server
+}
+# All templates must implement this function too
+function nodejs_create_app {
+    touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+	touch /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+	mkdir -p /usr/share/$PROJECT/venv/$TEMPLATE
+	
+	chmod +x /home/$HOST_USER/.$PROJECT/$APP_NAME.sh && chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.sh  # User exported variables
+	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+	
+	chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+	
+	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/venv/$TEMPLATE && chmod 777 /usr/share/$PROJECT/venv/$TEMPLATE
 }
 
 function _create_ssl {
@@ -63,12 +77,9 @@ function _create_ssl {
 
 # create a user with super cow powers (First Time Execution)
 function setup_server {
-    apt-get update
+    apt-get update -y
 	# todo: Copy public key to user's directory
-	_install_nginx
-	_install_sshd
 	openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
-	_create_user
 # 	echo "" | sudo -S service php5.6-fpm reload
 }
 
@@ -78,9 +89,9 @@ function _restart_nginx {
 }
 
 # template_setup family of functions
-function nodejs_setup {
+function nodejs_app_setup {
     
-    cd /usr/share/cargospace/venv/$TEMPLATE
+    cd /usr/share/$PROJECT/venv/$TEMPLATE
     pip install nodeenv # install node virtual environment manager
     local VERSION=''
     if [ "$NODE_VERSION" = "" ]
@@ -92,40 +103,50 @@ function nodejs_setup {
     
     nodeenv --node=$VERSION $APP_NAME # Every App with its virtual environment
     . $APP_NAME/bin/activate
-    cd /home/$GUSER && git clone $REPOSITORY $APP_NAME #TODO Run this command as $GUSER
+    cd /home/$HOST_USER && git clone $REPOSITORY $APP_NAME #TODO Run this command as $HOST_USER
     cd $APP_NAME && git checkout $BRANCH
     npm install
     deactivate_node
     
 echo -e "#!/bin/sh
 # load user provided environment variable first, so we can overite bad onces.
-source /home/$GUSER/.cargospace/$APP_NAME.sh
+source /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
 export PORT="$PORT"
+export NODE_ENV='production'
 export IP="0.0.0.0"
 # Call node directly or use foreverjs
-/usr/share/cargospace/venv/$TEMPLATE/$APP_NAME/bin/shim /home/$GUSER/$APP_NAME/$SERVER_ENTRY_POINT
-" > /usr/share/cargospace/startups/$APP_NAME.sh && chmod 755 /usr/share/cargospace/startups/$APP_NAME.sh
+/usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim /home/$HOST_USER/$APP_NAME/$SERVER_ENTRY_POINT
+" > /usr/share/$PROJECT/startup_scripts/$APP_NAME.sh && chmod 755 /usr/share/$PROJECT/startup_scripts/$APP_NAME.sh
 
 echo -e "[Unit]
 Description=$TEMPLATE-$APP_NAME Service
 [Service]
-ExecStart=/bin/sh -c '/usr/share/cargospace/startups/$APP_NAME.sh >> /home/$GUSER/.cargospace/$APP_NAME.log 2>&1'
+ExecStart=/bin/sh -c '/usr/share/$PROJECT/startup_scripts/$APP_NAME.sh >> /home/$HOST_USER/.$PROJECT/$APP_NAME.log 2>&1'
 Restart=on-failure
 RestartSec=60s
 [Install]
 WantedBy=multi-user.target
 " > /lib/systemd/system/$TEMPLATE-$APP_NAME.service && chmod 755 /lib/systemd/system/$TEMPLATE-$APP_NAME.service
 
-    systemctl enable $TEMPLATE-$APP_NAME.service
-    systemctl start $TEMPLATE-$APP_NAME.service
     _return_to_script_dir
 }
 
 # template_deploy family of functions
 function nodejs_deploy {
-    cd $HOME
-    cd $APP_NAME
+    cd /home/$HOST_USER/$APP_NAME
     git pull
+    systemctl is-enabled $TEMPLATE-$APP_NAME.service
+    if [ $? == 0 ]; then
+        systemctl is-active $TEMPLATE-$APP_NAME.service
+        if [ $? == 0 ]; then
+	        systemctl reload-or-restart $TEMPLATE-$APP_NAME.service
+	    else
+	        systemctl start $TEMPLATE-$APP_NAME.service        
+	    fi
+	else
+	    systemctl enable $TEMPLATE-$APP_NAME.service
+        systemctl start $TEMPLATE-$APP_NAME.service    
+	fi
     _return_to_script_dir
 }
 
@@ -274,3 +295,34 @@ function nodejs_delete_nginx_entry_with_ssl {
     
     _restart_nginx
 }
+
+
+
+if [ $ACTION == 'init_with_default_app' ]; then
+    # TODO: Validate Exported Variables
+    setup_server
+    install_nginx
+    install_sshd
+    create_user_and_project_directories
+    ${TEMPLATE}_create_app
+    ${TEMPLATE}_app_setup
+    exit 0
+elif [ $ACTION == 'add_app' ]; then
+    # Check if app already exists and exit 1 with reason
+    # Check if the chosen template is supported by script
+    # Check if APP_NAME is set and that it matches a standard domain name
+    ${TEMPLATE}_create_app
+    ${TEMPLATE}_app_setup
+    exit 0
+elif [ $ACTION == 'deploy' ]; then
+    # Check if template is set or fire an error. This shellscript doesn't remember and the server had better send a correct one
+    # Check if APP_NAME is set and that it exists on the filesystem
+    ${TEMPLATE}_deploy
+    exit 0
+elif [ $ACTION == '' ]; then
+    echo "Not Implemented"
+    exit 1
+else
+    echo "Not Implemented"
+    exit 1
+fi
