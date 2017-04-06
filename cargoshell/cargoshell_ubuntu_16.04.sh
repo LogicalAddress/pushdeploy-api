@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This scipt would be run as
+# 1. root first time of execution most likely as stackscript
+# 2. $HOST_USER subsequently
+
 SCRIPT_DIR=pwd                  #TODO: This is so wrong
 HOST_USER="cargospace"				#sudoer
 LTS_NODE_VERSION="6.10.2"           # use LTS if NODE_VERSION is not set
@@ -7,6 +11,7 @@ PROJECT="cargospace"
 GITHUB_REGEX="github"
 BITBUCKET_REGEX="bitbucket"
 GITLAB_REGEX="gitlab"
+SUDO=''
 
 # VARS TO BE EXPORTED: $ACTION (not used yet), $APP_NAME, $TEMPLATE, $CERT_TYPE, $NODE_VERSION
 # $REPOSITORY, $BRANCH, $PORT, $SERVER_ENTRY_POINT
@@ -23,19 +28,23 @@ export USER_OAUTH_TOKEN=""
 export BITBUCKET_ACCOUNT_NAME=""
 export GITLABSERVER="gitlab.com" #if not exported uses gitlab.com by default
 
+if [ `whoami` == $HOST_USER ]; then
+    SUDO='echo "" | sudo -S'
+fi
+
 # Called at the end of every function
 function _return_to_script_dir {
     cd $SCRIPT_DIR #return to script dir
 }
 
 function _restart_nginx {
-    service nginx reload
-    service nginx restart
+    eval $SUDO service nginx reload
+    eval $SUDO service nginx restart
 }
 
 function _create_ssl {
     if [ $CERT_TYPE == "letsencrypt" ]; then
-        certbot certonly -d $APP_NAME -d www.$APP_NAME
+        eval $SUDO certbot certonly -d $APP_NAME -d www.$APP_NAME
         # TODO: Create a Crontab to renew certificate at least ones a weak for those due
         return $CERT_TYPE
     else
@@ -174,35 +183,36 @@ function nodejs_create_app {
 	fi
 	
 	touch /home/$HOST_USER/.$PROJECT/$APP_NAME.log
-	mkdir -p /usr/share/$PROJECT/venv/$TEMPLATE
+	eval $SUDO mkdir -p /usr/share/$PROJECT/venv/$TEMPLATE
 	
 	if [ $? != 0 ]; then
 	    echo "mkdir /usr/share/$PROJECT/venv/$TEMPLATE failed"
 	    return 1
 	fi
 	
-	chmod +x /home/$HOST_USER/.$PROJECT/$APP_NAME.sh && chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.sh  # User exported variables
-	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
-	
-	chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.log
-	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.log
-	
-	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/venv/$TEMPLATE && chmod 777 /usr/share/$PROJECT/venv/$TEMPLATE
+	if [ $SUDO == '' ]; then
+        chmod +x /home/$HOST_USER/.$PROJECT/$APP_NAME.sh && chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.sh  # User exported variables
+    	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+    	
+    	chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+    	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+    	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/venv/$TEMPLATE && chmod 777 /usr/share/$PROJECT/venv/$TEMPLATE
+    fi
 }
 
 function nodejs_app_is_running {
-    systemctl is-active $TEMPLATE-$APP_NAME.service
+    eval $SUDO systemctl is-active $TEMPLATE-$APP_NAME.service
     if [ $? == 0 ]; then
 	    exit 0
 	fi
-	systemctl status $TEMPLATE-$APP_NAME.service
+	eval $SUDO systemctl status $TEMPLATE-$APP_NAME.service
 	exit 1
 }
 
 function nodejs_app_failed {
-    systemctl is-failed $TEMPLATE-$APP_NAME.service
+    eval $SUDO systemctl is-failed $TEMPLATE-$APP_NAME.service
     if [ $? == 0 ]; then
-        systemctl status $TEMPLATE-$APP_NAME.service
+        eval $SUDO systemctl status $TEMPLATE-$APP_NAME.service
 	    exit 0
 	fi
 	exit 1
@@ -259,7 +269,7 @@ export IP="0.0.0.0"
 	    return 1
 	fi
 
-echo -e "[Unit]
+eval $SUDO echo -e "[Unit]
 Description=$TEMPLATE-$APP_NAME Service
 [Service]
 ExecStart=/bin/sh -c '/usr/share/$PROJECT/startup_scripts/$APP_NAME.sh >> /home/$HOST_USER/.$PROJECT/$APP_NAME.log 2>&1'
@@ -267,7 +277,7 @@ Restart=on-failure
 RestartSec=60s
 [Install]
 WantedBy=multi-user.target
-" > /lib/systemd/system/$TEMPLATE-$APP_NAME.service && chmod 755 /lib/systemd/system/$TEMPLATE-$APP_NAME.service
+" > /lib/systemd/system/$TEMPLATE-$APP_NAME.service && eval $SUDO chmod 755 /lib/systemd/system/$TEMPLATE-$APP_NAME.service
     
     if [ $? != 0 ]; then
 	    echo "creating systemd directive /lib/systemd/system/$TEMPLATE-$APP_NAME.service failed"
@@ -281,6 +291,7 @@ WantedBy=multi-user.target
 function nodejs_deploy {
     cd /home/$HOST_USER/$APP_NAME
     git pull
+    git checkout $APP_BRANCH #just incase
     if [ $? != 0 ]; then
         echo "pulling changes.. failed"
 	    exit 1
@@ -290,31 +301,22 @@ function nodejs_deploy {
         echo "npm install changes.. failed"
 	    exit 1
 	fi
-    systemctl is-enabled $TEMPLATE-$APP_NAME.service
+    eval $SUDO systemctl is-enabled $TEMPLATE-$APP_NAME.service
     if [ $? == 0 ]; then
         echo "App already enabled"
-        systemctl is-active $TEMPLATE-$APP_NAME.service
+        eval $SUDO systemctl is-active $TEMPLATE-$APP_NAME.service
         if [ $? == 0 ]; then
             echo "App is active, restarting the App.."
-	        systemctl reload-or-restart $TEMPLATE-$APP_NAME.service
+	        eval $SUDO systemctl reload-or-restart $TEMPLATE-$APP_NAME.service
 	    else
 	        echo "App is not active, starting the App.."
-	        systemctl start $TEMPLATE-$APP_NAME.service        
+	        eval $SUDO systemctl start $TEMPLATE-$APP_NAME.service        
 	    fi
 	else
 	    echo "enabling and starting systemctl for this app"
-	    systemctl enable $TEMPLATE-$APP_NAME.service
-        systemctl start $TEMPLATE-$APP_NAME.service    
+	    eval $SUDO systemctl enable $TEMPLATE-$APP_NAME.service
+        eval $SUDO systemctl start $TEMPLATE-$APP_NAME.service    
 	fi
-    _return_to_script_dir
-}
-
-# template_runserver family of functions
-function nodejs_runserver {
-    cd $HOME
-    cd $APP_NAME
-    git checkout $APP_BRANCH #just incase
-    # TODO run or restart forever here
     _return_to_script_dir
 }
 
@@ -331,10 +333,10 @@ function nodejs_create_nginx_entry {
         listen 80;
         listen [::]:80;
         server_name $APP_NAME www.$APP_NAME;"`
-        touch /etc/nginx/sites-available/$APP_NAME
-        ln -s $appConfig /etc/nginx/sites-enabled/$APP_NAME
+        eval $SUDO touch /etc/nginx/sites-available/$APP_NAME
+        eval $SUDO ln -s $appConfig /etc/nginx/sites-enabled/$APP_NAME
     fi
-    echo -e "
+    eval $SUDO echo -e "
     server{
         $SERVER_INFO
     
@@ -385,10 +387,10 @@ function nodejs_add_nginx_entry_for_socket {
     upstream websocket {
         server 0.0.0.0:$PORT;
     }
-    " | cat - $appConfig > $tmpFile && mv $tmpFile $appConfig
+    " | eval $SUDO cat - $appConfig > $tmpFile && eval $SUDO mv $tmpFile $appConfig
     
-    sed -i 's/\(#\) \(proxy_http_version\)/\2/' $appConfig
-    sed -i 's/\(#\) \(proxy_set_header\)/\2/' $appConfig
+    eval $SUDO sed -i 's/\(#\) \(proxy_http_version\)/\2/' $appConfig
+    eval $SUDO sed -i 's/\(#\) \(proxy_set_header\)/\2/' $appConfig
     
     _restart_nginx
 }
@@ -396,10 +398,10 @@ function nodejs_add_nginx_entry_for_socket {
 # template_delete_nginx_entry_for_socket family of functions
 function nodejs_delete_nginx_entry_for_socket {
     local appConfig="/etc/nginx/sites-available/$APP_NAME"
-    sed -i '1,9d' /etc/nginx/sites-available/$APP_NAME
-    sed -i 's/\(proxy_http_version\)/# &/' $appConfig
-    sed -i 's/\(proxy_set_header Upgrade\)/# &/' $appConfig
-    sed -i 's/\(proxy_set_header Connection\)/# &/' $appConfig
+    eval $SUDO sed -i '1,9d' /etc/nginx/sites-available/$APP_NAME
+    eval $SUDO sed -i 's/\(proxy_http_version\)/# &/' $appConfig
+    eval $SUDO sed -i 's/\(proxy_set_header Upgrade\)/# &/' $appConfig
+    eval $SUDO sed -i 's/\(proxy_set_header Connection\)/# &/' $appConfig
     
     _restart_nginx
 }
@@ -422,13 +424,13 @@ function nodejs_add_nginx_entry_with_ssl {
         sslCertificate="/etc/letsencrypt/live/$APP_NAME/fullchain.pem;"
         $sslCertificateKey="/etc/letsencrypt/live/$APP_NAME/privkey.pem;"
     fi
-    sed -i 's/listen 80/listen 443 ssl/' $appConfig # listen 443 ssl;
-    sed -i 's/\(listen \[\:\:\]\:80\)/# &/' $appConfig # Comment out this line. Not Needed
+    eval $SUDO sed -i 's/listen 80/listen 443 ssl/' $appConfig # listen 443 ssl;
+    eval $SUDO sed -i 's/\(listen \[\:\:\]\:80\)/# &/' $appConfig # Comment out this line. Not Needed
     # sed -i "s/\(server_name\) \($APP_NAME\)/\1 \2 www.$APP_NAME/" $appConfig
-    sed -i "s/# ssl_certificate;/ssl_certificate $sslCertificate;/" $appConfig
-    sed -i "s/# ssl_certificate_key;/ssl_certificate_key $sslCertificateKey;/" $appConfig
+    eval $SUDO sed -i "s/# ssl_certificate;/ssl_certificate $sslCertificate;/" $appConfig
+    eval $SUDO sed -i "s/# ssl_certificate_key;/ssl_certificate_key $sslCertificateKey;/" $appConfig
     
-    echo -e "
+    eval $SUDO echo -e "
     server {
         listen 80;
         server_name $APP_NAME www.$APP_NAME;
@@ -443,14 +445,14 @@ function nodejs_add_nginx_entry_with_ssl {
 # template_delete_nginx_entry_with_ssl family of functions
 function nodejs_delete_nginx_entry_with_ssl {
     local appConfig="/etc/nginx/sites-available/$APP_NAME"
-    sed -i 's/listen 443 ssl/listen 80/' $appConfig
-    sed -i 's/\(#\) \(listen \[\:\:\]\:80\)/\2/' $appConfig
-    sed -i 's/ssl_certificate \/.*$/ssl_certificate;/' $appConfig
-    sed -i 's/ssl_certificate_key \/.*$/ssl_certificate_key;/' $appConfig
+    eval $SUDO sed -i 's/listen 443 ssl/listen 80/' $appConfig
+    eval $SUDO sed -i 's/\(#\) \(listen \[\:\:\]\:80\)/\2/' $appConfig
+    eval $SUDO sed -i 's/ssl_certificate \/.*$/ssl_certificate;/' $appConfig
+    eval $SUDO sed -i 's/ssl_certificate_key \/.*$/ssl_certificate_key;/' $appConfig
     # I obviously didn't cast the below spell
     # del last 7 lines http://www.unixguide.net/unix/sedoneliner.shtml
     # http://stackoverflow.com/questions/13380607/how-to-use-sed-to-remove-the-last-n-lines-of-a-file
-    sed -i -n -e :a -e '1,7!{P;N;D;};N;ba' $appConfig
+    eval $SUDO sed -i -n -e :a -e '1,7!{P;N;D;};N;ba' $appConfig
     
     _restart_nginx
 }
