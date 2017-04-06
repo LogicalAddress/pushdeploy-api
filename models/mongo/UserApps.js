@@ -12,8 +12,8 @@ var UserAppSchema = new Schema({
 	},
 	server: { type: Schema.ObjectId, ref: 'user_server', required : true, index: true},
 	// for managing nodejs's template variation see: https://pypi.python.org/pypi/nodeenv/
-	app_name: { type: String, default: 'default'},
-	port: { type: String, default: '3000'}, //as more nodejs apps are addded, we port++
+	app_name: { type: String, default: 'default'}, //must be unique per server - tester should take note.
+	port: { type: String, default: '3000'}, //as more nodejs apps are addded, we port++, unique too per server
 	template: { type: String, default: 'nodejs'}, //{python2, python3}, {php5.6, php7.0}
 	template_variation: { type: String, default: 'v4'}, //{django}, {laravel, wordpress,}
 
