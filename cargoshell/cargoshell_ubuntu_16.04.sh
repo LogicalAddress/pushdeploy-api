@@ -21,6 +21,7 @@ export SERVER_ENTRY_POINT="server.js"
 export APP_GIT="git@github.com:CargoSpace/CargoSpaceChallenge.git"
 export USER_OAUTH_TOKEN=""
 export BITBUCKET_ACCOUNT_NAME=""
+export GITLABSERVER="gitlab.com" #if not exported uses gitlab.com by default
 
 # Called at the end of every function
 function _return_to_script_dir {
@@ -56,6 +57,7 @@ function install_sshd {
     return 0
 }
 
+# To be called for each app added, ignoring wheather we have previously added it or not
 function upload_ssh_key {
     local KEY=$( cat /home/$HOST_USER/.ssh/id_rsa.pub )
     local TITLE=${KEY/* } # the '/* ' above deletes every character in $KEY up to and including the last space.
@@ -64,14 +66,51 @@ function upload_ssh_key {
         # https://developer.github.com/v3/users/keys/#create-a-public-key
         local JSON=$( printf '{"title": "%s", "key": "%s"}' "$TITLE" "$KEY" )
         curl -s -d "$JSON" "https://api.github.com/user/keys/?access_token=$USER_OAUTH_TOKEN"
+        # Upload CargoSpace key if we havn't aleady done so while ignoring duplicate errors from git providers
+        if [ "$USERCARGOSPACEPUBKEY" != "" ]
+        then
+            KEY=$USERCARGOSPACEPUBKEY
+            TITLE="CargoSpace"
+            JSON=$( printf '{"title": "%s", "key": "%s"}' "$TITLE" "$KEY" )
+            curl -s -d "$JSON" "https://api.github.com/user/keys/?access_token=$USER_OAUTH_TOKEN"
+        else
+            echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
+        fi
     elif [[ $APP_GIT =~ $BITBUCKET_REGEX ]];
     then
         local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
         curl -s $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
+        # Upload CargoSpace key if we havn't aleady done so while ignoring duplicate errors from git providers
+        if [ "$USERCARGOSPACEPUBKEY" != "" ]
+        then
+            KEY=$USERCARGOSPACEPUBKEY
+            TITLE="CargoSpace"
+            data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
+            curl -s $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
+        else
+            echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
+        fi
     elif [[ $APP_GIT =~ $GITLAB_REGEX ]];
     then
+        local GITSERVER=''
+        if [ "$GITLABSERVER" == "" ]
+        then
+           GITSERVER='gitlab.com'
+        else
+           GITSERVER=$GITLABSERVER
+        fi
         local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "private_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
-        curl -s $data "https://gitlabserver/api/v3/user/keys?private_token==$USER_OAUTH_TOKEN"
+        curl -s $data "https://$GITSERVER/api/v3/user/keys?private_token=$USER_OAUTH_TOKEN"
+        # Upload CargoSpace key if we havn't aleady done so while ignoring duplicate errors from git providers
+        if [ "$USERCARGOSPACEPUBKEY" != "" ]
+        then
+            KEY=$USERCARGOSPACEPUBKEY
+            TITLE="CargoSpace"
+            data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "private_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
+            curl -s $data "https://$GITSERVER/api/v3/user/keys?private_token=$USER_OAUTH_TOKEN"
+        else
+            echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
+        fi
     else
         echo "Project Hosting Not Supported"
         exit 1
@@ -105,6 +144,12 @@ function create_user_and_project_directories {
 	    echo "mkdir and ssh generation at /home/$HOST_USER/.ssh failed"
 	    return 1
 	fi
+	if [ "$USERCARGOSPACEPUBKEY" != "" ]
+    then
+        echo -e "# CargoSpace Key\n$USERCARGOSPACEPUBKEY" >> /home/$HOST_USER/.ssh/authorized_keys
+    else
+        echo "USERCARGOSPACEPUBKEY env not set, proceeding.."
+    fi
 	return 0
 }
 
@@ -173,7 +218,7 @@ function nodejs_app_setup {
 	    return 1
 	fi
     local VERSION=''
-    if [ "$NODE_VERSION" = "" ]
+    if [ "$NODE_VERSION" == "" ]
     then
        VERSION=$LTS_NODE_VERSION
     else
