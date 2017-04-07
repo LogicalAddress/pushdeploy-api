@@ -7,6 +7,8 @@ module.exports = function (context, DataTypes) {
         },
         uid: {
             type: DataTypes.STRING,
+            notNull: true,
+            notEmpty: true,
             unique: true   //not changeable, would be used across DBs/Servers (mongo) as this user's identifier
         },
         userType: {
@@ -15,10 +17,15 @@ module.exports = function (context, DataTypes) {
         },
         mobileNumber: {
             type: DataTypes.STRING,
+            notNull: true,
+            notEmpty: true,
             unique: true  //could change
         },
         email: {
             type: DataTypes.STRING,
+            isEmail: true,
+            notNull: true,
+            notEmpty: true,
             unique: true  //could change
         },
         password: {

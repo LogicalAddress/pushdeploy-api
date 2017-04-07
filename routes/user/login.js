@@ -1,11 +1,14 @@
 var User = require("../../lib/User");
+var _ = require("underscore");
 module.exports = function (app) {
 	app.post('/v1/user/login', function (req, res, next) {
-		User.register(req.body).then((record)=>{
-		    record.access_token = record.generateAccessToken(record);
-			res.status(201).json({status: "success", data: record});
+		User.auth(req.body).then((record)=>{
+		    var access_token = User.object2Token(record);
+		    record.access_token = access_token;
+			res.status(200).json({status: "success", data: record});
 		}).catch((error)=>{
-		    res.state(500).json({status: 'failure', message: error})
-		});			
+			console.log(error);
+		    res.status(500).json({status: 'failure', message: error});
+		});
 	});
 };
