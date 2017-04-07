@@ -21,6 +21,7 @@ export TEMPLATE="nodejs"
 export CERT_TYPE="letsencrypt"
 export NODE_VERSION=""
 export REPOSITORY=""
+export REPOSITORY_TYPE="private" # default
 export PORT="3000"
 export SERVER_ENTRY_POINT="server.js"
 export APP_GIT="git@github.com:CargoSpace/CargoSpaceChallenge.git"
@@ -459,7 +460,30 @@ function nodejs_delete_nginx_entry_with_ssl {
 ##############END NODEJS TEMPLATE########################
 
 
-if [ $ACTION == 'init_with_default_app' ]; then
+if [ $ACTION == 'init' ]; then
+    # TODO: Validate Exported Variables
+    setup_server
+    if [ $? != 0 ]; then
+        echo "setup_server failed"
+	    exit 1
+	fi
+    install_nginx
+    if [ $? != 0 ]; then
+        echo "install_nginx failed"
+	    exit 1
+	fi
+    install_sshd
+    if [ $? != 0 ]; then
+        echo "install_sshd failed"
+	    exit 1
+	fi
+    create_user_and_project_directories
+    if [ $? != 0 ]; then
+        echo "create_user_and_project_directories failed"
+	    exit 1
+	fi
+    exit 0
+elif [ $ACTION == 'init_with_default_app' ]; then
     # TODO: Validate Exported Variables
     setup_server
     if [ $? != 0 ]; then

@@ -1,5 +1,5 @@
-var UserServer = require("../../lib/userspace/UserServers");
-var UserApp = require("../../lib/userspace/UserApps");
+var UserServer = require("../../lib/launcher/UserServers");
+var UserApp = require("../../lib/launcher/UserApps");
 var userserver1 = null;
 var userserver2 = null;
 

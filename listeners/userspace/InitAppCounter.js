@@ -1,4 +1,4 @@
-var AppCounter = require('../../lib/userspace/AppCounter');
+var AppCounter = require('../../lib/launcher/AppCounter');
 var AppConfig = require('../../config/app');
 
 module.exports = function(){

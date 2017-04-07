@@ -12,6 +12,7 @@ var Transaction = sequelize.import(config.AppRoot + "/models/mysql/Transaction")
 sequelize.sync({force: true}).then(() =>{
     setTimeout(()=>{
         require("../lib/scripts/VirtualUser")();    
+        require("../lib/scripts/UserSeed")();
     }, 0);
     
 });

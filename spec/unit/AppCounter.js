@@ -1,4 +1,5 @@
-var AppCounter = require("../../lib/userspace/AppCounter");
+var AppCounter = require("../../lib/launcher/AppCounter");
+var UserServer = require("../../lib/launcher/UserServers");
 var appCounter1 = null;
 // var userserver2 = null;
 
