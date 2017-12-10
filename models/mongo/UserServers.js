@@ -16,6 +16,13 @@ var UserServerSchema = new Schema({
 	private_key: { type: String },
 	public_key: { type: String },
 	root_passwd: { type: String },
+	ipv4: {type: String },
+	ipv6: {type: String },
+	
+	apps: [{
+	    type: Schema.ObjectId,
+	    ref: 'user_app',
+	}],
 
 	enabled: { type: Boolean, default: true},
 	

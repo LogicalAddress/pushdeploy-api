@@ -197,7 +197,7 @@ function nodejs_create_app {
     	
     	chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.log
     	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.log
-    	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/venv/$TEMPLATE && chmod 777 /usr/share/$PROJECT/venv/$TEMPLATE
+    	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/venv/$TEMPLATE && chmod -R 777 /usr/share/$PROJECT/venv/$TEMPLATE
     fi
 }
 
@@ -223,9 +223,9 @@ function nodejs_app_failed {
 function nodejs_app_setup {
     
     cd /usr/share/$PROJECT/venv/$TEMPLATE
-    pip install nodeenv # install node virtual environment manager
+    pip install nodeenv # apt install nodeenv doesnt work on ubuntu 16.04. node virtual environment manager
     if [ $? != 0 ]; then
-	    echo "pip install nodeenv manager failed"
+	    echo "pip or apt install nodeenv manager failed"
 	    return 1
 	fi
     local VERSION=''

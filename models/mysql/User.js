@@ -17,7 +17,7 @@ module.exports = function (context, DataTypes) {
         },
         mobileNumber: {
             type: DataTypes.STRING,
-            notNull: true,
+            allowNull: false,
             notEmpty: true,
             unique: true  //could change
         },

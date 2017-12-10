@@ -1,18 +1,25 @@
 ## Start Mysql
-`sudo service mysql start
+```shell
+sudo service mysql start
+```
 
 ## Start Mongodb
-`./mongod
+```shell
+./mongod
+```
 
 ## Node Virtual Environment Manager
-`https://github.com/ekalinin/nodeenv`
+https://github.com/ekalinin/nodeenv`
 
 // http://ns1.cargospace.co/wsdl-atomiadns.wsdl
 // http://atomia.github.io/atomiadns/apidocs.html
 
+```shell
 curl --header "X-Auth-Username: gorilla@cargospace.co" --header "X-Auth-Password: faker00tX" http://ns1.cargospace.co/atomiadns.json/GetAllZones
 [{"name":"retnan.com","id":"1"}]
+```
 
+```shell
 curl --header "X-Auth-Username: gorilla@cargospace.co" --header "X-Auth-Password: faker00tX" --data '["retnan.com"]' http://ns1.cargospace.co/atomiadns.json/GetZone
 [{"name":"retnan.com.","records":[{"type":"CNAME","rdata":"www.cargospace.ng.","class":"IN","id":"4","ttl":"3600","label":"retnan.com."}]},{"name":"@","records":[{"rdata":"ns1.cargospace.co.","type":"NS","label":"@","ttl":"3600","id":"2","class":"IN"},{"label":"@","class":"IN","id":"1","ttl":"3600","type":"SOA","rdata":"ns1.cargospace.co hostmaster.ns1.cargospace.co %serial 10800 3600 604800 86400"}]}]
 
