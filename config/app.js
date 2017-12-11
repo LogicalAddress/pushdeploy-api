@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging') {
+  require('dotenv').config({path:__dirname+'/../.env'});
+}
+
 var env = process.env.NODE_ENV || 'development';
 var path = require('path');
 var AppRoot = path.normalize(__dirname + '/..');
@@ -5,15 +9,15 @@ var AppRoot = path.normalize(__dirname + '/..');
 var config = {
   development: {
     AppName: 'TechPool',
-    AppDomain: "http://techpool-dretnan.c9users.io",
+    AppDomain: process.env.API_URL,
     AppRoot: AppRoot,
     PoolSize: 1000000000,
-    port: 3000,
+    port: process.env.PORT || 8080,
     mongoStorage: {
-      url: 'mongodb://localhost:27017/techpool',
+      url: process.env.MONGODB_URL || null,
     },
     mysqlStorage: {
-      url: 'mysql://dretnan:@localhost/c9',
+      url: process.env.MYSQL_URL || null,
     },
     redis: {
       port: 6379,
@@ -22,15 +26,15 @@ var config = {
   },
   test: {
     AppName: 'TechPool',
-    AppDomain: "http://techpool-dretnan.c9users.io",
+    AppDomain: process.env.API_URL || 'http://localhost',
     AppRoot: AppRoot,
     PoolSize: 1000000000,
-    port: 3000,
+    port: process.env.PORT || 8080,
     mongoStorage: {
-      url: 'mongodb://localhost:27017/techpool',
+      url: process.env.MONGODB_URL || 'mongodb://localhost:27017/techpool',
     },
     mysqlStorage: {
-      url: 'mysql://dretnan:@localhost/c9',
+      url: process.env.MYSQL_URL || 'mysql://dretnan:@localhost/c9',
     },
     redis: {
       port: 6379,
@@ -39,10 +43,10 @@ var config = {
   },
   production: {
     AppName: 'TechPool',
-    AppDomain: "api.cargospace.co",
+    AppDomain: process.env.API_URL || "api.cargospace.co",
     AppRoot: AppRoot,
     PoolSize: 1000000000,
-    port: 8080,
+    port: process.env.PORT || 8080,
     mongoStorage: {
       url: process.env.MONGODB_URL,
     },

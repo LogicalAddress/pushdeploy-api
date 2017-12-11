@@ -1,5 +1,5 @@
 'use strict';
-
+require('dotenv').config(/*{path:__dirname+'/../../.env'}*/);
 module.exports = function (grunt) {
   // show elapsed time at the end
   require('time-grunt')(grunt);
