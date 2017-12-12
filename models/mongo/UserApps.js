@@ -16,6 +16,7 @@ var UserAppSchema = new Schema({
 	port: { type: String, default: '3000'}, //as more nodejs apps are addded, we port++, unique too per server
 	template: { type: String, default: 'nodejs'}, //{python2, python3}, {php5.6, php7.0}
 	template_variation: { type: String, default: 'v4'}, //{django}, {laravel, wordpress,}
+	app_repository: {type: String, default: 'git@github.com:IBM-Bluemix/node-helloworld.git'}, 
 
 	enabled: { type: Boolean, default: true},
 	
