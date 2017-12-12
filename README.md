@@ -1,11 +1,21 @@
 [![pipeline status](http://code.pie.ng/dr/LauncherAPI/badges/master/pipeline.svg)](http://code.pie.ng/dr/LauncherAPI/commits/master)
 [![coverage report](http://code.pie.ng/dr/LauncherAPI/badges/master/coverage.svg)](http://code.pie.ng/dr/LauncherAPI/commits/master)
-## Start Mysql
+
+## Developing
+
 ```shell
 sudo service mysql start
+sudo service mongodb start
+mv .env.example .env
+grunt
 ```
 
-## Start Mongodb
+## Running Test Suites
+```shell
+grunt test
+```
+
+## Start Mongodb on c9
 ```shell
 ./mongod
 ```
