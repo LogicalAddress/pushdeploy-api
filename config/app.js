@@ -22,6 +22,16 @@ var config = {
     redis: {
       port: 6379,
       host: 'localhost'
+    },
+    OAuth: {
+      bitbucket:{
+        publicKey: process.env.BITBUCKET_PUBLIC_KEY,
+        secretKey: process.env.BITBUCKET_SECRET_KEY
+      },
+      github:{
+        publicKey: process.env.GITHUB_PUBLIC_KEY,
+        secretKey: process.env.GITHUB_SECRET_KEY
+      }
     }
   },
   test: {
@@ -39,6 +49,16 @@ var config = {
     redis: {
       port: 6379,
       host: 'localhost'
+    },
+    OAuth: {
+      bitbucket:{
+        publicKey: process.env.BITBUCKET_PUBLIC_KEY,
+        secretKey: process.env.BITBUCKET_SECRET_KEY
+      },
+      github:{
+        publicKey: process.env.GITHUB_PUBLIC_KEY,
+        secretKey: process.env.GITHUB_SECRET_KEY
+      }
     }
   },
   production: {
@@ -56,6 +76,16 @@ var config = {
     redis: {
       port: 6379,
       host: 'localhost'
+    },
+    OAuth: {
+      bitbucket:{
+        publicKey: process.env.BITBUCKET_PUBLIC_KEY,
+        secretKey: process.env.BITBUCKET_SECRET_KEY
+      },
+      github:{
+        publicKey: process.env.GITHUB_PUBLIC_KEY,
+        secretKey: process.env.GITHUB_SECRET_KEY
+      }
     }
   }
 };

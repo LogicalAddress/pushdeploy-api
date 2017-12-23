@@ -1,42 +1,8 @@
-image: node:latest
-
-variables:
-  MONGO_DB: techpool
-  
-cache:
-  paths:
-  - node_modules/
-
-stages:
-  - test
-  - deploy
-
-
 before_script:
-  - npm install
+  - git config user.email "d.retnan@nhubnigeria.com"
+  - git config user.name "GitLab CI on behalf of Logical Address Inc."
 
-test:
-  variables:
-    MYSQL_DATABASE: testdb
-    MYSQL_ROOT_PASSWORD: testpass
-    NODE_ENV: test
-    PORT: 8080
-    MONGODB_URL: mongodb://localhost:27017/techpool
-    MYSQL_URL: mysql://root:testpass@mysql/testdb
-    API_URL: http://localhost
-  services:
-  - mongo:latest
-  - mysql:5.7.20
-  stage: test
+push_to_heroku:
   script:
-   - grunt test
-
-deploy_production:
-  stage: deploy
-  script:
-    - echo "ready for production"
-  environment:
-    name: production
-    url: https://pie.ng
-  only:
-  - master
+    - git commit --allow-empty -m "Publish to Heroku at $(date)"
+    - git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/launcher-api.git master

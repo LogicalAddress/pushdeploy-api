@@ -17,6 +17,8 @@ var UserAppSchema = new Schema({
 	template: { type: String, default: 'nodejs'}, //{python2, python3}, {php5.6, php7.0}
 	template_variation: { type: String, default: 'v4'}, //{django}, {laravel, wordpress,}
 	app_repository: {type: String, default: 'git@github.com:IBM-Bluemix/node-helloworld.git'}, 
+	
+	app_shell_script: {type: String, default: ''},
 
 	enabled: { type: Boolean, default: true},
 	

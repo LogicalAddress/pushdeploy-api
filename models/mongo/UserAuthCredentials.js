@@ -13,15 +13,28 @@ var UserAuthCredentialSchema = new Schema({
 	},
 
 	linode_token: { type: String },
+	linode_refresh_token: { type: String },
+	linode_token_expiry: { type: String },
+	
 	digitalocean_token: { type: String },
+	digitalocean_refresh_token: { type: String },
+	digitalocean_token_expiry: { type: String },
+	
 	bitbucket_token: { type: String },
+	bitbucket_refresh_token: { type: String },
+	bitbucket_token_expiry: { type: String },
+	
 	github_token: { type: String },
+	github_refresh_token: { type: String },
+	github_token_expiry: { type: String },
+	
 	aws_secret_key: { type: String }, //for caching purpose - last used secret key
 	aws_access_key: { type: String }, //for caching purpose - last used access key
 	aws_KeyFingerprint: { type: String },
 	aws_KeyMaterial: { type: String },
 	aws_key_name: { type: String },
 	aws_SecurityGroupId: { type: String },
+	
 	custom_private_key: { type: String },
 	custom_public_key: { type: String },
 	

@@ -36,7 +36,7 @@ module.exports = function (context, DataTypes) {
         },
         currency: {
             type: DataTypes.STRING,
-            default: 'NGN', //see config/AccountCode.js to see what i mean.
+            default: 'USD', //see config/AccountCode.js to see what i mean.
         },
         credit_card_number: {
             type: DataTypes.STRING,
@@ -58,6 +58,8 @@ module.exports = function (context, DataTypes) {
             type: DataTypes.STRING,
             default: '',
         },
+        primaryPlan: { type: DataTypes.STRING, allowNull: true, default: '' },
+        secondaryPlan: { type: DataTypes.STRING, allowNull: true, default: '' },
     }, {
         paranoid: true, // Allow Cascade Delete
     });

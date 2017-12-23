@@ -18,6 +18,8 @@ var UserServerSchema = new Schema({
 	root_passwd: { type: String },
 	ipv4: {type: String },
 	ipv6: {type: String },
+	instanceId: {type: String },
+	meta: { type: String },
 	
 	apps: [{
 	    type: Schema.ObjectId,
