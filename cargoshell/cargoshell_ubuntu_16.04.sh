@@ -4,7 +4,7 @@
 # 1. root first time of execution most likely as stackscript
 # 2. $HOST_USER subsequently
 
-SCRIPT_DIR=pwd                  #TODO: This is so wrong
+SCRIPT_DIR=`pwd`                  #TODO: This is so wrong
 HOST_USER="cargospace"				#sudoer
 LTS_NODE_VERSION="6.10.2"           # use LTS if NODE_VERSION is not set
 PROJECT="cargospace"
@@ -14,24 +14,24 @@ GITLAB_REGEX="gitlab"
 SUDO=''
 
 # VARS TO BE EXPORTED: $ACTION (not used yet), $APP_NAME, $TEMPLATE, $CERT_TYPE, $NODE_VERSION
-# $REPOSITORY, $BRANCH, $PORT, $SERVER_ENTRY_POINT
+# $REPOSITORY, $PORT, $SERVER_ENTRY_POINT
 
-export APP_NAME='default'
+export BRANCH="master"
 export TEMPLATE="nodejs"
 export CERT_TYPE="letsencrypt"
-export NODE_VERSION=""
-export REPOSITORY=""
 export REPOSITORY_TYPE="private" # default
-export PORT="3000"
-export SERVER_ENTRY_POINT="server.js"
 export APP_GIT="git@github.com:CargoSpace/CargoSpaceChallenge.git"
 export USER_OAUTH_TOKEN=""
 export BITBUCKET_ACCOUNT_NAME=""
 export GITLABSERVER="gitlab.com" #if not exported uses gitlab.com by default
 
-if [ `whoami` == $HOST_USER ]; then
-    SUDO='echo "" | sudo -S'
+if [ `whoami` != "root" ]; then
+    HOST_USER=`whoami`
 fi
+
+echo "Setting up the machine with user $HOST_USER"
+
+SUDO='echo "" | sudo -S'
 
 # Called at the end of every function
 function _return_to_script_dir {
@@ -55,15 +55,15 @@ function _create_ssl {
 }
 
 function install_nginx {
-    apt-get install nginx -y
-	update-rc.d nginx defaults
-	rm /etc/nginx/sites-enabled/default 2> /dev/null
-	ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+    eval $SUDO apt-get install nginx -y
+	eval $SUDO update-rc.d nginx defaults
+	eval $SUDO rm /etc/nginx/sites-enabled/default 2> /dev/null
+	# eval $SUDO ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 	return 0
 }
 
 function install_sshd {
-    apt install openssh-server -y
+    eval $SUDO apt install openssh-server -y
     return 0
 }
 
@@ -128,35 +128,80 @@ function upload_ssh_key {
 }
 
 function create_user_and_project_directories {
-    useradd --groups sudo,www-data --password="" --shell /bin/bash --user-group --create-home --home-dir /home/$HOST_USER $HOST_USER
-    if [ $? != 0 ]; then
-	    echo "useradd failed"
-	    return 1
+    
+    if [ `whoami` == "root" ]; then
+        id -u $HOST_USER
+        if [ $? != 0 ]; then
+    	    eval $SUDO useradd --groups sudo,www-data --password="" --shell /bin/bash --user-group --create-home --home-dir /home/$HOST_USER $HOST_USER
+            if [ $? != 0 ]; then
+        	    echo "useradd failed"
+        	    return 1
+        	else
+        	    echo "User $HOST_USER created"
+        	fi
+    	else
+    	    echo "User previously created"
+    	fi
 	fi
-	mkdir -p /home/$HOST_USER/.$PROJECT
-	if [ $? != 0 ]; then
-	    echo "mkdir /home/$HOST_USER/.$PROJECT"
-	    return 1
-	fi
-	mkdir -p /usr/share/$PROJECT/startup_scripts
-	if [ $? != 0 ]; then
-	    echo "mkdir /usr/share/$PROJECT/startup_scripts"
-	    return 1
-	fi
+	
+	if [ ! -d "/home/$HOST_USER/.$PROJECT" ]; then
+    	eval $SUDO mkdir -p /home/$HOST_USER/.$PROJECT
+    	if [ $? != 0 ]; then
+    	    echo "mkdir /home/$HOST_USER/.$PROJECT"
+    	    return 1
+    	else
+    	    echo "mkdir /home/$HOST_USER/.$PROJECT"
+    	fi
+    else
+        echo "/home/$HOST_USER/.$PROJECT Previously created"
+    fi
+    
+    if [ ! -d "/usr/share/$PROJECT/startup_scripts" ]; then
+    	eval $SUDO mkdir -p /usr/share/$PROJECT/startup_scripts
+    	if [ $? != 0 ]; then
+    	    echo "mkdir /usr/share/$PROJECT/startup_scripts"
+    	    return 1
+    	else
+    	    echo "mkdir /usr/share/$PROJECT/startup_scripts"
+    	fi
+    else
+        echo "/usr/share/$PROJECT/startup_scripts previously created"
+    fi
+    
+    
 	# Storage Path for CargSpace Files
-	chown -R $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT && chmod -R 777 /home/$HOST_USER/.$PROJECT
-	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/startup_scripts && chmod 777 /usr/share/$PROJECT/startup_scripts
+	eval $SUDO chown -R $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT
+	eval $SUDO chmod -R 777 /home/$HOST_USER/.$PROJECT
+	eval $SUDO chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/startup_scripts
+	eval $SUDO chmod 777 /usr/share/$PROJECT/startup_scripts
 	
 	# Create Key-Pair for this user
-	mkdir -p /home/$HOST_USER/.ssh && ssh-keygen -t rsa -C "$USER@`hostname`" -N "" -f /home/$HOST_USER/.ssh/id_rsa && chown -R $HOST_USER:$HOST_USER /home/$HOST_USER/.ssh
-	# worker@cargospace.co's public key to be entered in /home/$HOST_USER/ssh/autoriz... from our nodejs server
-	if [ $? != 0 ]; then
-	    echo "mkdir and ssh generation at /home/$HOST_USER/.ssh failed"
-	    return 1
+	if [ ! -d "/home/$HOST_USER/.ssh" ]; then
+	    eval $SUDO mkdir -p /home/$HOST_USER/.ssh
+	    if [ $? != 0 ]; then
+    	    echo "mkdir @ /home/$HOST_USER/.ssh failed"
+    	    return 1
+	    fi
+	else
+	    echo "/home/$HOST_USER/.ssh previous created"
 	fi
+	
+	if [ ! -f "/home/$HOST_USER/.ssh/id_rsa" ]; then
+	    eval $SUDO ssh-keygen -q -b 2048 -t rsa -f "/home/$HOST_USER/.ssh/id_rsa"
+	    if [ $? != 0 ]; then
+    	    echo "ssh generation at /home/$HOST_USER/.ssh/id_rsa failed"
+    	    return 1
+	    fi
+	else
+	    echo "/home/$HOST_USER/.ssh/id_rsa previous created"
+	fi
+	
+	eval $SUDO chown -R $HOST_USER:$HOST_USER /home/$HOST_USER/.ssh
+	# worker@cargospace.co's public key to be entered in /home/$HOST_USER/ssh/autoriz... from our nodejs server
+	
 	if [ "$USERCARGOSPACEPUBKEY" != "" ]
     then
-        echo -e "# CargoSpace Key\n$USERCARGOSPACEPUBKEY" >> /home/$HOST_USER/.ssh/authorized_keys
+        eval $SUDO echo -e "# CargoSpace Key\n$USERCARGOSPACEPUBKEY" >> /home/$HOST_USER/.ssh/authorized_keys
     else
         echo "USERCARGOSPACEPUBKEY env not set, proceeding.."
     fi
@@ -165,10 +210,14 @@ function create_user_and_project_directories {
 
 # create a user with super cow powers (First Time Execution)
 function setup_server {
-    apt-get update -y
-    apt-get install curl -y
+    eval $SUDO apt-get update -y
+    eval $SUDO apt-get install curl python-pip git -y
 	# todo: Copy public key to user's directory
-	openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+	if [ ! -f "/etc/ssl/certs/dhparam.pem" ]; then
+	    eval $SUDO openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+	else
+	    echo "/etc/ssl/certs/dhparam.pem previously created"
+	fi
     # echo "" | sudo -S service php5.6-fpm reload
     return 0
 }
@@ -176,29 +225,45 @@ function setup_server {
 # Implement the hooks for other templates in v2
 # All templates must implement this function too
 function nodejs_create_app {
-    touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
     
-    if [ $? != 0 ]; then
-	    echo "touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh failed"
-	    return 1
+    if [ ! -f "/home/$HOST_USER/.$PROJECT/$APP_NAME.sh" ]; then
+	    eval $SUDO touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+	    if [ $? != 0 ]; then
+	        echo "touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh failed"
+	        return 1
+	    fi
+	else
+	    echo "/home/$HOST_USER/.$PROJECT/$APP_NAME.sh previously created"
 	fi
 	
-	touch /home/$HOST_USER/.$PROJECT/$APP_NAME.log
-	eval $SUDO mkdir -p /usr/share/$PROJECT/venv/$TEMPLATE
-	
-	if [ $? != 0 ]; then
-	    echo "mkdir /usr/share/$PROJECT/venv/$TEMPLATE failed"
-	    return 1
+	if [ ! -f "/home/$HOST_USER/.$PROJECT/$APP_NAME.log" ]; then
+	    eval $SUDO touch /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+	    if [ $? != 0 ]; then
+	        echo "touch /home/$HOST_USER/.$PROJECT/$APP_NAME.log failed"
+	        return 1
+	    fi
+	else
+	    echo "/home/$HOST_USER/.$PROJECT/$APP_NAME.log previously created"
 	fi
 	
-	if [ $SUDO == '' ]; then
-        chmod +x /home/$HOST_USER/.$PROJECT/$APP_NAME.sh && chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.sh  # User exported variables
-    	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
-    	
-    	chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.log
-    	chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.log
-    	chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/venv/$TEMPLATE && chmod -R 777 /usr/share/$PROJECT/venv/$TEMPLATE
-    fi
+	if [ ! -d "/usr/share/$PROJECT/venv/$TEMPLATE" ]; then
+	    eval $SUDO mkdir -p /usr/share/$PROJECT/venv/$TEMPLATE
+	    if [ $? != 0 ]; then
+    	    echo "mkdir @ /usr/share/$PROJECT/venv/$TEMPLATE failed"
+    	    return 1
+	    fi
+	else
+	    echo "/usr/share/$PROJECT/venv/$TEMPLATE previous created"
+	fi
+	
+    eval $SUDO chmod +x /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+    eval $SUDO chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.sh  # User exported variables
+	eval $SUDO chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+	
+	eval $SUDO chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+	eval $SUDO chown $HOST_USER:$HOST_USER /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+	eval $SUDO chown -R $HOST_USER:$HOST_USER /usr/share/$PROJECT/venv/$TEMPLATE
+	eval $SUDO chmod -R 777 /usr/share/$PROJECT/venv/$TEMPLATE
 }
 
 function nodejs_app_is_running {
@@ -236,25 +301,35 @@ function nodejs_app_setup {
        VERSION=$NODE_VERSION
     fi
     
-    nodeenv --node=$VERSION $APP_NAME # Every App with its virtual environment
-    if [ $? != 0 ]; then
-	    echo "Setting up node environment for this user's selected configuration $TEMPLATE-$VERSION failed"
-	    return 1
-	fi
+    if [ ! -d "$APP_NAME" ]; then
+        /home/$HOST_USER/.local/bin/nodeenv --node=$VERSION $APP_NAME # Every App with its virtual environment
+        if [ $? != 0 ]; then
+    	    echo "Setting up node environment for this user's selected configuration $TEMPLATE-$VERSION failed"
+    	    return 1
+    	fi
+    	#TODO Replace Last Line exec /usr/share/cargospace/venv/$TEMPLATE/$APPNAME/bin/shim
+    fi
+        
     . $APP_NAME/bin/activate
-    cd /home/$HOST_USER && git clone $REPOSITORY $APP_NAME #TODO Run this command as $HOST_USER
-    if [ $? != 0 ]; then
-	    echo "cloning user repository failed. Did you set public key"
-	    return 1
-	fi
-    cd $APP_NAME && git checkout $BRANCH
+    cd /home/$HOST_USER
+    if [ ! -d "$APP_NAME" ]; then
+        git clone $REPOSITORY $APP_NAME #TODO Run this command as $HOST_USER
+        if [ $? != 0 ]; then
+    	    echo "cloning user repository failed. Did you set public key"
+    	    return 1
+	    fi
+	    cd $APP_NAME && git checkout $BRANCH
+    else
+        cd $APP_NAME && git pull origin $BRANCH
+    fi
+    
     npm install
     if [ $? != 0 ]; then
 	    echo "npm install failed"
 	    return 1
 	fi
     deactivate_node
-    
+if [ ! -f "/usr/share/$PROJECT/startup_scripts/$APP_NAME.sh" ]; then    
 echo -e "#!/bin/sh
 # load user provided environment variable first, so we can overite bad onces.
 source /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
@@ -269,8 +344,12 @@ export IP="0.0.0.0"
 	    echo "creating shell file for systemd /usr/share/$PROJECT/startup_scripts/$APP_NAME.sh failed"
 	    return 1
 	fi
+else
+    echo "/usr/share/$PROJECT/startup_scripts/$APP_NAME.sh previously carried out"
+fi
 
-eval $SUDO echo -e "[Unit]
+if [ ! -f "/lib/systemd/system/$TEMPLATE-$APP_NAME.service" ]; then   
+echo -e "[Unit]
 Description=$TEMPLATE-$APP_NAME Service
 [Service]
 ExecStart=/bin/sh -c '/usr/share/$PROJECT/startup_scripts/$APP_NAME.sh >> /home/$HOST_USER/.$PROJECT/$APP_NAME.log 2>&1'
@@ -278,13 +357,15 @@ Restart=on-failure
 RestartSec=60s
 [Install]
 WantedBy=multi-user.target
-" > /lib/systemd/system/$TEMPLATE-$APP_NAME.service && eval $SUDO chmod 755 /lib/systemd/system/$TEMPLATE-$APP_NAME.service
+" | sudo tee /lib/systemd/system/$TEMPLATE-$APP_NAME.service > /dev/null && eval $SUDO chmod 755 /lib/systemd/system/$TEMPLATE-$APP_NAME.service
     
     if [ $? != 0 ]; then
 	    echo "creating systemd directive /lib/systemd/system/$TEMPLATE-$APP_NAME.service failed"
 	    return 1
 	fi
-	
+else
+    echo "/lib/systemd/system/$TEMPLATE-$APP_NAME.service previously carried out"
+fi	
     _return_to_script_dir
 }
 
@@ -297,6 +378,7 @@ function nodejs_deploy {
         echo "pulling changes.. failed"
 	    exit 1
 	fi
+	. /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/activate
     npm install
     if [ $? != 0 ]; then
         echo "npm install changes.. failed"
@@ -324,56 +406,60 @@ function nodejs_deploy {
 # template_create_nginx_entry family of functions
 function nodejs_create_nginx_entry {
     local appConfig="/etc/nginx/sites-available/$APP_NAME"
-    local SERVER_INFO=""
-    if [ $APP_NAME == 'default' ]; then
-        SERVER_INFO=`echo -e "
-        listen 80 default_server;
-        listen [::]:80 default_server;"`
-    else
-        SERVER_INFO=`echo -e "
-        listen 80;
-        listen [::]:80;
-        server_name $APP_NAME www.$APP_NAME;"`
-        eval $SUDO touch /etc/nginx/sites-available/$APP_NAME
-        eval $SUDO ln -s $appConfig /etc/nginx/sites-enabled/$APP_NAME
-    fi
-    eval $SUDO echo -e "
-    server{
-        $SERVER_INFO
-    
-        # CargoSpace SSL (DO NOT REMOVE!)
-        # ssl_certificate;
-        # ssl_certificate_key;
-    
-        ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-        ssl_prefer_server_ciphers on;
-        ssl_dhparam /etc/ssl/certs/dhparam.pem;
-        ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA';
-        ssl_session_timeout 1d;
-        ssl_session_cache shared:SSL:50m;
-        ssl_stapling on;
-        ssl_stapling_verify on;
-        add_header Strict-Transport-Security max-age=15768000;
-    
+    if [ ! -f "$appConfig" ]; then
+        local SERVER_INFO=""
+        if [ $APP_NAME == 'default' ]; then
+            SERVER_INFO=`echo -e "
+            listen 80 default_server;
+            listen [::]:80 default_server;"`
+        else
+            SERVER_INFO=`echo -e "
+            listen 80;
+            listen [::]:80;
+            server_name $APP_NAME www.$APP_NAME;"`
+            eval $SUDO touch /etc/nginx/sites-available/$APP_NAME
+            eval $SUDO ln -s $appConfig /etc/nginx/sites-enabled/$APP_NAME
+        fi
+        echo -e "
+        server{
+            $SERVER_INFO
         
-        access_log off;
-        error_log  /var/log/nginx/$APP_NAME-error.log error;
-    
-    
-        location / {
-            proxy_pass http://0.0.0.0:$PORT;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            # CargoSpace Socket (DO NOT REMOVE!)
-            # proxy_http_version 1.1;
-            # proxy_set_header Upgrade \$http_upgrade;
-            # proxy_set_header Connection \$connection_upgrade;
+            # CargoSpace SSL (DO NOT REMOVE!)
+            # ssl_certificate;
+            # ssl_certificate_key;
+        
+            ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+            ssl_prefer_server_ciphers on;
+            ssl_dhparam /etc/ssl/certs/dhparam.pem;
+            ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA';
+            ssl_session_timeout 1d;
+            ssl_session_cache shared:SSL:50m;
+            ssl_stapling on;
+            ssl_stapling_verify on;
+            add_header Strict-Transport-Security max-age=15768000;
+        
+            
+            access_log off;
+            error_log  /var/log/nginx/$APP_NAME-error.log error;
+        
+        
+            location / {
+                proxy_pass http://0.0.0.0:$PORT;
+                proxy_set_header Host \$host;
+                proxy_set_header X-Real-IP \$remote_addr;
+                proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                # CargoSpace Socket (DO NOT REMOVE!)
+                # proxy_http_version 1.1;
+                # proxy_set_header Upgrade \$http_upgrade;
+                # proxy_set_header Connection \$connection_upgrade;
+            }
         }
-    }
-    " > $appConfig
-    
-    _restart_nginx
+        " | sudo tee $appConfig > /dev/null
+        
+        _restart_nginx
+    else
+        echo "$appConfig previously done"
+    fi
 }
 
 # template_add_nginx_entry_for_socket family of functions
@@ -482,6 +568,7 @@ if [ $ACTION == 'init' ]; then
         echo "create_user_and_project_directories failed"
 	    exit 1
 	fi
+	echo "init finished."
     exit 0
 elif [ $ACTION == 'init_with_default_app' ]; then
     # TODO: Validate Exported Variables
@@ -515,6 +602,16 @@ elif [ $ACTION == 'init_with_default_app' ]; then
         echo "${TEMPLATE}_app_setup failed"
 	    exit 1
 	fi
+	${TEMPLATE}_create_nginx_entry
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_create_nginx_entry failed"
+	    exit 1
+	fi
+	${TEMPLATE}_deploy
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_deploy failed"
+	    exit 1
+	fi
     exit 0
 elif [ $ACTION == 'add_app' ]; then
     # Check if app already exists and exit 1 with reason
@@ -528,6 +625,16 @@ elif [ $ACTION == 'add_app' ]; then
     ${TEMPLATE}_app_setup
     if [ $? != 0 ]; then
         echo "${TEMPLATE}_app_setup failed"
+	    exit 1
+	fi
+	${TEMPLATE}_create_nginx_entry
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_create_nginx_entry failed"
+	    exit 1
+	fi
+	${TEMPLATE}_deploy
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_deploy failed"
 	    exit 1
 	fi
     exit 0

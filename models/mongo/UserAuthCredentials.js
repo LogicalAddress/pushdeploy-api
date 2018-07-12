@@ -23,10 +23,14 @@ var UserAuthCredentialSchema = new Schema({
 	bitbucket_token: { type: String },
 	bitbucket_refresh_token: { type: String },
 	bitbucket_token_expiry: { type: String },
+	bitbucket_scope: { type: String },
+	bitbucket_token_type: { type: String },
 	
 	github_token: { type: String },
 	github_refresh_token: { type: String },
 	github_token_expiry: { type: String },
+	github_scope: { type: String },
+	github_token_type: { type: String },
 	
 	aws_secret_key: { type: String }, //for caching purpose - last used secret key
 	aws_access_key: { type: String }, //for caching purpose - last used access key

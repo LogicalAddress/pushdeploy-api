@@ -28,6 +28,10 @@ var UserServerSchema = new Schema({
 
 	enabled: { type: Boolean, default: true},
 	
+	state: { type: String, default: 'CREATE_IN_PROGRESS' },
+	
+	status: { type: String, default: '' },
+	
 	created_at: { type: Date, default: Date.now},
 	updated_at: { type: Date, default: Date.now}
 });
