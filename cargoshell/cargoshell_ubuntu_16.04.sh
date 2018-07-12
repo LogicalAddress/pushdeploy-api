@@ -29,8 +29,6 @@ if [ `whoami` != "root" ]; then
     HOST_USER=`whoami`
 fi
 
-echo "Setting up the machine with user $HOST_USER"
-
 SUDO='echo "" | sudo -S'
 
 # Called at the end of every function
@@ -201,7 +199,7 @@ function create_user_and_project_directories {
 	
 	if [ "$USERCARGOSPACEPUBKEY" != "" ]
     then
-        eval $SUDO echo -e "# CargoSpace Key\n$USERCARGOSPACEPUBKEY" >> /home/$HOST_USER/.ssh/authorized_keys
+        echo -e "# CargoSpace Key\n$USERCARGOSPACEPUBKEY" | tee -a /home/$HOST_USER/.ssh/authorized_keys > /dev/null
     else
         echo "USERCARGOSPACEPUBKEY env not set, proceeding.."
     fi
@@ -210,6 +208,7 @@ function create_user_and_project_directories {
 
 # create a user with super cow powers (First Time Execution)
 function setup_server {
+    echo "Setting up the machine with user $HOST_USER"
     eval $SUDO apt-get update -y
     eval $SUDO apt-get install curl python-pip git -y
 	# todo: Copy public key to user's directory
@@ -269,6 +268,7 @@ function nodejs_create_app {
 function nodejs_app_is_running {
     eval $SUDO systemctl is-active $TEMPLATE-$APP_NAME.service
     if [ $? == 0 ]; then
+        eval $SUDO systemctl status $TEMPLATE-$APP_NAME.service
 	    exit 0
 	fi
 	eval $SUDO systemctl status $TEMPLATE-$APP_NAME.service
@@ -281,6 +281,7 @@ function nodejs_app_failed {
         eval $SUDO systemctl status $TEMPLATE-$APP_NAME.service
 	    exit 0
 	fi
+	eval $SUDO systemctl status $TEMPLATE-$APP_NAME.service
 	exit 1
 }
 
@@ -307,7 +308,9 @@ function nodejs_app_setup {
     	    echo "Setting up node environment for this user's selected configuration $TEMPLATE-$VERSION failed"
     	    return 1
     	fi
-    	#TODO Replace Last Line exec /usr/share/cargospace/venv/$TEMPLATE/$APPNAME/bin/shim
+    	#TODO rm Last Line 
+    	sed -i -n -e :a -e '1,1!{P;N;D;};N;ba' /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim
+    	echo -e "exec /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/node \"\$@\"" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
     fi
         
     . $APP_NAME/bin/activate
@@ -332,7 +335,7 @@ function nodejs_app_setup {
 if [ ! -f "/usr/share/$PROJECT/startup_scripts/$APP_NAME.sh" ]; then    
 echo -e "#!/bin/sh
 # load user provided environment variable first, so we can overite bad onces.
-source /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+. /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
 export PORT="$PORT"
 export NODE_ENV='production'
 export IP="0.0.0.0"
@@ -371,6 +374,7 @@ fi
 
 # template_deploy family of functions
 function nodejs_deploy {
+    echo "Deploying..."
     cd /home/$HOST_USER/$APP_NAME
     git pull
     git checkout $APP_BRANCH #just incase
@@ -390,7 +394,7 @@ function nodejs_deploy {
         eval $SUDO systemctl is-active $TEMPLATE-$APP_NAME.service
         if [ $? == 0 ]; then
             echo "App is active, restarting the App.."
-	        eval $SUDO systemctl reload-or-restart $TEMPLATE-$APP_NAME.service
+	        eval $SUDO systemctl restart $TEMPLATE-$APP_NAME.service
 	    else
 	        echo "App is not active, starting the App.."
 	        eval $SUDO systemctl start $TEMPLATE-$APP_NAME.service        
@@ -405,6 +409,7 @@ function nodejs_deploy {
 
 # template_create_nginx_entry family of functions
 function nodejs_create_nginx_entry {
+    echo "nginx ...."
     local appConfig="/etc/nginx/sites-available/$APP_NAME"
     if [ ! -f "$appConfig" ]; then
         local SERVER_INFO=""

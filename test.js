@@ -2,14 +2,23 @@ var fs = require("fs") , laeh = require('laeh2').leanStacks(true), _x = laeh._x
 , sshclient = require("sshclient"), //https://www.npmjs.com/package/sshclient
 request = require("request"),
  opts = {
-    debug: true,
+    debug: false,
     console: console,
     session: [
         { op: 'writeFile', path: '/home/ubuntu/setup.sh', body: fs.readFileSync(__dirname + '/cargoshell/cargoshell_ubuntu_16.04.sh') },
         { op: 'exec', command: 'chmod +x /home/ubuntu/setup.sh' },
         // { op: 'exec', command: 'export ACTION=init && /home/ubuntu/setup.sh > log.out 2>&1' },
         //PORT = 8080 + APPCOUNTER + 1
-        { op: 'exec', command: 'export ACTION=init_with_default_app SERVER_ENTRY_POINT=app.js APP_NAME=default PORT=8080 NODE_VERSION=8.9.3 REPOSITORY="https://github.com/dretnan/pie-fake-moneywave.git" && /home/ubuntu/setup.sh > log.out 2>&1' },
+        //Setup Server with deafult App
+        // { op: 'exec', command: 'export ACTION=init_with_default_app SERVER_ENTRY_POINT=app.js APP_NAME=default PORT=8080 NODE_VERSION=8.9.3 REPOSITORY="https://github.com/dretnan/pie-fake-moneywave.git" && /home/ubuntu/setup.sh > log.out 2>&1' },
+        // Add App to Existing server
+        //  { op: 'exec', command: 'export ACTION=add_app SERVER_ENTRY_POINT=bin/www APP_NAME=niger.cargospace.ng PORT=8081 NODE_VERSION=8.9.3 REPOSITORY="https://github.com/shapeshed/express_example.git" && /home/ubuntu/setup.sh > log.out 2>&1' },
+         //deploy
+        //  { op: 'exec', command: 'export ACTION=deploy APP_NAME=niger.cargospace.ng && /home/ubuntu/setup.sh > log.out 2>&1' },
+         //status
+         { op: 'exec', command: 'export ACTION=status APP_NAME=app.cargospace.ng && /home/ubuntu/setup.sh' },
+         //failed
+        //  { op: 'exec', command: 'export ACTION=app_failed APP_NAME=app.cargospace.ng && /home/ubuntu/setup.sh > log.out 2>&1' },
     ]
 };
 
