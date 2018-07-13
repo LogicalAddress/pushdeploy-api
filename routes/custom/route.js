@@ -170,6 +170,19 @@ module.exports = function (app) {
 			    }).catch((err)=>{
 			    	console.log("UPDATE_SERVER", err);
 			    });
+			    _app.state = 'RUNNING';
+			    _app.save().then((response)=>{
+			    	console.log("UPDATE_APP", response);
+			    	notifier({
+				    	data: {
+					    	ACTION: "UPDATE_APP",
+					    	O_REQ: req.body,
+					    	RESPONSE: response
+				    	}
+			    	});
+			    }).catch((err)=>{
+			    	console.log("UPDATE_APP", err);
+			    });
 			    notifier({
 			    	data: {
 				    	ACTION: "CREATE_INSTANCE",

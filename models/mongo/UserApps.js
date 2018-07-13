@@ -22,6 +22,8 @@ var UserAppSchema = new Schema({
 
 	enabled: { type: Boolean, default: true},
 	
+	state: { type: String, default: 'CREATE_IN_PROGRESS' },
+	
 	auto_deploy: {type: Boolean, default: false},
 	
 	created_at: { type: Date, default: Date.now},
