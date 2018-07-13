@@ -55,8 +55,9 @@ function _create_ssl {
 function install_nginx {
     eval $SUDO apt-get install nginx -y
 	eval $SUDO update-rc.d nginx defaults
-	eval $SUDO rm /etc/nginx/sites-enabled/default 2> /dev/null
-	# eval $SUDO ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+    eval $SUDO rm /etc/nginx/sites-enabled/00-default 2> /dev/null
+    eval $SUDO rm /etc/nginx/sites-enabled/default 2> /dev/null
+    eval $SUDO rm /etc/nginx/sites-available/default 2> /dev/null
 	return 0
 }
 
@@ -417,6 +418,8 @@ function nodejs_create_nginx_entry {
             SERVER_INFO=`echo -e "
             listen 80 default_server;
             listen [::]:80 default_server;"`
+            eval $SUDO touch /etc/nginx/sites-available/$APP_NAME
+            eval $SUDO ln -s $appConfig /etc/nginx/sites-enabled/00-$APP_NAME
         else
             SERVER_INFO=`echo -e "
             listen 80;
@@ -425,6 +428,7 @@ function nodejs_create_nginx_entry {
             eval $SUDO touch /etc/nginx/sites-available/$APP_NAME
             eval $SUDO ln -s $appConfig /etc/nginx/sites-enabled/$APP_NAME
         fi
+        
         echo -e "
         server{
             $SERVER_INFO

@@ -30,6 +30,8 @@ var UserServerSchema = new Schema({
 	
 	state: { type: String, default: 'CREATE_IN_PROGRESS' },
 	
+	_app_counter: { type: Number, default: 0 },
+	
 	status: { type: String, default: '' },
 	
 	created_at: { type: Date, default: Date.now},
