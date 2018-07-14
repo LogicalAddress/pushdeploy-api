@@ -18,6 +18,8 @@ var UserAppSchema = new Schema({
 	template_variation: { type: String, default: 'v4'}, //{django}, {laravel, wordpress,}
 	app_repository: {type: String, default: ''}, 
 	
+	repo_meta_data: { type: String },
+	
 	app_shell_script: {type: String, default: ''},
 
 	enabled: { type: Boolean, default: true},
