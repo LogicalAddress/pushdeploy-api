@@ -15,7 +15,7 @@ module.exports = function (app) {
 			// secretAccessKey: req.body.secretAccessKey,
 			// volumeSize: req.body.volumeSize
 			// InstanceType: req.body.InstanceType
-		})
+		});
 		Aws.createInstance(payload).then((result)=>{
 			console.log("DEBUG", result);
     		res.status(200).json({body: { status: "IN_PROGRESS", data: result}});

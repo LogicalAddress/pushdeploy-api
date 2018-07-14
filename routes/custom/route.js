@@ -1,11 +1,11 @@
-var Auth = require("../../lib/middlewares/authenticate")
-, App = require('../../lib/launcher/UserApps')
-, Cred = require("../../lib/middlewares/credentials")
-, fs = require("fs") , laeh = require('laeh2').leanStacks(true), _x = laeh._x
-, sshclient = require("sshclient"), //https://www.npmjs.com/package/sshclient
- Servers = require("../../lib/launcher/UserServers"),
- generate = require('project-name-generator'), request = require("request"),
- AppCounter = require('../../lib/launcher/AppCounter'),
+var Auth = require("../../lib/middlewares/authenticate"), 
+App = require('../../lib/launcher/UserApps'), 
+Cred = require("../../lib/middlewares/credentials"), fs = require("fs"),
+laeh = require('laeh2').leanStacks(true), _x = laeh._x,
+sshclient = require("sshclient"), //https://www.npmjs.com/package/sshclient
+Servers = require("../../lib/launcher/UserServers"),
+generate = require('project-name-generator'), request = require("request"),
+AppCounter = require('../../lib/launcher/AppCounter'),
  opts = {
     port: 22,
     debug: true,

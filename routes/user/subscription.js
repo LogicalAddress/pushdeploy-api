@@ -18,10 +18,10 @@ module.exports = function (app) {
 			    mobileNumber: req.techpool.user.mobileNumber,
 			    amount: req.body.amount
 			}).then((response)=>{
-			    console.log("DEBUG", response)
+			    console.log("DEBUG", response);
 			}).catch((err)=>{
 			    console.log(err);
-			})
+			});
 		}).catch((error)=>{
 		    res.status(500).json({status: 'failure', message: error});
 		});			

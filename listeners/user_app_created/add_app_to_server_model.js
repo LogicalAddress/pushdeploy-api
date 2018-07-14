@@ -10,7 +10,7 @@ module.exports = function(){
                 console.log("Add_app_to_server_model:update", updatedServer);
             }).catch((err)=>{
                 console.log("Add_app_to_server_model:update", err);    
-            })
+            });
     	}).catch(function(err) {
     	    console.log("Add_app_to_server_model:Init", err);
     	});

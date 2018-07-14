@@ -16,9 +16,6 @@ var config = {
     mongoStorage: {
       url: process.env.MONGODB_URL || null,
     },
-    mysqlStorage: {
-      url: process.env.MYSQL_URL || null,
-    },
     redis: {
       port: 6379,
       host: 'localhost'
@@ -43,9 +40,6 @@ var config = {
     mongoStorage: {
       url: process.env.MONGODB_URL || 'mongodb://localhost:27017/techpool',
     },
-    mysqlStorage: {
-      url: process.env.MYSQL_URL || 'mysql://dretnan:@localhost/c9',
-    },
     redis: {
       port: 6379,
       host: 'localhost'
@@ -69,9 +63,6 @@ var config = {
     port: process.env.PORT || 8080,
     mongoStorage: {
       url: process.env.MONGODB_URL,
-    },
-    mysqlStorage: {
-      url: process.env.MYSQL_URL,
     },
     redis: {
       port: 6379,
