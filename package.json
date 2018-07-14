@@ -32,7 +32,8 @@
     "sshclient": "0.0.4",
     "underscore": "^1.8.3",
     "ursa": "^0.9.4",
-    "xml2json": "^0.11.0"
+    "xml2json": "^0.11.0",
+    "parse-github-repo-url": "^1.4.1"
   },
   "devDependencies": {
     "grunt": "~0.4.5",

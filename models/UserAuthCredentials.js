@@ -20,12 +20,17 @@ var UserAuthCredentialSchema = new Schema({
 	digitalocean_refresh_token: { type: String },
 	digitalocean_token_expiry: { type: String },
 	
+	
+	bitbucket_username: { type: String },
+	bitbucket_profile: { type: String },
 	bitbucket_token: { type: String },
 	bitbucket_refresh_token: { type: String },
 	bitbucket_token_expiry: { type: String },
 	bitbucket_scope: { type: String },
 	bitbucket_token_type: { type: String },
 	
+	github_username: { type: String },
+	github_profile: { type: String },
 	github_token: { type: String },
 	github_refresh_token: { type: String },
 	github_token_expiry: { type: String },
