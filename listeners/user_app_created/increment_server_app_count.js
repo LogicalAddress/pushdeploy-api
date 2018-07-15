@@ -3,7 +3,7 @@ var Server = require("../../lib/launcher/UserServers");
 
 module.exports = function(){
     process.on('user_app_created', function(app){
-        
+        console.log("EVENT", "user_app_created", "LISTNER", "increment_server_app_count");
         AppCounter.incrementAppCounter(app).then(function(response){
             // Silence is golden
             console.log("AppCounter", response);

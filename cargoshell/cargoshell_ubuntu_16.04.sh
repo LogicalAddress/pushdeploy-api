@@ -14,15 +14,15 @@ GITLAB_REGEX="gitlab"
 SUDO=''
 
 # VARS TO BE EXPORTED: $ACTION (not used yet), $APP_NAME, $TEMPLATE, $CERT_TYPE, $NODE_VERSION
-# $REPOSITORY, $PORT, $SERVER_ENTRY_POINT
+# $REPOSITORY, $PORT, $SERVER_ENTRY_POINT, $GITUSERNAME
 
 export BRANCH="master"
 export TEMPLATE="nodejs"
 export CERT_TYPE="letsencrypt"
 export REPOSITORY_TYPE="private" # default
-export APP_GIT="git@github.com:CargoSpace/CargoSpaceChallenge.git"
+export APP_GIT=$REPOSITORY
 export USER_OAUTH_TOKEN=""
-export BITBUCKET_ACCOUNT_NAME=""
+export BITBUCKET_ACCOUNT_NAME=$GITUSERNAME
 export GITLABSERVER="gitlab.com" #if not exported uses gitlab.com by default
 
 if [ `whoami` != "root" ]; then
@@ -39,6 +39,11 @@ function _return_to_script_dir {
 function _restart_nginx {
     eval $SUDO service nginx reload
     eval $SUDO service nginx restart
+}
+
+function notify_home {
+    local JSON=$( printf '{"type": "CREATE_SERVER_SUCCESS", "superuser": "%s", "server_id": "%s", "app_name": "%s", "port": "%s"}' "$HOST_USER" "$SERVER_ID" "$APP_NAME" "$PORT" )
+    curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
 }
 
 function _create_ssl {
@@ -577,6 +582,7 @@ if [ $ACTION == 'init' ]; then
         echo "create_user_and_project_directories failed"
 	    exit 1
 	fi
+	notify_home
 	echo "init finished."
     exit 0
 elif [ $ACTION == 'init_with_default_app' ]; then
@@ -621,6 +627,7 @@ elif [ $ACTION == 'init_with_default_app' ]; then
         echo "${TEMPLATE}_deploy failed"
 	    exit 1
 	fi
+	notify_home
     exit 0
 elif [ $ACTION == 'add_app' ]; then
     # Check if app already exists and exit 1 with reason

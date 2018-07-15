@@ -10,6 +10,7 @@ var config = {
   development: {
     AppName: 'TechPool',
     AppDomain: process.env.API_URL,
+    WebHookUrl: process.env.WEB_HOOK_URL,
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: process.env.PORT || 8080,
@@ -34,6 +35,7 @@ var config = {
   test: {
     AppName: 'TechPool',
     AppDomain: process.env.API_URL || 'http://localhost',
+    WebHookUrl: process.env.WEB_HOOK_URL || 'http://localhost/webhooks',
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: process.env.PORT || 8080,
@@ -57,7 +59,8 @@ var config = {
   },
   production: {
     AppName: 'TechPool',
-    AppDomain: process.env.API_URL || "api.cargospace.co",
+    AppDomain: process.env.API_URL,
+    WebHookUrl: process.env.WEB_HOOK_URL,
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: process.env.PORT || 8080,

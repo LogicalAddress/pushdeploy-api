@@ -16,6 +16,7 @@ var UserServerSchema = new Schema({
 	private_key: { type: String },
 	public_key: { type: String },
 	root_passwd: { type: String },
+	superuser: {type: String },
 	ipv4: {type: String },
 	ipv6: {type: String },
 	instanceId: {type: String },
@@ -33,8 +34,6 @@ var UserServerSchema = new Schema({
 	state: { type: String, default: 'CREATE_IN_PROGRESS' },
 	
 	_app_counter: { type: Number, default: 0 },
-	
-	status: { type: String, default: '' },
 	
 	created_at: { type: Date, default: Date.now},
 	updated_at: { type: Date, default: Date.now}

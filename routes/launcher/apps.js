@@ -63,7 +63,7 @@ module.exports = function (app) {
 			// opts.privateKey = req.techpool.credentials.custom_private_key;
 			opts.privateKey = fs.readFileSync(__dirname + '/../../launcher.pem');
 			opts.session = [
-		        { op: 'exec', command: 'export ACTION=add_app SERVER_ENTRY_POINT='+req.body.entry_point+' APP_NAME='+_app.app_name+' PORT='+ (3000 + parseInt(_server._app_counter))+' NODE_VERSION='+_app.template_variation+' REPOSITORY="'+_app.app_repository+'" && /home/'+opts.username+'/_setup.sh > _app.log.out 2>&1' },
+		        { op: 'exec', command: 'export ACTION=add_app SERVER_ENTRY_POINT='+req.body.entry_point+' APP_NAME='+_app.app_name+' PORT='+ (3000 + parseInt(_server._app_counter))+' NODE_VERSION='+_app.template_variation+' REPOSITORY="'+_app.app_repository+'" && /home/'+_server.superuser+'/_setup.sh > _app_'+_app.app_name+'.log.out 2>&1' },
 		    ];
 			sshclient.session(opts, _x(function(err, response){
 				//Control Only reaches here when cargoshell returns with a non-zero EXIT_STATUS
