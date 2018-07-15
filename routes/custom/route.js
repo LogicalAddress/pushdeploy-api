@@ -63,7 +63,7 @@ module.exports = function (app) {
 			}else{
 				_server.state = 'RE-INITIALIZING'; //ignore db update. Is it important?
 				res.status(200).json({body: { status: "IN_PROGRESS", data: response }});
-				setup(req, _server);
+				setup(req, _server, true);
 				return;
 			}
 		}).catch((error)=>{
