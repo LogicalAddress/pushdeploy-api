@@ -41,8 +41,13 @@ function _restart_nginx {
     eval $SUDO service nginx restart
 }
 
-function notify_home {
+function notify_home_that_server_ready {
     local JSON=$( printf '{"type": "CREATE_SERVER_SUCCESS", "superuser": "%s", "server_id": "%s", "app_name": "%s", "port": "%s"}' "$HOST_USER" "$SERVER_ID" "$APP_NAME" "$PORT" )
+    curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
+}
+
+function notify_home_that_app_added {
+    local JSON=$( printf '{"type": "CREATE_APP_SUCCESS", "superuser": "%s", "server_id": "%s", "app_name": "%s", "port": "%s", "app_id": "%s"}' "$HOST_USER" "$SERVER_ID" "$APP_NAME" "$PORT" "$APP_ID")
     curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
 }
 
@@ -582,7 +587,7 @@ if [ $ACTION == 'init' ]; then
         echo "create_user_and_project_directories failed"
 	    exit 1
 	fi
-	notify_home
+	notify_home_that_server_ready
 	echo "init finished."
     exit 0
 elif [ $ACTION == 'init_with_default_app' ]; then
@@ -627,7 +632,7 @@ elif [ $ACTION == 'init_with_default_app' ]; then
         echo "${TEMPLATE}_deploy failed"
 	    exit 1
 	fi
-	notify_home
+	notify_home_that_server_ready
     exit 0
 elif [ $ACTION == 'add_app' ]; then
     # Check if app already exists and exit 1 with reason
@@ -653,6 +658,7 @@ elif [ $ACTION == 'add_app' ]; then
         echo "${TEMPLATE}_deploy failed"
 	    exit 1
 	fi
+	notify_home_that_app_added
     exit 0
 elif [ $ACTION == 'deploy' ]; then
     # Check if template is set or fire an error. This shellscript doesn't remember and the server had better send a correct one

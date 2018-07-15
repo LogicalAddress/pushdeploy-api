@@ -11,14 +11,6 @@ module.exports = function (app) {
         res.status(200).json({status: "success", message: "RECV"});
         var payload = req.body;
         if(payload.type == "CREATE_SERVER_SUCCESS"){
-            notifier({
-                uid: req.techpool.user.uid,
-		    	data: {
-			    	ACTION: "CREATE_INSTANCE",
-			    	O_REQ: null,
-			    	RESPONSE: "ready"
-		    	}
-		    });
             UserServer.findOne({uid: req.techpool.user.uid, _id: payload.server_id})
             .then((server)=>{
                 server.superuser = payload.superuser;
@@ -30,25 +22,28 @@ module.exports = function (app) {
     			    	data: {
     				    	ACTION: "UPDATE_SERVER",
     				    	O_REQ: null,
-    				    	RESPONSE: response
+    				    	MESSAGE: 'RUNNING',
+    				    	DATA: response
     			    	}
     		    	});
+    		    	notifier({
+                        uid: req.techpool.user.uid,
+        		    	data: {
+        			    	ACTION: "CREATE_INSTANCE",
+        			    	O_REQ: null,
+        			    	MESSAGE: "READY",
+        			    	DATA: response,
+        		    	}
+        		    });
 			    }).catch((err)=>{
-			    	console.log("SUPER_SERVER_UPDATE", err);
+			    	console.log("SUPER_SERVER_UPDATE Err", err);
 			    });
             }).catch((error)=>{
                console.log("findOne Server: Empty");
                console.log("EVENT", payload, error);
                //TODO: Log
             });
-            notifier({
-                uid: req.techpool.user.uid,
-		    	data: {
-			    	ACTION: "CREATE_APP",
-			    	O_REQ: null,
-			    	RESPONSE: "ready"
-		    	}
-		    });
+            
             UserApp.findOne({
                 uid: req.techpool.user.uid, 
                 app_name: payload.app_name,
@@ -63,15 +58,53 @@ module.exports = function (app) {
 				    	data: {
 					    	ACTION: "UPDATE_APP",
 					    	O_REQ: null,
-					    	RESPONSE: response
+					    	MESSAGE: "RUNNING",
+					    	DATA: response
 				    	}
 			    	});
+			    	notifier({
+                        uid: req.techpool.user.uid,
+        		    	data: {
+        			    	ACTION: "CREATE_APP",
+        			    	O_REQ: null,
+        			    	MESSAGE: "READY",
+        			    	DATA: response
+        		    	}
+        		    });
 			    }).catch((err)=>{
-			    	console.log("UPDATE_APP", err);
+			    	console.log("UPDATE_APP Err", err);
 			    });
             }).catch((error)=>{
                console.log("findOne App: Empty");
                console.log("EVENT", payload, error);
+            });
+        }else if(payload.type == "CREATE_APP_SUCCESS"){
+            
+            UserApp.findOne({
+                uid: req.techpool.user.uid, 
+                server: payload.server_id, 
+                _id: payload.app_id //should we want to allow multiple app name (diff template) per server
+            }).then((app)=>{
+                app.state = 'RUNNING';
+                app.port = payload.port;
+			    app.save().then((response)=>{
+    		    	console.log("UPDATE_APP", response);
+    		    	notifier({
+    		    	    uid: req.techpool.user.uid,
+				    	data: {
+					    	ACTION: "SERVER_UPDATE",
+					    	O_REQ: null,
+					    	MESSAGE: 'NEW APP RUNNING',
+					    	DATA: response
+				    	}
+			    	});
+			    }).catch((err)=>{
+			    	console.log("UPDATE_APP ERR", err);
+			    });
+            }).catch((error)=>{
+               console.log("findOne Server: Empty");
+               console.log("EVENT", payload, error);
+               //TODO: Log
             });
         }else{
             console.log("UNHANDLED EVENTS", payload);
