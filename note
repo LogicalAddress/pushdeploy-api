@@ -1,1 +1,12 @@
-github/bitbucket webhook, on revoke, clear auth credentials for the user
+- github/bitbucket webhook, on revoke, clear auth credentials for the user
+- getting the non-root user for the setup
+- detect entry point automatically
+- use curl to notify techpool (webhooks) inside the server
+ - upload the server log
+ - upload the app installation log
+- the default app should be a monitoring app per server
+    - server loads, uptime, system-ctrl status of each app etc.
+    - nginx logs, etc.
+    - https://www.nginx.com/products/nginx-amplify/
+    - https://github.com/mthenw/frontail
+    - https://github.com/sanketbajoria/scullog

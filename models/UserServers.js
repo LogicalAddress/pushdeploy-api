@@ -25,6 +25,8 @@ var UserServerSchema = new Schema({
 	    type: Schema.ObjectId,
 	    ref: 'user_app',
 	}],
+	
+	cargoshell_version: { type: String, default: '0.1'},
 
 	enabled: { type: Boolean, default: true},
 	
