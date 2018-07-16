@@ -21,7 +21,6 @@ export TEMPLATE="nodejs"
 export CERT_TYPE="letsencrypt"
 export REPOSITORY_TYPE="private" # default
 export APP_GIT=$REPOSITORY
-export USER_OAUTH_TOKEN=""
 export BITBUCKET_ACCOUNT_NAME=$GITUSERNAME
 export GITLABSERVER="gitlab.com" #if not exported uses gitlab.com by default
 
@@ -80,18 +79,18 @@ function install_sshd {
 function upload_ssh_key {
     local KEY=$( cat /home/$HOST_USER/.ssh/id_rsa.pub )
     local TITLE=${KEY/* } # the '/* ' above deletes every character in $KEY up to and including the last space.
-    if [[ $APP_GIT =~ $GITHUB_REGEX ]];
+    if [ $GIT_PROVIDER == "github" ];
     then
         # https://developer.github.com/v3/users/keys/#create-a-public-key
-        local JSON=$( printf '{"title": "%s", "key": "%s"}' "$TITLE" "$KEY" )
-        curl -s -d "$JSON" "https://api.github.com/user/keys/?access_token=$USER_OAUTH_TOKEN"
+        local JSON=$( printf '{"title": "%s", "key": "%s"}' "$SERVER_NAME" "$KEY" )
+        curl -v -H "Authorization: token ${USER_OAUTH_TOKEN}" -H "Content-Type: application/json" -X POST -d "$JSON" "https://api.github.com/user/keys/"
         # Upload CargoSpace key if we havn't aleady done so while ignoring duplicate errors from git providers
         if [ "$USERCARGOSPACEPUBKEY" != "" ]
         then
             KEY=$USERCARGOSPACEPUBKEY
             TITLE="CargoSpace"
             JSON=$( printf '{"title": "%s", "key": "%s"}' "$TITLE" "$KEY" )
-            curl -s -d "$JSON" "https://api.github.com/user/keys/?access_token=$USER_OAUTH_TOKEN"
+            curl -v -d "$JSON" "https://api.github.com/user/keys/?access_token=$USER_OAUTH_TOKEN"
         else
             echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
         fi
@@ -327,14 +326,42 @@ function nodejs_app_setup {
     . $APP_NAME/bin/activate
     cd /home/$HOST_USER
     if [ ! -d "$APP_NAME" ]; then
-        git clone $REPOSITORY $APP_NAME #TODO Run this command as $HOST_USER
-        if [ $? != 0 ]; then
-    	    echo "cloning user repository failed. Did you set public key"
-    	    return 1
+        
+        if [ $REPO_VISIBILITY == "private" ]; then
+             if [ $GIT_PROVIDER == "github" ]; then
+                # https://blog.github.com/2012-09-21-easier-builds-and-deployments-using-git-over-https-and-oauth/
+                #################
+                mkdir $APP_NAME
+                cd $APP_NAME
+                git init
+                git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
+                if [ $? != 0 ]; then
+            	    echo "cloning user repository failed. Did you set public key"
+            	    return 1
+        	    fi
+        	    cd ..
+        	    ##################
+        	  elif [ $GIT_PROVIDER == "bitbucket" ]; then
+        	      git clone $REPOSITORY $APP_NAME
+        	  else
+        	        git clone $REPOSITORY $APP_NAME
+        	  fi
+	    else
+	        git clone $REPOSITORY $APP_NAME #TODO Run this command as $HOST_USER
 	    fi
 	    cd $APP_NAME && git checkout $BRANCH
     else
-        cd $APP_NAME && git pull origin $BRANCH
+        if [ $REPO_VISIBILITY == "private" ]; then
+             if [ $GIT_PROVIDER == "github" ]; then
+                cd $APP_NAME && git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
+             elif [ $GIT_PROVIDER == "bitbucket" ]; then
+        	      cd $APP_NAME && git pull origin $BRANCH
+        	  else
+        	        cd $APP_NAME && git pull origin $BRANCH
+        	  fi
+        else
+            cd $APP_NAME && git pull origin $BRANCH
+        fi
     fi
     
     npm install
@@ -387,7 +414,19 @@ fi
 function nodejs_deploy {
     echo "Deploying..."
     cd /home/$HOST_USER/$APP_NAME
-    git pull
+    if [ $REPO_VISIBILITY == "private" ]; then
+             if [ $GIT_PROVIDER == "github" ]; then
+                git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
+             elif [ $GIT_PROVIDER == "bitbucket" ]; then
+                git pull
+                git checkout $APP_BRANCH #just incase
+             else
+                git pull
+                git checkout $APP_BRANCH #just incase
+             fi
+    else
+        git pull    
+    fi
     git checkout $APP_BRANCH #just incase
     if [ $? != 0 ]; then
         echo "pulling changes.. failed"
@@ -643,6 +682,16 @@ elif [ $ACTION == 'add_app' ]; then
         echo "${TEMPLATE}_create_app failed"
 	    exit 1
 	fi
+	
+	echo $REPO_VISIBILITY;
+	
+	if [ $REPO_VISIBILITY == "private" ]; then
+	    echo "upload_ssh_key running..."
+	    upload_ssh_key
+    else
+        echo "Not uploading ssh key, app is probably a public repo"
+	fi
+	
     ${TEMPLATE}_app_setup
     if [ $? != 0 ]; then
         echo "${TEMPLATE}_app_setup failed"
@@ -653,6 +702,7 @@ elif [ $ACTION == 'add_app' ]; then
         echo "${TEMPLATE}_create_nginx_entry failed"
 	    exit 1
 	fi
+	
 	${TEMPLATE}_deploy
     if [ $? != 0 ]; then
         echo "${TEMPLATE}_deploy failed"
