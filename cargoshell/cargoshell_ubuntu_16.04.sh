@@ -89,22 +89,22 @@ function upload_ssh_key {
         then
             KEY=$USERCARGOSPACEPUBKEY
             TITLE="CargoSpace"
-            JSON=$( printf '{"title": "%s", "key": "%s"}' "$TITLE" "$KEY" )
+            JSON=$( printf '{"title": "%s", "key": "%s"}' "$SERVER_NAME" "$KEY" )
             curl -v -d "$JSON" "https://api.github.com/user/keys/?access_token=$USER_OAUTH_TOKEN"
         else
             echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
         fi
-    elif [[ $APP_GIT =~ $BITBUCKET_REGEX ]];
+    elif [ $GIT_PROVIDER == "bitbucket" ];
     then
-        local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
-        curl -s $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
+        local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$SERVER_NAME" "$USER_OAUTH_TOKEN" )
+        curl -v $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
         # Upload CargoSpace key if we havn't aleady done so while ignoring duplicate errors from git providers
         if [ "$USERCARGOSPACEPUBKEY" != "" ]
         then
             KEY=$USERCARGOSPACEPUBKEY
             TITLE="CargoSpace"
-            data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
-            curl -s $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
+            data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$SERVER_NAME" "$USER_OAUTH_TOKEN" )
+            curl -v $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
         else
             echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
         fi
@@ -117,15 +117,15 @@ function upload_ssh_key {
         else
            GITSERVER=$GITLABSERVER
         fi
-        local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "private_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
-        curl -s $data "https://$GITSERVER/api/v3/user/keys?private_token=$USER_OAUTH_TOKEN"
+        local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "private_token=%s"' "$KEY" "$SERVER_NAME" "$USER_OAUTH_TOKEN" )
+        curl -v $data "https://$GITSERVER/api/v3/user/keys?private_token=$USER_OAUTH_TOKEN"
         # Upload CargoSpace key if we havn't aleady done so while ignoring duplicate errors from git providers
         if [ "$USERCARGOSPACEPUBKEY" != "" ]
         then
             KEY=$USERCARGOSPACEPUBKEY
             TITLE="CargoSpace"
-            data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "private_token=%s"' "$KEY" "$TITLE" "$USER_OAUTH_TOKEN" )
-            curl -s $data "https://$GITSERVER/api/v3/user/keys?private_token=$USER_OAUTH_TOKEN"
+            data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "private_token=%s"' "$KEY" "$SERVER_NAME" "$USER_OAUTH_TOKEN" )
+            curl -v $data "https://$GITSERVER/api/v3/user/keys?private_token=$USER_OAUTH_TOKEN"
         else
             echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
         fi
@@ -342,7 +342,19 @@ function nodejs_app_setup {
         	    cd ..
         	    ##################
         	  elif [ $GIT_PROVIDER == "bitbucket" ]; then
-        	      git clone $REPOSITORY $APP_NAME
+        	        # https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html
+                    # git clone $REPOSITORY $APP_NAME
+                    #################
+                    mkdir $APP_NAME
+                    cd $APP_NAME
+                    git init
+                    git pull https://x-token-auth:$USER_OAUTH_TOKEN@bitbucket.org/$REPO_USER/$REPO_PROJECT_NAME.git
+                    if [ $? != 0 ]; then
+                        echo "cloning user repository failed. Did you set public key"
+                        return 1
+                    fi
+                    cd ..
+                    ##################
         	  else
         	        git clone $REPOSITORY $APP_NAME
         	  fi
@@ -355,9 +367,9 @@ function nodejs_app_setup {
              if [ $GIT_PROVIDER == "github" ]; then
                 cd $APP_NAME && git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
              elif [ $GIT_PROVIDER == "bitbucket" ]; then
-        	      cd $APP_NAME && git pull origin $BRANCH
-        	  else
-        	        cd $APP_NAME && git pull origin $BRANCH
+                cd $APP_NAME && git pull https://x-token-auth:$USER_OAUTH_TOKEN@bitbucket.org/$REPO_USER/$REPO_PROJECT_NAME.git
+        	 else
+        	     cd $APP_NAME && git pull origin $BRANCH
         	  fi
         else
             cd $APP_NAME && git pull origin $BRANCH
