@@ -1,13 +1,14 @@
 var Auth = require("../../lib/middlewares/authenticate"), 
 App = require('../../lib/launcher/UserApps'), 
 Cred = require("../../lib/middlewares/credentials"),
+refreshToken = require("../../lib/middlewares/bitbucketRtoken"),
 Servers = require("../../lib/launcher/UserServers"),
 setup = require("../../lib/launcher/appSetup"),
 notifier = require("../../lib/launcher/notifier");
 
 module.exports = function (app) {
 	
-	app.post('/v1/app/create', Auth, Cred, (req, res, next) => {
+	app.post('/v1/app/create', Auth, refreshToken, Cred, (req, res, next) => {
 		Servers.findOne({
 			uid: req.techpool.user.uid, 
 			_id: req.body.server
