@@ -3,10 +3,10 @@
  - upload the server log - No. Make it on demand until we can tail logs
  - upload the app installation log - No. Make it on demand
  - store all event in a collection, set state, received, ack, processed.
- - deploy for private repos - 
 - the default app should be a monitoring app per server
     - server loads, uptime, system-ctrl status of each app etc.
     - nginx logs, etc.
     - https://www.nginx.com/products/nginx-amplify/
     - https://github.com/mthenw/frontail
     - https://github.com/sanketbajoria/scullog
+- should we let git pull fail? or leave it quitely as it currently is?
