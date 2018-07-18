@@ -3,11 +3,15 @@ Cred = require("../../lib/middlewares/credentials"),
 LogEvent = require("../../lib/middlewares/logevent"),
 UserServer = require('../../lib/launcher/UserServers'),
 UserApp = require('../../lib/launcher/UserApps'),
-notifier = require('../../lib/launcher/notifier');
+notifier = require('../../lib/launcher/notifier'),
+multer  = require('multer'),
+storage = multer.memoryStorage(),
+upload = multer({ storage: storage });
 
 module.exports = function (app) {
     
-	app.post('/v1/server/events', Auth, Cred, LogEvent, function (req, res, next) {
+	app.post('/v1/server/events', Auth, Cred, LogEvent, upload.single('file'), function (req, res, next) {
+        console.log("Webhook Received: ", req.body.type);
         res.status(200).json({status: "success", message: "RECV"});
         var payload = req.body;
         if(payload.type == "CREATE_SERVER_SUCCESS"){
@@ -106,6 +110,11 @@ module.exports = function (app) {
                console.log("EVENT", payload, error);
                //TODO: Log
             });
+        }else if(payload.type == "DEPLOY_LOGS"){
+            console.log(req.file, req.body);
+        }else if(payload.type == "SERVER_LOGS"){
+            console.log(req.file, req.body);
+        
         }else{
             console.log("UNHANDLED EVENTS", payload);
         }

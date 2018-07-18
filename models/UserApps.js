@@ -20,6 +20,12 @@ var UserAppSchema = new Schema({
 	
 	repo_meta_data: { type: String },
 	
+	git_provider: { type: String },
+	
+	webhook_sub_id: { type: String},
+	
+	webhook_sub_data: {type: String },
+	
 	app_shell_script: {type: String, default: ''},
 
 	enabled: { type: Boolean, default: true},
@@ -27,6 +33,8 @@ var UserAppSchema = new Schema({
 	state: { type: String, default: 'CREATE_IN_PROGRESS' },
 	
 	auto_deploy: {type: Boolean, default: false},
+	
+	isPublic: {type: Boolean, default: true},
 	
 	created_at: { type: Date, default: Date.now},
 	updated_at: { type: Date, default: Date.now}

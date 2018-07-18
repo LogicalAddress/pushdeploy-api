@@ -1,0 +1,65 @@
+Setting up the machine with user ubuntu
+Hit:1 http://us-west-2.ec2.archive.ubuntu.com/ubuntu xenial InRelease
+Get:2 http://us-west-2.ec2.archive.ubuntu.com/ubuntu xenial-updates InRelease [109 kB]
+Get:3 http://us-west-2.ec2.archive.ubuntu.com/ubuntu xenial-backports InRelease [107 kB]
+Get:4 http://us-west-2.ec2.archive.ubuntu.com/ubuntu xenial-updates/main amd64 Packages [806 kB]
+Get:5 http://us-west-2.ec2.archive.ubuntu.com/ubuntu xenial-updates/universe amd64 Packages [642 kB]
+Get:6 http://security.ubuntu.com/ubuntu xenial-security InRelease [107 kB]
+Fetched 1,771 kB in 0s (2,141 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+curl is already the newest version (7.47.0-1ubuntu2.8).
+git is already the newest version (1:2.7.4-0ubuntu1.4).
+python-pip is already the newest version (8.1.1-2ubuntu0.4).
+0 upgraded, 0 newly installed, 0 to remove and 9 not upgraded.
+/etc/ssl/certs/dhparam.pem previously created
+Reading package lists...
+Building dependency tree...
+Reading state information...
+nginx is already the newest version (1.10.3-0ubuntu0.16.04.2).
+0 upgraded, 0 newly installed, 0 to remove and 9 not upgraded.
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Reading package lists...
+Building dependency tree...
+Reading state information...
+openssh-server is already the newest version (1:7.2p2-4ubuntu2.4).
+0 upgraded, 0 newly installed, 0 to remove and 9 not upgraded.
+/home/ubuntu/.cargospace Previously created
+/usr/share/cargospace/startup_scripts previously created
+/home/ubuntu/.ssh previous created
+/home/ubuntu/.ssh/id_rsa previous created
+USERCARGOSPACEPUBKEY env not set, proceeding..
+/home/ubuntu/.cargospace/default.sh previously created
+/home/ubuntu/.cargospace/default.log previously created
+/usr/share/cargospace/venv/nodejs previous created
+Collecting nodeenv
+Installing collected packages: nodeenv
+Successfully installed nodeenv-1.3.1
+You are using pip version 8.1.1, however version 10.0.1 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+/home/ubuntu/_setup.sh: line 387: [: ==: unary operator expected
+From https://github.com/shapeshed/express_example
+ * branch            master     -> FETCH_HEAD
+Already up-to-date.
+up to date in 0.789s
+/usr/share/cargospace/startup_scripts/default.sh previously carried out
+/lib/systemd/system/nodejs-default.service previously carried out
+nginx ....
+Deploying...
+/home/ubuntu/_setup.sh: line 450: [: ==: unary operator expected
+Already up-to-date.
+M	package.json
+Your branch is up-to-date with 'origin/master'.
+up to date in 0.788s
+enabled
+App already enabled
+active
+App is active, restarting the App..
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0 78   173    0     0  100   136      0    155 --:--:-- --:--:-- --:--:--   155100   173  100    37  100   136     40    149 --:--:-- --:--:-- --:--:--   148
+{"status":"success","message":"RECV"}

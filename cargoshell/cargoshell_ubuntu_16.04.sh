@@ -50,6 +50,11 @@ function notify_home_that_app_added {
     curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
 }
 
+function notify_home_that_app_deployed {
+    local JSON=$( printf '{"type": "DEPLOY_APP_SUCCESS", "superuser": "%s", "server_id": "%s", "app_name": "%s", "app_id": "%s"}' "$HOST_USER" "$SERVER_ID" "$APP_NAME" "$APP_ID")
+    curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
+}
+
 function _create_ssl {
     if [ $CERT_TYPE == "letsencrypt" ]; then
         eval $SUDO certbot certonly -d $APP_NAME -d www.$APP_NAME
@@ -214,6 +219,27 @@ function create_user_and_project_directories {
         echo "USERCARGOSPACEPUBKEY env not set, proceeding.."
     fi
 	return 0
+}
+
+function deploy_logs {
+    tail /home/$HOST_USER/_app_$APP_NAME.log.out -n 100 > /home/$HOST_USER/_tmp_app_$APP_NAME.log.out
+    curl --header "x-access-token: $CALLBACK_TOKEN" \
+  -F "type=DEPLOY_LOGS" \
+  -F "server_id=$SERVER_ID" \
+  -F "app_name=$APP_NAME" \
+  -F "file=@/home/$HOST_USER/_tmp_app_$APP_NAME.log.out" \
+  $CALLBACK_URL
+  rm /home/$HOST_USER/_tmp_app_$APP_NAME.log.out
+}
+
+function server_logs {
+    tail /home/$HOST_USER/log.out -n 100 > /home/$HOST_USER/_tmp.log.out
+    curl --header "x-access-token: $CALLBACK_TOKEN" \
+  -F "type=SERVER_LOGS" \
+  -F "server_id=$SERVER_ID" \
+  -F "file=@/home/$HOST_USER/_tmp.log.out" \
+  $CALLBACK_URL
+  rm /home/$HOST_USER/_tmp.log.out
 }
 
 # create a user with super cow powers (First Time Execution)
@@ -728,6 +754,25 @@ elif [ $ACTION == 'deploy' ]; then
     ${TEMPLATE}_deploy
     if [ $? != 0 ]; then
         echo "${TEMPLATE}_deploy failed"
+	    exit 1
+	fi
+	notify_home_that_app_deployed
+    exit 0
+elif [ $ACTION == 'server_logs' ]; then
+    # Check if template is set or fire an error. This shellscript doesn't remember and the server had better send a correct one
+    # Check if APP_NAME is set and that it exists on the filesystem
+    server_logs
+    if [ $? != 0 ]; then
+        echo "server_logs failed"
+	    exit 1
+	fi
+    exit 0
+elif [ $ACTION == 'deploy_logs' ]; then
+    # Check if template is set or fire an error. This shellscript doesn't remember and the server had better send a correct one
+    # Check if APP_NAME is set and that it exists on the filesystem
+    deploy_logs
+    if [ $? != 0 ]; then
+        echo "${TEMPLATE}_deploy_logs failed"
 	    exit 1
 	fi
     exit 0

@@ -20,7 +20,7 @@ module.exports = function (app) {
 			}
 			App.findOne({
 				uid: req.techpool.user.uid, 
-				_id: req.body.server,
+				server: req.body.server,
 				/*differ multiple app different template to v10 if we ever get there*/
 				app_name: req.body.app_name.trim(), 
 			}).then((response)=>{
@@ -37,6 +37,8 @@ module.exports = function (app) {
 		            	app_repository: req.body.app_repository.trim(),
 		            	template: req.body.template,
 		            	template_variation: req.body.template_variation,
+		            	isPublic: req.body.repo_meta_data.isPublic,
+		            	git_provider: req.body.git_provider || ""
 		            }).then((app)=>{
 		            	_app = app;
 		            	res.status(200).json({body: { status: "IN_PROGRESS", data: app }});
