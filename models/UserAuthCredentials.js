@@ -41,7 +41,7 @@ var UserAuthCredentialSchema = new Schema({
 	aws_access_key: { type: String }, //for caching purpose - last used access key
 	aws_KeyFingerprint: { type: String },
 	aws_KeyMaterial: { type: String },
-	aws_key_name: { type: String },
+	aws_KeyName: { type: String },
 	aws_SecurityGroupId: { type: String },
 	
 	custom_private_key: { type: String },

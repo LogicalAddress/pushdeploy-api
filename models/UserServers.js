@@ -22,6 +22,9 @@ var UserServerSchema = new Schema({
 	instanceId: {type: String },
 	meta: { type: String },
 	
+	aws_account_id: { type: String },
+	aws_reservation_id: { type: String },
+	
 	apps: [{
 	    type: Schema.ObjectId,
 	    ref: 'user_app',

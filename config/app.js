@@ -8,7 +8,7 @@ var AppRoot = path.normalize(__dirname + '/..');
 
 var config = {
   development: {
-    AppName: 'TechPool',
+    AppName: 'PushDeploy',
     AppDomain: process.env.API_URL,
     WebHookUrl: process.env.WEB_HOOK_URL,
     AppRoot: AppRoot,
@@ -33,14 +33,14 @@ var config = {
     }
   },
   test: {
-    AppName: 'TechPool',
+    AppName: 'PushDeploy',
     AppDomain: process.env.API_URL || 'http://localhost',
     WebHookUrl: process.env.WEB_HOOK_URL || 'http://localhost/webhooks',
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: process.env.PORT || 8080,
     mongoStorage: {
-      url: process.env.MONGODB_URL || 'mongodb://localhost:27017/techpool',
+      url: process.env.MONGODB_URL || 'mongodb://localhost:27017/PushDeploy',
     },
     redis: {
       port: 6379,
@@ -58,7 +58,7 @@ var config = {
     }
   },
   production: {
-    AppName: 'TechPool',
+    AppName: 'PushDeploy',
     AppDomain: process.env.API_URL,
     WebHookUrl: process.env.WEB_HOOK_URL,
     AppRoot: AppRoot,
