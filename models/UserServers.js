@@ -24,6 +24,14 @@ var UserServerSchema = new Schema({
 	
 	aws_account_id: { type: String },
 	aws_reservation_id: { type: String },
+	aws_accessKeyId: { type: String },
+	aws_secretAccessKey: { type: String },
+	aws_SecurityGroupId: { type: String },
+	aws_KeyName: { type: String },
+	aws_KeyFingerprint: { type: String },
+	aws_KeyMaterial: { type: String },
+	aws_region: { type: String },
+	
 	
 	apps: [{
 	    type: Schema.ObjectId,

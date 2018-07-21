@@ -23,12 +23,9 @@ module.exports = function (app) {
             meta: JSON.stringify(payload)//JSON.stringify(bigPayload)
         }).then(function(server){
         	console.log("CREATE SERVER:", server);
-        	// bigPayload = Object.assign(bigPayload, {server: server});
-            // process.emit('aws_instance_created', bigPayload);
-			// return resolve(ciResponse);
 			Aws.createInstance(payload, req.techpool.credentials, server).then((result)=>{
 				console.log("DEBUG", "Aws.createInstance", result);
-				var response = Object.assign(server.toObject(), {aws_reservation_id: result.raw.ReservationId});
+				var response = Object.assign(server.toObject(), {instanceId: result.InstanceId, aws_reservation_id: result.raw.ReservationId});
 				console.log("Response", response);
 	    		res.status(200).json({body: { status: "IN_PROGRESS", data: response}});
 	    	}).catch((error)=>{
@@ -37,8 +34,44 @@ module.exports = function (app) {
 	    	});
     	}).catch(function(err) {
     	    console.log(err);
-    	    //TODO: undo create server here
-    	    //Unset AuthCredCredentials
+    	    res.status(500).json({ status: 'failure', message: "Unable to create your server.."});
+    	    return;
+    	});
+			
+	});
+	
+	app.post('/v1/aws/update_instance_state', Auth, Cred, (req, res, next) => {
+		var payload = Object.assign(req.body, {
+			uid: req.techpool.user.uid});
+		UserServer.findById({
+            uid: payload.uid,
+            _id: payload.server_id || payload._id
+        }).then(function(server){
+			Aws.instance({
+        		accessKeyId: server.accessKeyId, 
+        		secretAccessKey: server.secretAccessKey,
+        		region: server.aws_region,
+        		instanceId: server.instanceId
+        	}).then((result)=>{
+				server.ipv4 = result.Reservations[0].Instances[0].PublicIpAddress;
+				server.state = result.Reservations[0].Instances[0].State.Name;
+				server.save().then((response)=>{
+					console.log("Updating server with aws instance state");
+					res.status(200).json({body: { status: "success", data: server}});
+					return;
+				}).catch((error)=>{
+					console.log("Updating server with aws instance state failed");
+					res.status(500).json({ status: 'failure', message: "Unable to update instance state"});	
+					return;
+				});
+	    	}).catch((error)=>{
+	    		console.log("DEBUG", "Aws.createInstance", error);
+	    		res.status(500).json({ status: 'failure', message: error});	
+	    	});
+    	}).catch(function(err) {
+    	    console.log(err);
+    	    res.status(500).json({ status: 'failure', message: "Unable to find your server.."});
+    	    return;
     	});
 			
 	});
