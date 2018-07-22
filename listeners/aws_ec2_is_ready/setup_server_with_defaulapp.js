@@ -47,7 +47,7 @@ var doit = function(server, retryAttempts){
         	    });
             }).catch((error)=>{
                 console.log("Setting Up Server Failed", error);
-                UserApp.remove({_id: _app._id}).then((response)=>{
+                UserApp.delete(_app).then((response)=>{
                     console.log("removing app..", _app);
                 }).catch((error)=>{
                     console.log("unable to remove app");
@@ -69,7 +69,7 @@ var doit = function(server, retryAttempts){
     // }).catch((error)=>{
         // console.log("For some reasons, the server we had just created is lost");
     // });
-}
+};
 
 module.exports = function(){
     process.on('aws_ec2_is_ready', function(server, retryAttempts){
