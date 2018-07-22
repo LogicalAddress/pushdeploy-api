@@ -30,7 +30,7 @@ module.exports = function (app) {
 	    		res.status(200).json({body: { status: "IN_PROGRESS", data: response}});
 	    	}).catch((error)=>{
 	    		console.log("DEBUG", "Aws.createInstance", error);
-	    		res.status(500).json({ status: 'failure', message: error});	
+	    		res.status(500).json({ status: 'failure', message: error.message || error});	
 	    	});
     	}).catch(function(err) {
     	    console.log(err);

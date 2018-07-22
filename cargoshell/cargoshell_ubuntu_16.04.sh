@@ -42,17 +42,29 @@ function _restart_nginx {
 
 function notify_home_that_server_ready {
     local JSON=$( printf '{"type": "CREATE_SERVER_SUCCESS", "superuser": "%s", "server_id": "%s", "app_name": "%s", "port": "%s"}' "$HOST_USER" "$SERVER_ID" "$APP_NAME" "$PORT" )
-    curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
+    if [ -n "$CALLBACK_TOKEN" ]; then
+        curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
+    else
+        curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
+    fi
 }
 
 function notify_home_that_app_added {
     local JSON=$( printf '{"type": "CREATE_APP_SUCCESS", "superuser": "%s", "server_id": "%s", "app_name": "%s", "port": "%s", "app_id": "%s"}' "$HOST_USER" "$SERVER_ID" "$APP_NAME" "$PORT" "$APP_ID")
-    curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
+    if [ -n "$CALLBACK_TOKEN" ]; then
+        curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
+    else
+        curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
+    fi
 }
 
 function notify_home_that_app_deployed {
     local JSON=$( printf '{"type": "DEPLOY_APP_SUCCESS", "superuser": "%s", "server_id": "%s", "app_name": "%s", "app_id": "%s"}' "$HOST_USER" "$SERVER_ID" "$APP_NAME" "$APP_ID")
-    curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
+    if [ -n "$CALLBACK_TOKEN" ]; then
+        curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
+    else
+        curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
+    fi
 }
 
 function _create_ssl {

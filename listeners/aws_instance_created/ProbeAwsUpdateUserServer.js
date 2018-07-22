@@ -32,6 +32,8 @@ module.exports = function(){
                             	}
                             });
                             clearInterval(Id);
+                            process.emit("aws_ec2_is_ready", _server, 5);
+                            console.log("waiting for next node..");
         				}).catch((error)=>{
         					console.log("Updating server with aws instance state failed - This is bad");
         					clearInterval(Id);

@@ -120,4 +120,15 @@ module.exports = function (app) {
         }
         
 	});
+	
+	app.post('/v1/events', LogEvent, upload.single('file'), function (req, res, next) {
+        console.log("General Webhook Received: ", req.body.type);
+        res.status(200).json({status: "success", message: "RECV"});
+        var payload = req.body;
+        if(payload.type == "CREATE_SERVER_SUCCESS"){
+            console.log("To Be Implemented");
+        }else{
+            console.log("UNHANDLED EVENTS", payload);
+        }
+	});
 };
