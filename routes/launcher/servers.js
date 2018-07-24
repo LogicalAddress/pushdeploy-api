@@ -4,7 +4,7 @@ var Servers = require("../../lib/launcher/UserServers");
 
 module.exports = function (app) {
 	
-	app.get('/v1/launcher/server', Auth, function (req, res, next) {
+	app.get('/v1/servers', Auth, function (req, res, next) {
 		Servers.findAllByUid(req.techpool.user.uid).then((record)=>{
 			res.status(200).json({body: { status: "success", data: record}});
 		}).catch((error)=>{

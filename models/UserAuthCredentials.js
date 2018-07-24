@@ -13,10 +13,12 @@ var UserAuthCredentialSchema = new Schema({
 	},
 
 	linode_token: { type: String },
+	linode_username: { type: String },
 	linode_refresh_token: { type: String },
 	linode_token_expiry: { type: String },
 	
 	digitalocean_token: { type: String },
+	digitalocean_username: { type: String },
 	digitalocean_refresh_token: { type: String },
 	digitalocean_token_expiry: { type: String },
 	

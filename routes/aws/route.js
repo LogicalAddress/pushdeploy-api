@@ -29,7 +29,14 @@ module.exports = function (app) {
 				console.log("Response", response);
 	    		res.status(200).json({body: { status: "IN_PROGRESS", data: response}});
 	    	}).catch((error)=>{
-	    		console.log("DEBUG", "Aws.createInstance", error);
+	    		console.log("RunInstance Error DEBUG", "Aws.createInstance", error);
+	    		console.log("Undo Create Server etal");
+	    		UserServer.deleteServer(server).then((response)=>{
+	    			console.log("Deleted Server " + server.server_name);
+	    			console.log("Hopefuly only relevant authcred are unset");
+	    		}).catch((error)=>{
+	    			console.log("Deleting Server " + server.server_name + " failed");
+	    		});
 	    		res.status(500).json({ status: 'failure', message: error.message || error});	
 	    	});
     	}).catch(function(err) {

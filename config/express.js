@@ -2,13 +2,16 @@ var glob = require('glob');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 var compress = require('compression');
-var cor = require('../lib/middlewares/cor');
+// var cor = require('../lib/middlewares/cor');
+var cors = require('cors');
 
 module.exports = function(app, config) {
     var env = process.env.NODE_ENV || 'development';
 	app.locals.ENV = env;
 	app.locals.ENV_DEVELOPMENT = env == 'development';
-	app.all('*', cor.allowCrossDomain);
+	// app.all('*', cor.allowCrossDomain);
+	app.use(cors());
+	// app.options('*', cors());
 	app.use(logger('dev'));
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({extended: true}));

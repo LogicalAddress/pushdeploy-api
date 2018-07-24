@@ -12,7 +12,7 @@ opts = {
 module.exports = function (app) {
 	
 	app.post('/v1/app/logs', Auth, Cred, (req, res, next) => {
-
+		console.log("checking logs..matching criteria", req.techpool.user.uid, req.body._id || req.body.app_id);
 		UserApps.findOne({
 			uid: req.techpool.user.uid, 
 			_id: req.body._id || req.body.app_id,
@@ -20,11 +20,18 @@ module.exports = function (app) {
 			var _app = response;
 			if(response){
 				try{
-					var conn = new Client();
+					var conn = new Client(), _server = _app.server;
 					opts.host = _app.server.ipv4;
 					opts.username = _app.server.superuser || 'ubuntu';
 					// opts.privateKey = req.techpool.credentials.custom_private_key;
-					opts.privateKey = fs.readFileSync(__dirname + '/../../launcher.pem');
+					console.log("checkKey",_server.private_key);
+					if(_server.provider === "custom"){
+						opts.privateKey = req.techpool.credentials.custom_private_key;//TODO: Copy to _server during setup for custom
+					}else if(_server.provider === "aws"){
+						opts.privateKey = _server.private_key;
+					}else{
+						throw new Error("Invalid Server Provider. How did we get here?");
+					}
 					var logBuf = "", count = 0;
 					conn.on('ready', function() {
 					    conn.shell(function(err, stream) {
@@ -56,6 +63,7 @@ module.exports = function (app) {
 					return;
 				}
 			}else{
+				console.log("App does not exists");
 				res.status(400).json({body: { status: "failure", message: "App does not exists" }});
 				return;
 			}

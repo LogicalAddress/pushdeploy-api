@@ -1,7 +1,7 @@
 var UserServer = require('../../lib/launcher/UserServers'),
 notifier = require("../../lib/launcher/notifier"),
 Aws = require('../../lib/aws/lib');
-
+var retryTimeInMs = 10000; //10sec 
 module.exports = function(){
     process.on('aws_instance_created', function(bigPayload, server){
         
@@ -32,7 +32,7 @@ module.exports = function(){
                             	}
                             });
                             clearInterval(Id);
-                            process.emit("aws_ec2_is_ready", _server, 5);
+                            process.emit("aws_ec2_is_ready", _server, retryTimeInMs);
                             console.log("waiting for next node..");
         				}).catch((error)=>{
         					console.log("Updating server with aws instance state failed - This is bad");
@@ -41,17 +41,17 @@ module.exports = function(){
     				}else{
     				    console.log("server not yet in running state. Current state is", result.Reservations[0].Instances[0].State.Name);
     				    console.log("is ipv4 ready? let's find out: ", result.Reservations[0].Instances[0].PublicIpAddress);
-    				    console.log("retry in 5sec...");
+    				    console.log("retry in "+retryTimeInMs+"sec...");
     				}
     	    	}).catch((error)=>{
     	    		console.log("Aws Probe DEBUG", "Aws.instance", error);
-    	    		console.log("Tring again in 5 seconds..");
+    	    		console.log("Tring again in "+retryTimeInMs+" seconds..");
     	    	});
             }).catch((error)=>{
                 console.log("Something has probanly deleted the server...failing religously");
                 clearInterval(Id);
             });
-        }, 10000);
+        }, retryTimeInMs);
         
     });	
 };
