@@ -11,7 +11,7 @@ module.exports = function(app, config) {
 	app.locals.ENV_DEVELOPMENT = env == 'development';
 	// app.all('*', cor.allowCrossDomain);
 	app.use(cors());
-	// app.options('*', cors());
+	app.options('*', cors());
 	app.use(logger('dev'));
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({extended: true}));

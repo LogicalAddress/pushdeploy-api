@@ -5,9 +5,9 @@ module.exports = function (app) {
 		User.create(req.body).then((record)=>{
 			var access_token = User.object2Token(record);
 		    record.access_token = access_token;
-			res.status(200).json({status: "success", data: record});
+			res.status(200).json({body: {status: "success", data: record}});
 		}).catch((error)=>{
-		    res.status(500).json({status: 'failure', message: error});
+		    res.status(500).json({status: 'failure', message: "Unable to register"});
 		});			
 	});
 };

@@ -20,7 +20,6 @@ var UserSchema = new Schema({
 	currency: { type: String, default: 'USD' },
 	
 	primaryPlan: { type: String, default: '' },
-	secondaryPlan: { type: String, default: '' },
 	
 	created_at: { type: Date, default: Date.now},
 	updated_at: { type: Date, default: Date.now}
