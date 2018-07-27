@@ -13,6 +13,8 @@ var UserDatabaseSchema = new Schema({
 	server: { type: Schema.ObjectId, ref: 'user_server', required : true, index: true},
 	db_name: { type: String, default: 'default'}, //must be unique per server - tester should take note.
 	
+	username: { type: String },
+	
 	password: { type: String },
 	
 	db_type: {type: String, default: 'mysql'},

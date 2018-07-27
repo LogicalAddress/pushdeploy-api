@@ -10,3 +10,4 @@
     - https://github.com/mthenw/frontail
     - https://github.com/sanketbajoria/scullog
 - should we let git pull fail? or leave it quitely as it currently is?
+- Add support for shell-in-a-box

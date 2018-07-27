@@ -3,6 +3,7 @@ Cred = require("../../../lib/middlewares/credentials"),
 LogEvent = require("../../../lib/middlewares/logevent"),
 UserServer = require('../../../lib/launcher/UserServers'),
 UserApp = require('../../../lib/launcher/UserApps'),
+UserDatabase = require('../../../lib/launcher/UserDatabase'),
 notifier = require('../../../lib/launcher/notifier'),
 multer  = require('multer'),
 storage = multer.memoryStorage(),
@@ -192,6 +193,32 @@ module.exports = function (app) {
             }).catch((error)=>{
                console.log("findOne App: Empty");
                console.log("EVENT", payload, error);
+            });
+        }else if(payload.type == "CREATE_DATABASE_SUCCESS"){
+            UserDatabase.findOne({
+                uid: req.techpool.user.uid, 
+                server: payload.server_id, 
+                _id: payload.db_id
+            }).then((database)=>{
+                database.state = 'CREATE_SUCCESS';
+			    database.save().then((response)=>{
+    		    	console.log("UPDATE_DATABASE", response);
+    		    	notifier({
+    		    	    uid: req.techpool.user.uid,
+				    	data: {
+					    	ACTION: "SERVER_UPDATE",
+					    	O_REQ: null,
+					    	MESSAGE: 'NEW DATABASE CREATED',
+					    	DATA: response
+				    	}
+			    	});
+			    }).catch((err)=>{
+			    	console.log("UPDATE_DATABASE ERR", err);
+			    });
+            }).catch((error)=>{
+               console.log("findOne Database: Empty");
+               console.log("EVENT", payload, error);
+               //TODO: Log
             });
         }else{
             console.log("UNHANDLED EVENTS", payload);

@@ -40,6 +40,25 @@ function _restart_nginx {
     eval $SUDO service nginx restart
 }
 
+function add_mysql_database {
+    # https://serversforhackers.com/c/installing-mysql-with-debconf
+    which mysql
+    if [ $? != 0 ]; then
+        echo "installing mysql..."
+        export DEBIAN_FRONTEND="noninteractive"
+        eval $SUDO apt-get -y install debconf-utils
+        eval $SUDO debconf-set-selections <<< "mysql-server mysql-server/root_password password $DB_ROOT_PASSWORD"
+        eval $SUDO debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $DB_ROOT_PASSWORD"
+        eval $SUDO apt-get -y install mysql-client mysql-server
+        # eval $SUDO mysql_secure_installation
+        if [ $? != 0 ]; then
+            echo "installing mysql...failed"
+            exit 1
+        fi
+	fi
+    mysql -u root -p"$DB_ROOT_PASSWORD" -e "create database $DB_NAME; GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USERNAME@localhost IDENTIFIED BY '$DB_PASSWORD'"
+}
+
 function notify_home_that_server_ready {
     local JSON=$( printf '{"type": "CREATE_SERVER_SUCCESS", "superuser": "%s", "server_id": "%s", "app_name": "%s", "port": "%s"}' "$HOST_USER" "$SERVER_ID" "$APP_NAME" "$PORT" )
     if [ -n "$CALLBACK_TOKEN" ]; then
@@ -791,9 +810,21 @@ elif [ $ACTION == 'deploy_logs' ]; then
 elif [ $ACTION == 'status' ]; then
     # TEMPLATE and APP_NAME is required
     ${TEMPLATE}_app_is_running
+    exit 0
 elif [ $ACTION == 'app_failed' ]; then
     # TEMPLATE and APP_NAME is required
     ${TEMPLATE}_app_failed
+    exit 0
+elif [ $ACTION == 'add_mysql_database' ]; then
+    # TEMPLATE and APP_NAME is required
+    add_mysql_database
+    if [ $? != 0 ]; then
+        echo "add_mysql_database failed"
+	    exit 1
+	fi
+	local JSON=$( printf '{"type": "CREATE_DATABASE_SUCCESS", "db_type": "mysql", "server_id": "%s", "db_name": "%s", "db_id": "%s"}' "$SERVER_ID" "$DB_NAME" "$DB_ID" )
+    curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
+    exit 0
 else
     echo "Invalid Action Sent"
     exit 1
