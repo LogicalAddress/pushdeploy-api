@@ -3,6 +3,7 @@ var AppConfig = require('../../config/app');
 
 var keypair = require('keypair');
 var forge = require('node-forge');
+var hat = require('hat');
 
 module.exports = function(){
     
@@ -16,6 +17,7 @@ module.exports = function(){
         var pubkeypem = key.public;
     	UserAuthCredential.upsert({
     	    uid: user.uid,
+    	    db_root_password: hat(),
     	    custom_private_key: forge.ssh.privateKeyToOpenSSH(
     	       forge.pki.privateKeyFromPem(privkeypem)),
     	    custom_public_key: forge.ssh.publicKeyToOpenSSH(

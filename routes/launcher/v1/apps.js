@@ -1,10 +1,10 @@
-var Auth = require("../../lib/middlewares/authenticate"), 
-App = require('../../lib/launcher/UserApps'), 
-Cred = require("../../lib/middlewares/credentials"),
-refreshToken = require("../../lib/middlewares/bitbucketRtoken"),
-Servers = require("../../lib/launcher/UserServers"),
-setup = require("../../lib/launcher/appSetup"),
-notifier = require("../../lib/launcher/notifier");
+var Auth = require("../../../lib/middlewares/authenticate"), 
+App = require('../../../lib/launcher/UserApps'), 
+Cred = require("../../../lib/middlewares/credentials"),
+refreshToken = require("../../../lib/middlewares/bitbucketRtoken"),
+Servers = require("../../../lib/launcher/UserServers"),
+setup = require("../../../lib/launcher/v1/appSetup"),
+notifier = require("../../../lib/launcher/notifier");
 
 module.exports = function (app) {
 	

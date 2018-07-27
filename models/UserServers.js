@@ -38,7 +38,7 @@ var UserServerSchema = new Schema({
 	    ref: 'user_app',
 	}],
 	
-	cargoshell_version: { type: String, default: '0.1'},
+	cargoshell_version: { type: String, default: 'v1'},
 
 	enabled: { type: Boolean, default: true},
 	

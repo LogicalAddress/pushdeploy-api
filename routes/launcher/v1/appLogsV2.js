@@ -1,6 +1,6 @@
-var Auth = require("../../lib/middlewares/authenticate"), 
-UserApps = require('../../lib/launcher/UserApps'), 
-Cred = require("../../lib/middlewares/credentials"),
+var Auth = require("../../../lib/middlewares/authenticate"), 
+UserApps = require('../../../lib/launcher/UserApps'), 
+Cred = require("../../../lib/middlewares/credentials"),
 fs = require("fs"),
 Client = require('ssh2').Client,
 opts = {

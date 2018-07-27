@@ -1,6 +1,6 @@
-var User = require("../../lib/User");
-var Auth = require("../../lib/middlewares/authenticate");
-var Servers = require("../../lib/launcher/UserServers");
+var User = require("../../../lib/User");
+var Auth = require("../../../lib/middlewares/authenticate");
+var Servers = require("../../../lib/launcher/UserServers");
 
 module.exports = function (app) {
 	

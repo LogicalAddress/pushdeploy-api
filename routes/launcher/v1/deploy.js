@@ -1,9 +1,9 @@
-var Auth = require("../../lib/middlewares/authenticate"), 
+var Auth = require("../../../lib/middlewares/authenticate"), 
 laeh = require('laeh2').leanStacks(true), _x = laeh._x,
 sshclient = require("sshclient"),
-UserApp = require('../../lib/launcher/UserApps'), 
-Cred = require("../../lib/middlewares/credentials"),
-AppConfig = require('../../config/app'),
+UserApp = require('../../../lib/launcher/UserApps'), 
+Cred = require("../../../lib/middlewares/credentials"),
+AppConfig = require('../../../config/app'),
 breakUrl = require('parse-github-repo-url'), //[user, repo, version] = parse(url)
 fs = require("fs"),
  opts = {
@@ -27,7 +27,14 @@ module.exports = function (app) {
 					opts.host = _app.server.ipv4;
 					opts.username = _app.server.username || 'ubuntu';
 					// opts.privateKey = req.techpool.credentials.custom_private_key;
-					opts.privateKey = fs.readFileSync(__dirname + '/../../launcher.pem');
+					// opts.privateKey = fs.readFileSync(__dirname + '/../../launcher.pem');
+					if(_app.server.provider === "custom"){
+						opts.privateKey = req.techpool.credentials.custom_private_key;//TODO: Copy to _server during setup for custom
+					}else if(_app.server.provider === "aws"){
+						opts.privateKey = _app.server.private_key;
+					}else{
+						throw new Error("Invalid Server Provider. How did we get here?");
+					}
 					var visibility = (_app.isPublic ? "public" : "private");
 					var gitToken = "", repoUser = "", repoProject = "";
 					var project = breakUrl(_app.app_repository);

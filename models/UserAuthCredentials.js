@@ -11,6 +11,8 @@ var UserAuthCredentialSchema = new Schema({
 		required : true,
 		unique: true, //1-1 Relationship
 	},
+	
+	db_root_password: { type: String, default: 'PushDeploy.io' },
 
 	linode_token: { type: String },
 	linode_username: { type: String },

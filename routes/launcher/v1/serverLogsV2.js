@@ -1,6 +1,6 @@
-var Auth = require("../../lib/middlewares/authenticate"), 
-UserServer = require('../../lib/launcher/UserServers.js'), 
-Cred = require("../../lib/middlewares/credentials"),
+var Auth = require("../../../lib/middlewares/authenticate"), 
+UserServer = require('../../../lib/launcher/UserServers.js'), 
+Cred = require("../../../lib/middlewares/credentials"),
 fs = require("fs"),
 Client = require('ssh2').Client,
 opts = {
@@ -24,7 +24,14 @@ module.exports = function (app) {
 					opts.host = _server.ipv4;
 					opts.username = _server.superuser || 'ubuntu';
 					// opts.privateKey = req.techpool.credentials.custom_private_key;
-					opts.privateKey = fs.readFileSync(__dirname + '/../../launcher.pem');
+					if(_server.provider === "custom"){
+						opts.privateKey = req.techpool.credentials.custom_private_key;//TODO: Copy to _server during setup for custom
+					}else if(_server.provider === "aws"){
+						opts.privateKey = _server.private_key;
+					}else{
+						throw new Error("Invalid Server Provider. How did we get here?");
+					}
+					// opts.privateKey = fs.readFileSync(__dirname + '/../../launcher.pem');
 					var logBuf = "";
 					conn.on('ready', function() {
 					    conn.shell(function(err, stream) {

@@ -3,7 +3,7 @@ UserApp = require('../../lib/launcher/UserApps'),
 Cred = require("../../lib/middlewares/credentials"),
 UserServer = require("../../lib/launcher/UserServers"),
 generate = require('project-name-generator'),
-setup = require("../../lib/launcher/setup"),
+setup = require("../../lib/launcher/v1/setup"),
 notifier = require("../../lib/launcher/notifier");
 
 var copts = {

@@ -1,7 +1,7 @@
 var UserServer = require('../../lib/launcher/UserServers'),
 UserApp = require('../../lib/launcher/UserApps'),
 notifier = require("../../lib/launcher/notifier"),
-setupEc2 = require("../../lib/launcher/setupEc2");
+setupEc2 = require("../../lib/launcher/v1/setupEc2");
 
 
 var copts = {

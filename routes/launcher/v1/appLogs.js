@@ -1,7 +1,7 @@
-var Auth = require("../../lib/middlewares/authenticate"), 
-UserApps = require('../../lib/launcher/UserApps'), 
-Cred = require("../../lib/middlewares/credentials"),
-appLogs = require("../../lib/launcher/appLogs");
+var Auth = require("../../../lib/middlewares/authenticate"), 
+UserApps = require('../../../lib/launcher/UserApps'), 
+Cred = require("../../../lib/middlewares/credentials"),
+appLogs = require("../../../lib/launcher/v1/appLogs");
 
 module.exports = function (app) {
 	

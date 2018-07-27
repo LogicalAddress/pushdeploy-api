@@ -1,8 +1,8 @@
-var Auth = require("../../lib/middlewares/authenticate"), 
+var Auth = require("../../../lib/middlewares/authenticate"), 
 laeh = require('laeh2').leanStacks(true), _x = laeh._x,
 sshclient = require("sshclient"),
-UserApp = require('../../lib/launcher/UserApps'), 
-Cred = require("../../lib/middlewares/credentials"),
+UserApp = require('../../../lib/launcher/UserApps'), 
+Cred = require("../../../lib/middlewares/credentials"),
 fs = require("fs"),
  opts = {
     port: 22,

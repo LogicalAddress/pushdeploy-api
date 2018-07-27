@@ -1,10 +1,10 @@
-var Auth = require("../../lib/middlewares/authenticate"), 
+var Auth = require("../../../lib/middlewares/authenticate"), 
 
-Cred = require("../../lib/middlewares/credentials"),
-refreshToken = require("../../lib/middlewares/bitbucketRtoken"),
-getApp = require("../../lib/middlewares/getApp.js"),
-createWebHook = require("../../lib/launcher/createGitWebHooks.js"),
-updateWebHook = require("../../lib/launcher/updateGitWebHooks.js");
+Cred = require("../../../lib/middlewares/credentials"),
+refreshToken = require("../../../lib/middlewares/bitbucketRtoken"),
+getApp = require("../../../lib/middlewares/getApp.js"),
+createWebHook = require("../../../lib/launcher/createGitWebHooks.js"),
+updateWebHook = require("../../../lib/launcher/updateGitWebHooks.js");
 
 module.exports = function (app) {
 	app.post('/v1/app/toggle_auto_deploy', Auth, refreshToken, Cred, getApp, (req, res, next) => {
