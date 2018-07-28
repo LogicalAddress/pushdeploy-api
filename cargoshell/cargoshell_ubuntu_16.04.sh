@@ -97,7 +97,11 @@ function _create_ssl {
     	#eval $SUDO certbot --nginx -d $APP_NAME -d www.$APP_NAME
         eval $SUDO certbot certonly --email $EMAIL -d $APP_NAME -d www.$APP_NAME
         # TODO: Create a Crontab to renew certificate at least ones a weak for those due
-        return $CERT_TYPE
+        if [ $? != 0 ]; then
+            echo "Certbot Didn't Work"
+            exit 1;
+        fi
+        return 0
     else
         echo "Invalid CERT_TYPE $CERT_TYPE"
         exit 1
@@ -630,7 +634,7 @@ function nodejs_delete_nginx_entry_for_socket {
 # template_add_nginx_entry_with_ssl family of functions
 function nodejs_add_nginx_entry_with_ssl {
     # Redirect all http to https
-    local appConfig="/etc/nginx/sites-available/$APP_NAME"
+    local appConfig="/etc/nginx/sites-available/$APP_NAME/"
     if [ $APP_NAME == 'default' ]; then
         exit 1 #Sorry, only for valid domain names ssl is allocated.
     fi
@@ -638,8 +642,8 @@ function nodejs_add_nginx_entry_with_ssl {
     # server_name cargospace.ng www.cargospace.ng;
     # ssl_certificate /etc/letsencrypt/live/cargospace.ng/fullchain.pem;
     # ssl_certificate_key /etc/letsencrypt/live/cargospace.ng/privkey.pem;
-    local sslCertificate=''
-    local $sslCertificateKey=''
+    local sslCertificate
+    local $sslCertificateKey
     _create_ssl
     if [ $CERT_TYPE == "letsencrypt" ]; then
         sslCertificate="/etc/letsencrypt/live/$APP_NAME/fullchain.pem;"
@@ -829,7 +833,7 @@ elif [ $ACTION == 'add_mysql_database' ]; then
         echo "add_mysql_database failed"
 	    exit 1
 	fi
-	local JSON=$( printf '{"type": "CREATE_DATABASE_SUCCESS", "db_type": "mysql", "server_id": "%s", "db_name": "%s", "db_id": "%s"}' "$SERVER_ID" "$DB_NAME" "$DB_ID" )
+	JSON=$( printf '{"type": "CREATE_DATABASE_SUCCESS", "db_type": "mysql", "server_id": "%s", "db_name": "%s", "db_id": "%s"}' "$SERVER_ID" "$DB_NAME" "$DB_ID" )
     curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
     exit 0
 elif [ $ACTION == 'toggle_ssl' ]; then
@@ -844,7 +848,7 @@ elif [ $ACTION == 'toggle_ssl' ]; then
         echo "toggle_ssl failed"
 	    exit 1
 	fi
-	local JSON=$( printf '{"type": "TOGGLE_SSL_SUCCESS", "type": "letsencrypt", "server_id": "%s", "app_name": "%s", "app_id": "%s"}' "$SERVER_ID" "$APP_NAME" "$APP_ID" )
+	JSON=$( printf '{"type": "TOGGLE_SSL_SUCCESS", "type": "letsencrypt", "server_id": "%s", "app_name": "%s", "app_id": "%s"}' "$SERVER_ID" "$APP_NAME" "$APP_ID" )
     curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
     exit 0
 else
