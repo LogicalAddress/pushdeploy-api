@@ -95,7 +95,7 @@ function _create_ssl {
     	    eval $SUDO apt-get install python-certbot-nginx -y
     	fi
     	#eval $SUDO certbot --nginx -d $APP_NAME -d www.$APP_NAME
-        eval $SUDO certbot certonly -d $APP_NAME -d www.$APP_NAME
+        eval $SUDO certbot certonly --email $EMAIL -d $APP_NAME -d www.$APP_NAME
         # TODO: Create a Crontab to renew certificate at least ones a weak for those due
         return $CERT_TYPE
     else

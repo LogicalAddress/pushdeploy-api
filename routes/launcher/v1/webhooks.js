@@ -220,6 +220,31 @@ module.exports = function (app) {
                console.log("EVENT", payload, error);
                //TODO: Log
             });
+        }else if(payload.type == "TOGGLE_SSL_SUCCESS"){
+            UserApp.findOne({
+                server: payload.server_id, 
+                _id: payload.app_id
+            }).then((app)=>{
+                app.ssl_enabled = !app.ssl_enabled;
+			    app.save().then((response)=>{
+    		    	console.log("UPDATE_APP", response);
+    		    	notifier({
+    		    	    uid: req.techpool.user.uid,
+				    	data: {
+					    	ACTION: "UPDATE_APP",
+					    	O_REQ: null,
+					    	MESSAGE: 'SSL TOGGLED',
+					    	DATA: response
+				    	}
+			    	});
+			    }).catch((err)=>{
+			    	console.log("UPDATE_APP ERR", err);
+			    });
+            }).catch((error)=>{
+               console.log("findOne TOGGLE_SSL_SUCCESS App: Empty");
+               console.log("EVENT", payload, error);
+               //TODO: Log
+            });
         }else{
             console.log("UNHANDLED EVENTS", payload);
         }
