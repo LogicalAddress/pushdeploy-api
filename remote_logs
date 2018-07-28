@@ -41,7 +41,7 @@ Installing collected packages: nodeenv
 Successfully installed nodeenv-1.3.1
 You are using pip version 8.1.1, however version 10.0.1 is available.
 You should consider upgrading via the 'pip install --upgrade pip' command.
-/home/ubuntu/_setup.sh: line 387: [: ==: unary operator expected
+/home/ubuntu/.setup.sh: line 387: [: ==: unary operator expected
 From https://github.com/shapeshed/express_example
  * branch            master     -> FETCH_HEAD
 Already up-to-date.
@@ -50,7 +50,7 @@ up to date in 0.789s
 /lib/systemd/system/nodejs-default.service previously carried out
 nginx ....
 Deploying...
-/home/ubuntu/_setup.sh: line 450: [: ==: unary operator expected
+/home/ubuntu/.setup.sh: line 450: [: ==: unary operator expected
 Already up-to-date.
 M	package.json
 Your branch is up-to-date with 'origin/master'.

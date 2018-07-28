@@ -3,7 +3,7 @@ Database = require('../../../lib/launcher/UserDatabase'),
 Cred = require("../../../lib/middlewares/credentials"),
 Servers = require("../../../lib/launcher/UserServers"),
 notifier = require("../../../lib/launcher/notifier"),
-generate = require('project-name-generator'),
+// generate = require('project-name-generator'),
 setup = require("../../../lib/launcher/v1/databaseSetup");
 var hat = require('hat');
 module.exports = function (app) {
@@ -37,8 +37,8 @@ module.exports = function (app) {
             Database.create({
             	uid: req.techpool.user.uid,
             	server: req.body.server,
-            	db_name: generate({ words: 1 }).raw[0].toLowerCase(),
-            	username: generate({ words: 1 }).raw[0].toLowerCase(),
+            	db_name: hat().substring(0, 6), //generate({ words: 1 }).raw[0].toLowerCase(),
+            	username: hat().substring(0, 6), //generate({ words: 1 }).raw[0].toLowerCase(),
             	password: hat(),
             }).then((database)=>{
             	res.status(200).json({body: { status: "IN_PROGRESS", data: database }});

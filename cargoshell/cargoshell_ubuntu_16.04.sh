@@ -56,7 +56,7 @@ function add_mysql_database {
             exit 1
         fi
 	fi
-    mysql -u root -p"$DB_ROOT_PASSWORD" -e "create database $DB_NAME; GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USERNAME@localhost IDENTIFIED BY '$DB_PASSWORD'"
+    mysql -u root -p"$DB_ROOT_PASSWORD" -e "create database $DB_NAME; GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USERNAME@localhost IDENTIFIED BY '$DB_PASSWORD'; FLUSH PRIVILEGES;"
 }
 
 function notify_home_that_server_ready {
@@ -88,6 +88,13 @@ function notify_home_that_app_deployed {
 
 function _create_ssl {
     if [ $CERT_TYPE == "letsencrypt" ]; then
+        which certbot
+        if [ $? != 0 ]; then
+    	    eval $SUDO add-apt-repository ppa:certbot/certbot -y
+    	    eval $SUDO apt-get update -y
+    	    eval $SUDO apt-get install python-certbot-nginx -y
+    	fi
+    	#eval $SUDO certbot --nginx -d $APP_NAME -d www.$APP_NAME
         eval $SUDO certbot certonly -d $APP_NAME -d www.$APP_NAME
         # TODO: Create a Crontab to renew certificate at least ones a weak for those due
         return $CERT_TYPE
@@ -253,7 +260,7 @@ function create_user_and_project_directories {
 }
 
 function deploy_logs {
-    tail /home/$HOST_USER/_app_$APP_NAME.log.out -n 100 > /home/$HOST_USER/_tmp_app_$APP_NAME.log.out
+    tail /home/$HOST_USER/.app_$APP_NAME.log.out -n 100 > /home/$HOST_USER/_tmp_app_$APP_NAME.log.out
     curl --header "x-access-token: $CALLBACK_TOKEN" \
   -F "type=DEPLOY_LOGS" \
   -F "server_id=$SERVER_ID" \
@@ -264,7 +271,7 @@ function deploy_logs {
 }
 
 function server_logs {
-    tail /home/$HOST_USER/log.out -n 100 > /home/$HOST_USER/_tmp.log.out
+    tail /home/$HOST_USER/.log.out -n 100 > /home/$HOST_USER/_tmp.log.out
     curl --header "x-access-token: $CALLBACK_TOKEN" \
   -F "type=SERVER_LOGS" \
   -F "server_id=$SERVER_ID" \
@@ -277,7 +284,7 @@ function server_logs {
 function setup_server {
     echo "Setting up the machine with user $HOST_USER"
     eval $SUDO apt-get update -y
-    eval $SUDO apt-get install curl python-pip git -y
+    eval $SUDO apt-get install curl python-pip git software-properties-common -y
 	# todo: Copy public key to user's directory
 	if [ ! -f "/etc/ssl/certs/dhparam.pem" ]; then
 	    eval $SUDO openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
@@ -823,6 +830,21 @@ elif [ $ACTION == 'add_mysql_database' ]; then
 	    exit 1
 	fi
 	local JSON=$( printf '{"type": "CREATE_DATABASE_SUCCESS", "db_type": "mysql", "server_id": "%s", "db_name": "%s", "db_id": "%s"}' "$SERVER_ID" "$DB_NAME" "$DB_ID" )
+    curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
+    exit 0
+elif [ $ACTION == 'toggle_ssl' ]; then
+    # TEMPLATE and APP_NAME is required
+    if [ $TOGGLE_SSL == 'on' ]; then
+        ${TEMPLATE}_add_nginx_entry_with_ssl
+    else
+        ${TEMPLATE}_delete_nginx_entry_with_ssl
+	fi
+    
+    if [ $? != 0 ]; then
+        echo "toggle_ssl failed"
+	    exit 1
+	fi
+	local JSON=$( printf '{"type": "TOGGLE_SSL_SUCCESS", "type": "letsencrypt", "server_id": "%s", "app_name": "%s", "app_id": "%s"}' "$SERVER_ID" "$APP_NAME" "$APP_ID" )
     curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
     exit 0
 else

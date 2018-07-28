@@ -20,6 +20,8 @@ var UserAppSchema = new Schema({
 	
 	repo_meta_data: { type: String },
 	
+	ssl_enabled: { type: Boolean, default: false },
+	
 	git_provider: { type: String },
 	
 	webhook_sub_id: { type: String},

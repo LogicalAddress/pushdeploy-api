@@ -26,7 +26,8 @@ module.exports = function (app) {
 		            server_name: generate({ number: true }).dashed, // 'disgraceful-temper-7794'
 		            ipv4: req.body.ipv4,
 		            provider: 'custom',
-		            meta: JSON.stringify(req.body)
+		            meta: JSON.stringify(req.body),
+		            private_key: req.techpool.credentials.custom_private_key
 		        }).then(function(_server){
 		            UserApp.create({
 		            	uid: req.techpool.user.uid,
