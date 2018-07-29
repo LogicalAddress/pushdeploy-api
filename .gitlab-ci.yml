@@ -1,11 +1,10 @@
-image: node:latest
-
 stages:
   - deploy_production
   - deploy_staging
 
 deploy_staging:
   stage: deploy_staging
+  image: python:latest
   variables:
     BRANCH: "staging"
     EB_APP_NAME: "pushdeployapi"
@@ -31,6 +30,7 @@ deploy_staging:
   
 deploy_production:
   stage: deploy_production
+  image: python:latest
   variables:
     BRANCH: "master"
     EB_APP_NAME: "pushdeployapi"
