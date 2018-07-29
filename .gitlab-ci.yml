@@ -24,7 +24,7 @@ deploy_staging:
     - git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/pushdeployapi-staging.git master
   environment:
     name: staging
-    # url: pushdeploy-prod.us-west-2.elasticbeanstalk.com
+    # url: pushdeployapi-staging.us-west-2.elasticbeanstalk.com
     url: pushdeployweb-staging.herokuapp.com
   only:
   - staging
@@ -48,7 +48,7 @@ deploy_production:
     - git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/pushdeployapi-prod.git master
   environment:
     name: production
-    # url: pushdeploy-prod.us-west-2.elasticbeanstalk.com
+    # url: pushdeployapi-prod.us-west-2.elasticbeanstalk.com
     url: pushdeployweb-prod.herokuapp.com
   only:
   - master

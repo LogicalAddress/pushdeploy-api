@@ -33,6 +33,8 @@ aws elasticbeanstalk update-environment \
   --environment-name $EB_APP_ENV \
   --version-label "$EB_APP_NAME-$ts"
 
+rm $fn
+
 if [ $? == 0 ]; then
     echo "Done! Deployed version $EB_APP_NAME-$ts"
 else
