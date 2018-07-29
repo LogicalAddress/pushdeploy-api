@@ -1,8 +1,54 @@
-before_script:
-  - git config user.email "d.retnan@nhubnigeria.com"
-  - git config user.name "GitLab CI on behalf of Logical Address Inc."
+image: node:latest
 
-push_to_heroku:
+stages:
+  - deploy_production
+  - deploy_staging
+
+deploy_staging:
+  stage: deploy_staging
+  variables:
+    BRANCH: "staging"
+    EB_APP_NAME: "pushdeployapi"
+    EB_APP_ENV: "pushdeployapi-staging"
+    S3_BUCKET: "pushdeploy-eb-builds"
+    S3_KEY: "builds"
+  before_script:
+    - git config user.email "sales@logicaladdress.com"
+    - git config user.name "GitLab CI on behalf of Logical Address Inc."
   script:
+    - echo "Deploying to staging server (eb)"
+    - ./bin/ebdeploy.sh
+    - echo "Deploying to staging server (heroku)"
+    - git checkout staging
     - git commit --allow-empty -m "Publish to Heroku at $(date)"
-    - git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/launcher-api.git master
+    - git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/pushdeployapi-staging.git master
+  environment:
+    name: staging
+    # url: pushdeploy-prod.us-west-2.elasticbeanstalk.com
+    url: pushdeployweb-staging.herokuapp.com
+  only:
+  - staging
+  
+deploy_production:
+  stage: deploy_production
+  variables:
+    BRANCH: "master"
+    EB_APP_NAME: "pushdeployapi"
+    EB_APP_ENV: "pushdeployapi-prod"
+    S3_BUCKET: "pushdeploy-eb-builds"
+    S3_KEY: "builds"
+  before_script:
+    - git config user.email "sales@logicaladdress.com"
+    - git config user.name "GitLab CI on behalf of Logical Address Inc."
+  script:
+    - echo "Deploying to production server (eb)"
+    - ./bin/ebdeploy.sh
+    - echo "Deploying to production server (heroku)"
+    - git commit --allow-empty -m "Publish to Heroku at $(date)"
+    - git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/pushdeployapi-prod.git master
+  environment:
+    name: production
+    # url: pushdeploy-prod.us-west-2.elasticbeanstalk.com
+    url: pushdeployweb-prod.herokuapp.com
+  only:
+  - master

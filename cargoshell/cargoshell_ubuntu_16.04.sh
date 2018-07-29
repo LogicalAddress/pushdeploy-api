@@ -86,6 +86,10 @@ function notify_home_that_app_deployed {
     fi
 }
 
+function _delete_ssl {
+    certbot --nginx rollback --non-interactive -d $APP_NAME -d www.$APP_NAME
+}
+
 function _create_ssl {
     if [ $CERT_TYPE == "letsencrypt" ]; then
         which certbot
@@ -95,7 +99,7 @@ function _create_ssl {
     	    eval $SUDO apt-get install python-certbot-nginx -y
     	fi
     	#eval $SUDO certbot --nginx -d $APP_NAME -d www.$APP_NAME
-        eval $SUDO certbot certonly --email $EMAIL -d $APP_NAME -d www.$APP_NAME
+        eval $SUDO certbot --nginx --redirect --agree-tos --non-interactive --email $EMAIL -d $APP_NAME -d www.$APP_NAME
         # TODO: Create a Crontab to renew certificate at least ones a weak for those due
         if [ $? != 0 ]; then
             echo "Certbot Didn't Work"
@@ -559,37 +563,27 @@ function nodejs_create_nginx_entry {
         fi
         
         echo -e "
+        map \$http_upgrade \$connection_upgrade {
+            default upgrade;
+            '' close;
+        }
+        upstream websocket {
+            server 0.0.0.0:$PORT;
+        }
         server{
             $SERVER_INFO
-        
-            # CargoSpace SSL (DO NOT REMOVE!)
-            # ssl_certificate;
-            # ssl_certificate_key;
-        
-            ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-            ssl_prefer_server_ciphers on;
-            ssl_dhparam /etc/ssl/certs/dhparam.pem;
-            ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA';
-            ssl_session_timeout 1d;
-            ssl_session_cache shared:SSL:50m;
-            ssl_stapling on;
-            ssl_stapling_verify on;
-            add_header Strict-Transport-Security max-age=15768000;
-        
             
             access_log off;
             error_log  /var/log/nginx/$APP_NAME-error.log error;
-        
         
             location / {
                 proxy_pass http://0.0.0.0:$PORT;
                 proxy_set_header Host \$host;
                 proxy_set_header X-Real-IP \$remote_addr;
                 proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                # CargoSpace Socket (DO NOT REMOVE!)
-                # proxy_http_version 1.1;
-                # proxy_set_header Upgrade \$http_upgrade;
-                # proxy_set_header Connection \$connection_upgrade;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade \$http_upgrade;
+                proxy_set_header Connection \$connection_upgrade;
             }
         }
         " | sudo tee $appConfig > /dev/null
@@ -600,85 +594,23 @@ function nodejs_create_nginx_entry {
     fi
 }
 
-# template_add_nginx_entry_for_socket family of functions
-function nodejs_add_nginx_entry_for_socket {
-    local tmpFile="/etc/nginx/sites-available/qtmp"
-    local appConfig="/etc/nginx/sites-available/$APP_NAME"
-    echo -e "
-    map \$http_upgrade \$connection_upgrade {
-        default upgrade;
-        '' close;
-    }
-    upstream websocket {
-        server 0.0.0.0:$PORT;
-    }
-    " | eval $SUDO cat - $appConfig > $tmpFile && eval $SUDO mv $tmpFile $appConfig
-    
-    eval $SUDO sed -i 's/\(#\) \(proxy_http_version\)/\2/' $appConfig
-    eval $SUDO sed -i 's/\(#\) \(proxy_set_header\)/\2/' $appConfig
-    
-    _restart_nginx
-}
-
-# template_delete_nginx_entry_for_socket family of functions
-function nodejs_delete_nginx_entry_for_socket {
-    local appConfig="/etc/nginx/sites-available/$APP_NAME"
-    eval $SUDO sed -i '1,9d' /etc/nginx/sites-available/$APP_NAME
-    eval $SUDO sed -i 's/\(proxy_http_version\)/# &/' $appConfig
-    eval $SUDO sed -i 's/\(proxy_set_header Upgrade\)/# &/' $appConfig
-    eval $SUDO sed -i 's/\(proxy_set_header Connection\)/# &/' $appConfig
-    
-    _restart_nginx
-}
-
 # template_add_nginx_entry_with_ssl family of functions
 function nodejs_add_nginx_entry_with_ssl {
     # Redirect all http to https
-    local appConfig="/etc/nginx/sites-available/$APP_NAME/"
     if [ $APP_NAME == 'default' ]; then
         exit 1 #Sorry, only for valid domain names ssl is allocated.
     fi
-    # listen 443 ssl;
-    # server_name cargospace.ng www.cargospace.ng;
-    # ssl_certificate /etc/letsencrypt/live/cargospace.ng/fullchain.pem;
-    # ssl_certificate_key /etc/letsencrypt/live/cargospace.ng/privkey.pem;
-    local sslCertificate
-    local $sslCertificateKey
     _create_ssl
-    if [ $CERT_TYPE == "letsencrypt" ]; then
-        sslCertificate="/etc/letsencrypt/live/$APP_NAME/fullchain.pem;"
-        $sslCertificateKey="/etc/letsencrypt/live/$APP_NAME/privkey.pem;"
-    fi
-    eval $SUDO sed -i 's/listen 80/listen 443 ssl/' $appConfig # listen 443 ssl;
-    eval $SUDO sed -i 's/\(listen \[\:\:\]\:80\)/# &/' $appConfig # Comment out this line. Not Needed
-    # sed -i "s/\(server_name\) \($APP_NAME\)/\1 \2 www.$APP_NAME/" $appConfig
-    eval $SUDO sed -i "s/# ssl_certificate;/ssl_certificate $sslCertificate;/" $appConfig
-    eval $SUDO sed -i "s/# ssl_certificate_key;/ssl_certificate_key $sslCertificateKey;/" $appConfig
-    
-    eval $SUDO echo -e "
-    server {
-        listen 80;
-        server_name $APP_NAME www.$APP_NAME;
-        return 301 https://\$host\$request_uri;
-    }
-    " >> $appConfig
-    
     _restart_nginx
 }
 
 
 # template_delete_nginx_entry_with_ssl family of functions
 function nodejs_delete_nginx_entry_with_ssl {
-    local appConfig="/etc/nginx/sites-available/$APP_NAME"
-    eval $SUDO sed -i 's/listen 443 ssl/listen 80/' $appConfig
-    eval $SUDO sed -i 's/\(#\) \(listen \[\:\:\]\:80\)/\2/' $appConfig
-    eval $SUDO sed -i 's/ssl_certificate \/.*$/ssl_certificate;/' $appConfig
-    eval $SUDO sed -i 's/ssl_certificate_key \/.*$/ssl_certificate_key;/' $appConfig
-    # I obviously didn't cast the below spell
-    # del last 7 lines http://www.unixguide.net/unix/sedoneliner.shtml
-    # http://stackoverflow.com/questions/13380607/how-to-use-sed-to-remove-the-last-n-lines-of-a-file
-    eval $SUDO sed -i -n -e :a -e '1,7!{P;N;D;};N;ba' $appConfig
-    
+    if [ $APP_NAME == 'default' ]; then
+        exit 1 #Sorry, only for valid domain names ssl is allocated.
+    fi
+    _delete_ssl
     _restart_nginx
 }
 ##############END NODEJS TEMPLATE########################
