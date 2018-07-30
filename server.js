@@ -1,8 +1,4 @@
 var config = require('./config/app');
-if(!config.mongoStorage.url){
-  console.log('Please `cp .env.example .env` first');
-  process.exit();
-}
 var express = require('express');
 var mongoose = require('mongoose');
 
