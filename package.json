@@ -5,6 +5,9 @@
   "main": "server.js",
   "repository": "",
   "author": "Logical Address Ltd. <hello@logicaladdress.com>",
+  "scripts": {
+    "start": "node ./server.js"
+  },
   "dependencies": {
     "async": "~0.2.8",
     "aws-sdk": "^2.168.0",
