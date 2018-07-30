@@ -21,6 +21,10 @@ var config = {
       port: 6379,
       host: 'localhost'
     },
+    ClientSetting: {
+      stripeKey: process.env.STRIPE_PUBLIC_KEY || null,
+      paystackKey: process.env.PAYSTACK_PUBLIC_KEY || null,
+    },
     OAuth: {
       bitbucket:{
         publicKey: process.env.BITBUCKET_PUBLIC_KEY,
@@ -46,6 +50,10 @@ var config = {
       port: 6379,
       host: 'localhost'
     },
+    ClientSetting: {
+      stripeKey: process.env.STRIPE_PUBLIC_KEY || 'pk_test_U5qVNRp0u0u1VxqnptEbz9WK',
+      paystackKey: process.env.PAYSTACK_PUBLIC_KEY || 'pk_test_8eb0c568b925399e7192843b4c8a20bbb80a9295',
+    },
     OAuth: {
       bitbucket:{
         publicKey: process.env.BITBUCKET_PUBLIC_KEY,
@@ -70,6 +78,10 @@ var config = {
     redis: {
       port: 6379,
       host: 'localhost'
+    },
+    ClientSetting: {
+      stripeKey: 'pk_test_U5qVNRp0u0u1VxqnptEbz9WK',
+      paystackKey: 'pk_test_8eb0c568b925399e7192843b4c8a20bbb80a9295',
     },
     OAuth: {
       bitbucket:{

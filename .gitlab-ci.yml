@@ -23,8 +23,8 @@ deploy_staging:
     - git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/pushdeployapi-staging.git master
   environment:
     name: staging
-    # url: pushdeployapi-staging.us-west-2.elasticbeanstalk.com
-    url: pushdeployweb-staging.herokuapp.com
+    url: pushdeployapi-staging.us-west-2.elasticbeanstalk.com
+    # url: pushdeployapi-staging.herokuapp.com
   only:
   - staging
   
@@ -34,7 +34,7 @@ deploy_production:
   variables:
     BRANCH: "master"
     EB_APP_NAME: "pushdeployapi"
-    EB_APP_ENV: "pushdeployapi-prod"
+    EB_APP_ENV: "pushdeployapi-live"
     S3_BUCKET: "pushdeploy-eb-builds"
     S3_KEY: "builds"
   before_script:
@@ -48,7 +48,7 @@ deploy_production:
     - git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/pushdeployapi-prod.git master
   environment:
     name: production
-    # url: pushdeployapi-prod.us-west-2.elasticbeanstalk.com
-    url: pushdeployweb-prod.herokuapp.com
+    url: pushdeployapi-live.us-west-2.elasticbeanstalk.com
+    # url: pushdeployapi-prod.herokuapp.com
   only:
   - master
