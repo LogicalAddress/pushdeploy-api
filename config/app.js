@@ -80,8 +80,8 @@ var config = {
       host: 'localhost'
     },
     ClientSetting: {
-      stripeKey: 'pk_test_U5qVNRp0u0u1VxqnptEbz9WK',
-      paystackKey: 'pk_test_8eb0c568b925399e7192843b4c8a20bbb80a9295',
+      stripeKey: process.env.STRIPE_PUBLIC_KEY,
+      paystackKey: process.env.PAYSTACK_PUBLIC_KEY,
     },
     OAuth: {
       bitbucket:{
