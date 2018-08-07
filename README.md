@@ -1,6 +1,3 @@
-[![pipeline status](http://code.pie.ng/dr/LauncherAPI/badges/master/pipeline.svg)](http://code.pie.ng/dr/LauncherAPI/commits/master)
-[![coverage report](http://code.pie.ng/dr/LauncherAPI/badges/master/coverage.svg)](http://code.pie.ng/dr/LauncherAPI/commits/master)
-
 ## Developing
 
 ```shell
