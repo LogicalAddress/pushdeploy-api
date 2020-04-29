@@ -5,13 +5,16 @@ module.exports = function(){
     process.on('user_app_created', function(app){
         // Caching via redundancy
         console.log("EVENT", "user_app_created", "LISTNER", "add_app_to_server_model");
-    	Server.findOne({_id: app.server}).then(function(server){
-            server.apps.push(app);
-            server.save().then((updatedServer)=>{
-                console.log("Add_app_to_server_model:update", updatedServer);
-            }).catch((err)=>{
-                console.log("Add_app_to_server_model:update", err);    
-            });
+        console.log({app});
+        Server.addApp(app).then(function(server){
+            //See why we comment: https://stackoverflow.com/questions/48607918/mongoerror-unknown-modifier-pushall-in-node-js#48621806
+            // server.apps.push(app);
+            // server.apps.concat([app._id]);
+            // server.save().then((updatedServer)=>{
+                console.log("Add_app_to_server_model:update", server);
+            // }).catch((err)=>{
+            //     console.log("Add_app_to_server_model:update", err);    
+            // });
     	}).catch(function(err) {
     	    console.log("Add_app_to_server_model:Init", err);
     	});

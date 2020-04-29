@@ -14,6 +14,7 @@ var config = {
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: process.env.PORT || 8080,
+    IP: process.env.IP || '127.0.0.1',
     mongoStorage: {
       url: process.env.MONGODB_URL || null,
     },
@@ -43,6 +44,7 @@ var config = {
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: process.env.PORT || 8080,
+    IP: process.env.IP || '127.0.0.1',
     mongoStorage: {
       url: process.env.MONGODB_URL || 'mongodb://localhost:27017/PushDeploy',
     },
@@ -72,6 +74,7 @@ var config = {
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: process.env.PORT || 8080,
+    IP: process.env.IP,
     mongoStorage: {
       url: process.env.MONGODB_URL,
     },

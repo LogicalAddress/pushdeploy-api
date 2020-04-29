@@ -10,4 +10,4 @@ db.on('error', function () {
 
 var app = express();
 require('./config/express')(app, config);
-app.listen(process.env.PORT || config.port);
+app.listen(process.env.PORT || config.port, '192.168.0.100');

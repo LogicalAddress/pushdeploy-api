@@ -3,8 +3,8 @@
 ```shell
 sudo service mysql start
 sudo service mongodb start
-mv .env.example .env
-grunt
+cp .env.example .env
+grunt #npm install -g grunt-cli
 ```
 
 ## Running Test Suites
