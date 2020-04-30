@@ -91,7 +91,7 @@ function _delete_ssl {
 }
 
 function _create_ssl {
-    if [ $CERT_TYPE == "letsencrypt" ]; then
+    if [ "$CERT_TYPE" == "letsencrypt" ]; then
         which certbot
         if [ $? != 0 ]; then
     	    eval $SUDO add-apt-repository ppa:certbot/certbot -y
@@ -130,7 +130,7 @@ function install_sshd {
 function upload_ssh_key {
     local KEY=$( cat /home/$HOST_USER/.ssh/id_rsa.pub )
     local TITLE=${KEY/* } # the '/* ' above deletes every character in $KEY up to and including the last space.
-    if [ $GIT_PROVIDER == "github" ];
+    if [ "$GIT_PROVIDER" == "github" ];
     then
         # https://developer.github.com/v3/users/keys/#create-a-public-key
         local JSON=$( printf '{"title": "%s", "key": "%s"}' "$SERVER_NAME" "$KEY" )
@@ -145,7 +145,7 @@ function upload_ssh_key {
         else
             echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
         fi
-    elif [ $GIT_PROVIDER == "bitbucket" ];
+    elif [ "$GIT_PROVIDER" == "bitbucket" ];
     then
         local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$SERVER_NAME" "$USER_OAUTH_TOKEN" )
         curl -v $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
@@ -369,9 +369,13 @@ function nodejs_app_failed {
 
 # template_setup family of functions
 function nodejs_app_setup {
-    
     cd /usr/share/$PROJECT/venv/$TEMPLATE
-    pip install nodeenv # apt install nodeenv doesnt work on ubuntu 16.04. node virtual environment manager
+    if [ `whoami` == "root" ]; then
+        eval $SUDO -H -u $HOST_USER pip install nodeenv # apt install nodeenv doesnt work on ubuntu 16.04. node virtual environment manager
+    else
+        pip install nodeenv # apt install nodeenv doesnt work on ubuntu 16.04. node virtual environment manager
+    fi
+    
     if [ $? != 0 ]; then
 	    echo "pip or apt install nodeenv manager failed"
 	    return 1
@@ -385,7 +389,7 @@ function nodejs_app_setup {
     fi
     
     if [ ! -d "$APP_NAME" ]; then
-        /home/$HOST_USER/.local/bin/nodeenv --node=$VERSION $APP_NAME # Every App with its virtual environment
+        eval $SUDO -H -u $HOST_USER /home/$HOST_USER/.local/bin/nodeenv --node=$VERSION $APP_NAME # Every App with its virtual environment
         if [ $? != 0 ]; then
     	    echo "Setting up node environment for this user's selected configuration $TEMPLATE-$VERSION failed"
     	    return 1
@@ -399,14 +403,14 @@ function nodejs_app_setup {
     cd /home/$HOST_USER
     if [ ! -d "$APP_NAME" ]; then
         
-        if [ $REPO_VISIBILITY == "private" ]; then
+        if [ "$REPO_VISIBILITY" == "private" ]; then
              if [ $GIT_PROVIDER == "github" ]; then
                 # https://blog.github.com/2012-09-21-easier-builds-and-deployments-using-git-over-https-and-oauth/
                 #################
-                mkdir $APP_NAME
+                eval $SUDO -H -u $HOST_USER mkdir $APP_NAME
                 cd $APP_NAME
-                git init
-                git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
+                eval $SUDO -H -u $HOST_USER git init
+                eval $SUDO -H -u $HOST_USER git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
                 if [ $? != 0 ]; then
             	    echo "cloning user repository failed. Did you set public key"
             	    return 1
@@ -417,10 +421,10 @@ function nodejs_app_setup {
         	        # https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html
                     # git clone $REPOSITORY $APP_NAME
                     #################
-                    mkdir $APP_NAME
+                    eval $SUDO -H -u $HOST_USER mkdir $APP_NAME
                     cd $APP_NAME
-                    git init
-                    git pull https://x-token-auth:$USER_OAUTH_TOKEN@bitbucket.org/$REPO_USER/$REPO_PROJECT_NAME.git
+                    eval $SUDO -H -u $HOST_USER git init
+                    eval $SUDO -H -u $HOST_USER git pull https://x-token-auth:$USER_OAUTH_TOKEN@bitbucket.org/$REPO_USER/$REPO_PROJECT_NAME.git
                     if [ $? != 0 ]; then
                         echo "cloning user repository failed. Did you set public key"
                         return 1
@@ -428,23 +432,23 @@ function nodejs_app_setup {
                     cd ..
                     ##################
         	  else
-        	        git clone $REPOSITORY $APP_NAME
+        	        eval $SUDO -H -u $HOST_USER git clone $REPOSITORY $APP_NAME
         	  fi
 	    else
-	        git clone $REPOSITORY $APP_NAME #TODO Run this command as $HOST_USER
+	        eval $SUDO -H -u $HOST_USER git clone $REPOSITORY $APP_NAME #TODO Run this command as $HOST_USER
 	    fi
-	    cd $APP_NAME && git checkout $BRANCH
+	    cd $APP_NAME && eval $SUDO -H -u $HOST_USER git checkout $BRANCH
     else
-        if [ $REPO_VISIBILITY == "private" ]; then
-             if [ $GIT_PROVIDER == "github" ]; then
-                cd $APP_NAME && git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
-             elif [ $GIT_PROVIDER == "bitbucket" ]; then
-                cd $APP_NAME && git pull https://x-token-auth:$USER_OAUTH_TOKEN@bitbucket.org/$REPO_USER/$REPO_PROJECT_NAME.git
+        if [ "$REPO_VISIBILITY" == "private" ]; then
+             if [ "$GIT_PROVIDER" == "github" ]; then
+                cd $APP_NAME && eval $SUDO -H -u $HOST_USER git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
+             elif [ "$GIT_PROVIDER" == "bitbucket" ]; then
+                cd $APP_NAME && eval $SUDO -H -u $HOST_USER git pull https://x-token-auth:$USER_OAUTH_TOKEN@bitbucket.org/$REPO_USER/$REPO_PROJECT_NAME.git
         	 else
-        	     cd $APP_NAME && git pull origin $BRANCH
+        	     cd $APP_NAME && eval $SUDO -H -u $HOST_USER git pull origin $BRANCH
         	  fi
         else
-            cd $APP_NAME && git pull origin $BRANCH
+            cd $APP_NAME && eval $SUDO -H -u $HOST_USER git pull origin $BRANCH
         fi
     fi
     
@@ -498,20 +502,20 @@ fi
 function nodejs_deploy {
     echo "Deploying..."
     cd /home/$HOST_USER/$APP_NAME
-    if [ $REPO_VISIBILITY == "private" ]; then
-             if [ $GIT_PROVIDER == "github" ]; then
-                git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
-             elif [ $GIT_PROVIDER == "bitbucket" ]; then
-                git pull
-                git checkout $APP_BRANCH #just incase
+    if [ "$REPO_VISIBILITY" == "private" ]; then
+             if [ "$GIT_PROVIDER" == "github" ]; then
+                eval $SUDO -H -u $HOST_USER git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
+             elif [ "$GIT_PROVIDER" == "bitbucket" ]; then
+                eval $SUDO -H -u $HOST_USER git pull
+                eval $SUDO -H -u $HOST_USER git checkout $APP_BRANCH #just incase
              else
-                git pull
-                git checkout $APP_BRANCH #just incase
+                eval $SUDO -H -u $HOST_USER git pull
+                eval $SUDO -H -u $HOST_USER git checkout $APP_BRANCH #just incase
              fi
     else
-        git pull    
+        eval $SUDO -H -u $HOST_USER git pull    
     fi
-    git checkout $APP_BRANCH #just incase
+    eval $SUDO -H -u $HOST_USER git checkout $APP_BRANCH #just incase
     if [ $? != 0 ]; then
         echo "pulling changes.. failed"
 	    exit 1
@@ -547,7 +551,7 @@ function nodejs_create_nginx_entry {
     local appConfig="/etc/nginx/sites-available/$APP_NAME"
     if [ ! -f "$appConfig" ]; then
         local SERVER_INFO=""
-        if [ $APP_NAME == 'default' ]; then
+        if [ "$APP_NAME" == 'default' ]; then
             SERVER_INFO=`echo -e "
             listen 80 default_server;
             listen [::]:80 default_server;"`
@@ -597,7 +601,7 @@ function nodejs_create_nginx_entry {
 # template_add_nginx_entry_with_ssl family of functions
 function nodejs_add_nginx_entry_with_ssl {
     # Redirect all http to https
-    if [ $APP_NAME == 'default' ]; then
+    if [ "$APP_NAME" == 'default' ]; then
         exit 1 #Sorry, only for valid domain names ssl is allocated.
     fi
     _create_ssl
@@ -607,7 +611,7 @@ function nodejs_add_nginx_entry_with_ssl {
 
 # template_delete_nginx_entry_with_ssl family of functions
 function nodejs_delete_nginx_entry_with_ssl {
-    if [ $APP_NAME == 'default' ]; then
+    if [ "$APP_NAME" == 'default' ]; then
         exit 1 #Sorry, only for valid domain names ssl is allocated.
     fi
     _delete_ssl
@@ -697,7 +701,7 @@ elif [ $ACTION == 'add_app' ]; then
 	
 	echo $REPO_VISIBILITY;
 	
-	if [ $REPO_VISIBILITY == "private" ]; then
+	if [ "$REPO_VISIBILITY" == "private" ]; then
 	    echo "upload_ssh_key running..."
 	    upload_ssh_key
     else

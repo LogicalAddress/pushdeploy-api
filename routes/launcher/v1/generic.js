@@ -3,7 +3,7 @@ Cred = require("../../../lib/middlewares/credentials"),
 getRepoDetails = require("../../../lib/launcher/getRepoDetails"),
 App = require('../../../lib/launcher/UserApps');
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
     
 	app.post('/v1/app/validate', Auth, Cred, function (req, res, next) {
         console.log(req.body);

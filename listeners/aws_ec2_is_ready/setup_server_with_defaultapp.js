@@ -71,7 +71,7 @@ var doit = function(server, retryAttempts){
     // });
 };
 
-module.exports = function(){
+module.exports = function(app, socketIO){
     process.on('aws_ec2_is_ready', function(server, retryAttempts){
         console.log("doit(server, retryAttempts);");
         doit(server, retryAttempts);

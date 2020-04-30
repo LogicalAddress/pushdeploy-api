@@ -2,7 +2,7 @@ var User = require("../../../lib/User");
 var Auth = require("../../../lib/middlewares/authenticate");
 var Servers = require("../../../lib/launcher/UserServers");
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.get('/v1/servers', Auth, function (req, res, next) {
 		Servers.findAllByUid(req.techpool.user.uid).then((record)=>{

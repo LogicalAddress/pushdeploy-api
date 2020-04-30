@@ -9,7 +9,7 @@ opts = {
     console: console,
 };
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.post('/v1/server/logs', Auth, Cred, (req, res, next) => {
 

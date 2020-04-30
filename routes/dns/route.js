@@ -10,7 +10,7 @@ var checkAddZoneEntry = require("../../validation/dns/AddZoneEntry");
 	*/
 	
 	
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 
 	/*
 	* All DNS Root zone (Admin)

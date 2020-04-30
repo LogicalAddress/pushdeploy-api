@@ -5,7 +5,7 @@ var keypair = require('keypair');
 var forge = require('node-forge');
 var hat = require('hat');
 
-module.exports = function(){
+module.exports = function(app, socketIO){
     
     /*
      [Error: Encrypted private key detected, but no passphrase given]

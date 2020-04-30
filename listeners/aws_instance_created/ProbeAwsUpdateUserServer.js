@@ -2,7 +2,7 @@ var UserServer = require('../../lib/launcher/UserServers'),
 notifier = require("../../lib/launcher/notifier"),
 Aws = require('../../lib/aws/lib');
 var retryTimeInMs = 10000; //10sec 
-module.exports = function(){
+module.exports = function(app, socketIO){
     process.on('aws_instance_created', function(bigPayload, server){
         
         var Id = setInterval(()=>{

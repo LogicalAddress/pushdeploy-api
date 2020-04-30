@@ -6,7 +6,7 @@ getApp = require("../../../lib/middlewares/getApp.js"),
 createWebHook = require("../../../lib/launcher/createGitWebHooks.js"),
 updateWebHook = require("../../../lib/launcher/updateGitWebHooks.js");
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	app.post('/v1/app/toggle_auto_deploy', Auth, refreshToken, Cred, getApp, (req, res, next) => {
 		if(req.techpool.app.webhook_sub_id){
 			updateWebHook(req.techpool.app, req.techpool.credentials)

@@ -6,7 +6,7 @@ Servers = require("../../../lib/launcher/UserServers"),
 setup = require("../../../lib/launcher/v1/appSetup"),
 notifier = require("../../../lib/launcher/notifier");
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.post('/v1/app/create', Auth, refreshToken, Cred, (req, res, next) => {
 		Servers.findOne({

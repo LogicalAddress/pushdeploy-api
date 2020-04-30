@@ -9,7 +9,7 @@ opts = {
     console: console,
 };
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.post('/v1/app/logs', Auth, Cred, (req, res, next) => {
 		console.log("checking logs..matching criteria", req.techpool.user.uid, req.body._id || req.body.app_id);

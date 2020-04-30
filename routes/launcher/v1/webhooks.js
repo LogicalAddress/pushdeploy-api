@@ -9,7 +9,7 @@ multer  = require('multer'),
 storage = multer.memoryStorage(),
 upload = multer({ storage: storage });
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
     
 	app.post('/v1/server/events', Auth, Cred, LogEvent, upload.single('file'), function (req, res, next) {
         console.log("Webhook Received: ", req.body.type);

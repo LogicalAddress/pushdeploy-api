@@ -6,7 +6,7 @@ notifier = require("../../../lib/launcher/notifier"),
 // generate = require('project-name-generator'),
 setup = require("../../../lib/launcher/v1/databaseSetup");
 var hat = require('hat');
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.get('/v1/database/:server_id', Auth, function (req, res, next) {
 		Database.findAll({

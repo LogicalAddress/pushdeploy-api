@@ -3,7 +3,7 @@ Cred = require("../../../lib/middlewares/credentials"),
 UserServer = require("../../../lib/launcher/UserServers"),
 serverLogs = require("../../../lib/launcher/v1/serverLogs");
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.get('/v1/servers/logs_', Auth, Cred, (req, res, next) => {
 		UserServer.findOne({

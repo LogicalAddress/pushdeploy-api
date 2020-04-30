@@ -12,7 +12,7 @@ fs = require("fs"),
     session: [],
 };
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.post('/v1/app/toggle_ssl', Auth, Cred, (req, res, next) => {
 		UserApp.findOne({

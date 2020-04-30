@@ -3,7 +3,7 @@ UserApps = require('../../../lib/launcher/UserApps'),
 Cred = require("../../../lib/middlewares/credentials"),
 appLogs = require("../../../lib/launcher/v1/appLogs");
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.get('/v1/app/logs_', Auth, Cred, (req, res, next) => {
 

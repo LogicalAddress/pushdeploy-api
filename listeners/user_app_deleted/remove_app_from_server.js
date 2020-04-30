@@ -1,6 +1,6 @@
 var Server = require("../../lib/launcher/UserServers");
 
-module.exports = function(){
+module.exports = function(_app, socketIO){
     process.on('user_app_deleted', function(app){
         // Caching via redundancy
         console.log("EVENT", "user_app_deleted", "LISTNER", "remove_app_from_server");

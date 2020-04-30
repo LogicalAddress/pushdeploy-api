@@ -9,7 +9,7 @@ var generate = require('project-name-generator');
 	*/
 	
 	
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.post('/v1/aws/instances', Auth, Cred, (req, res, next) => {
 		var payload = Object.assign(req.body, {

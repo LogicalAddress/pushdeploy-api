@@ -13,7 +13,7 @@ fs = require("fs"),
     session: [],
 };
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.post('/v1/app/deploy', Auth, Cred, (req, res, next) => {
 		UserApp.findOne({

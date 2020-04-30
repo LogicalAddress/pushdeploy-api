@@ -12,7 +12,7 @@ var copts = {
 	entry_point: "bin/www"
 };
 
-module.exports = function (app) {
+module.exports = function (app, socketIO) {
 	
 	app.post('/v1/custom/instances', Auth, Cred, (req, res, next) => {
 		UserServer.findOne({
