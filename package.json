@@ -1,5 +1,5 @@
 {
-  "name": "TechPool",
+  "name": "pushdeploy-api",
   "version": "0.0.0",
   "description": "Various Tech Integration",
   "main": "server.js",

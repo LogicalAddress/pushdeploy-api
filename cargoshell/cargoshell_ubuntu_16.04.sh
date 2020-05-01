@@ -14,7 +14,7 @@ GITLAB_REGEX="gitlab"
 SUDO=''
 
 # VARS TO BE EXPORTED: $ACTION (not used yet), $APP_NAME, $TEMPLATE, $CERT_TYPE, $NODE_VERSION
-# $REPOSITORY, $PORT, $SERVER_ENTRY_POINT, $GITUSERNAME
+# $REPOSITORY, $PORT, $GITUSERNAME
 
 export BRANCH="master"
 export TEMPLATE="nodejs"
@@ -467,6 +467,12 @@ function nodejs_app_setup {
 	    echo "npm install failed"
 	    return 1
 	fi
+    # Get SERVER_ENTRY_POINT HERE
+    startScript=$(node -p "require('/home/$HOST_USER/$APP_NAME/package.json').scripts.start")
+    spaceStrip=${startScript##* }
+    SERVER_ENTRY_POINT=${spaceStrip##*.\/}
+    echo "SERVER_ENTRY_POINT found.."
+    echo $SERVER_ENTRY_POINT
     deactivate_node
 if [ ! -f "/usr/share/$PROJECT/startup_scripts/$APP_NAME.sh" ]; then    
 echo -e "#!/bin/sh
@@ -580,9 +586,6 @@ function nodejs_create_nginx_entry {
         map \$http_upgrade \$connection_upgrade {
             default upgrade;
             '' close;
-        }
-        upstream websocket {
-            server 0.0.0.0:$PORT;
         }
         server{
             $SERVER_INFO
