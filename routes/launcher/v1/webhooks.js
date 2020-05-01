@@ -21,6 +21,14 @@ module.exports = function (app, socketIO) {
                 server.superuser = payload.superuser;
                 server.state = 'RUNNING';
 			    server.save().then((response)=>{
+                    try{
+                        socketIO.to(req.techpool.user.uid).emit({
+                            action: 'CREATE_SERVER_SUCCESS',
+                            data: response
+                        });
+                    }catch(err){
+                        console.log("Socket.IO Transmission failed: ", err.message);
+                    }
     		    	console.log("UPDATE_AND READY SERVER", response);
     		    	notifier({
     		    	    uid: req.techpool.user.uid,
@@ -196,7 +204,6 @@ module.exports = function (app, socketIO) {
             });
         }else if(payload.type == "CREATE_DATABASE_SUCCESS"){
             UserDatabase.findOne({
-                uid: req.techpool.user.uid, 
                 server: payload.server_id, 
                 _id: payload.db_id
             }).then((database)=>{

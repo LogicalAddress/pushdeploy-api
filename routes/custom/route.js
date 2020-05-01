@@ -51,7 +51,7 @@ module.exports = function (app, socketIO) {
 		            	}).catch((err)=>{
 		            		console.log("User Server FindOne", err);
 		            	});
-		            	setup(req, _server);
+		            	setup(req, socketIO, _server);
 		            	return;
 		            }).catch((err)=>{
 		            	console.log("APP create", err);
@@ -64,7 +64,7 @@ module.exports = function (app, socketIO) {
 			}else{
 				_server.state = 'RE-INITIALIZING'; //ignore db update. Is it important?
 				res.status(200).json({body: { status: "IN_PROGRESS", data: response }});
-				setup(req, _server, true);
+				setup(req, socketIO, _server, true);
 				return;
 			}
 		}).catch((error)=>{

@@ -1,10 +1,15 @@
 ## Developing
 
 ```shell
+./ngrok http 192.168.0.100:8080
+# In a different shell
 sudo service mysql start
 sudo service mongodb start
+export IP=192.168.0.100
 cp .env.example .env
 grunt #npm install -g grunt-cli
+export API_URL="https://7dfcfdd0.ngrok.io"
+grunt
 ```
 
 ## Running Test Suites

@@ -47,16 +47,17 @@ function add_mysql_database {
         echo "installing mysql..."
         export DEBIAN_FRONTEND="noninteractive"
         eval $SUDO apt-get -y install debconf-utils
-        eval $SUDO debconf-set-selections <<< "mysql-server mysql-server/root_password password $DB_ROOT_PASSWORD"
-        eval $SUDO debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $DB_ROOT_PASSWORD"
-        eval $SUDO apt-get -y install mysql-client mysql-server
-        # eval $SUDO mysql_secure_installation
+        echo "mysql-server-5.7 mysql-server/root_password password $DB_ROOT_PASSWORD" | sudo debconf-set-selections
+        echo "mysql-server-5.7 mysql-server/root_password_again password $DB_ROOT_PASSWORD" | sudo debconf-set-selections
+        sudo apt-get -y install mysql-server-5.7
         if [ $? != 0 ]; then
             echo "installing mysql...failed"
             exit 1
         fi
 	fi
-    mysql -u root -p"$DB_ROOT_PASSWORD" -e "create database $DB_NAME; GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USERNAME@localhost IDENTIFIED BY '$DB_PASSWORD'; FLUSH PRIVILEGES;"
+    # mysql -u root -password -e "use mysql; UPDATE user SET authentication_string=PASSWORD('$DB_ROOT_PASSWORD') WHERE User='root'; flush privileges;"
+    mysql -u root -p$DB_ROOT_PASSWORD -e "create database $DB_NAME; GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USERNAME@localhost IDENTIFIED BY '$DB_PASSWORD'; FLUSH PRIVILEGES;"
+    sudo service mysql restart
 }
 
 function notify_home_that_server_ready {
@@ -186,6 +187,13 @@ function upload_ssh_key {
     fi
 }
 
+function install_mongodb {
+    echo "Installing mongodb server"
+    #echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+    #sudo apt-get update -y
+    sudo apt-get install -y mongodb
+}
+
 function create_user_and_project_directories {
     
     if [ `whoami` == "root" ]; then
@@ -197,6 +205,8 @@ function create_user_and_project_directories {
         	    return 1
         	else
         	    echo "User $HOST_USER created"
+                echo "Allow new User to run sudo without password"
+                echo -e "$HOST_USER ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers > /dev/null
         	fi
     	else
     	    echo "User previously created"
@@ -667,6 +677,10 @@ elif [ $ACTION == 'init_with_default_app' ]; then
         echo "create_user_and_project_directories failed"
 	    exit 1
 	fi
+    install_mongodb
+    if [ $? != 0 ]; then
+        echo "install_mongodb failed...continue regardless"
+    fi
     ${TEMPLATE}_create_app
     if [ $? != 0 ]; then
         echo "${TEMPLATE}_create_app failed"

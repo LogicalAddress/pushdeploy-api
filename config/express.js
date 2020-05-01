@@ -21,6 +21,8 @@ module.exports = function(app, config, socketIO) {
 	middlewares.forEach(function (middleware) {
 		require(middleware)(app);
 	});
+
+	socketIO.use(require('../lib/middlewares/socketAuth'));
 	
 	var listeners = glob.sync(config.AppRoot + '/listeners/**/*.js');
 	listeners.forEach(function (listener) {

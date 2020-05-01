@@ -22,3 +22,13 @@ var app = express();
 var io = require('socket.io').listen(app.listen(config.port, config.IP));
 io.adapter(redis({ host: config.redis.host, port: config.redis.port }));
 require('./config/express')(app, config, io);
+
+
+io.on("connection", (socket) => {
+  console.log(socket.user.name + " connected");
+  socket.emit("connected", "Live updates from pushdeploy is available");
+  socket.join(socket.user._id);
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+});
