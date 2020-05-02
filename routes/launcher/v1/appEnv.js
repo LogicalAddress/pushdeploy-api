@@ -32,7 +32,7 @@ module.exports = function (app, socketIO) {
 					}else{
 						throw new Error("Invalid Server Provider. How did we get here?");
 					}
-					var remoteFile = '/home/'+opts.username+'/.cargospace/'+_app.app_name+'.sh';
+					var remoteFile = '/home/'+opts.username+'/.pushdeploy/'+_app.app_name+'.sh';
 					console.log("Remote file to get", remoteFile);
 					opts.session = [
 				        { op: 'writeFile', path: remoteFile, body: req.body.app_shell_script },

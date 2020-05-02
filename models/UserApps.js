@@ -24,7 +24,7 @@ var UserAppSchema = new Schema({
 	
 	git_provider: { type: String },
 	
-	webhook_sub_id: { type: String},
+	webhook_sub_id: { type: String, index: true},
 	
 	webhook_sub_data: {type: String },
 	

@@ -5,9 +5,9 @@
 # 2. $HOST_USER subsequently
 
 SCRIPT_DIR=`pwd`                  #TODO: This is so wrong
-HOST_USER="cargospace"				#sudoer
+HOST_USER="pushdeploy"				#sudoer
 LTS_NODE_VERSION="6.10.2"           # use LTS if NODE_VERSION is not set
-PROJECT="cargospace"
+PROJECT="pushdeploy"
 GITHUB_REGEX="github"
 BITBUCKET_REGEX="bitbucket"
 GITLAB_REGEX="gitlab"
@@ -133,28 +133,33 @@ function upload_ssh_key {
     local TITLE=${KEY/* } # the '/* ' above deletes every character in $KEY up to and including the last space.
     if [ "$GIT_PROVIDER" == "github" ];
     then
+        echo "Uploading key to github not neccessary any more. We got a token to handle to pull"
         # https://developer.github.com/v3/users/keys/#create-a-public-key
-        local JSON=$( printf '{"title": "%s", "key": "%s"}' "$SERVER_NAME" "$KEY" )
-        curl -v -H "Authorization: token ${USER_OAUTH_TOKEN}" -H "Content-Type: application/json" -X POST -d "$JSON" "https://api.github.com/user/keys/"
-        # Upload CargoSpace key if we havn't aleady done so while ignoring duplicate errors from git providers
-        if [ "$USERCARGOSPACEPUBKEY" != "" ]
-        then
-            KEY=$USERCARGOSPACEPUBKEY
-            TITLE="CargoSpace"
-            JSON=$( printf '{"title": "%s", "key": "%s"}' "$SERVER_NAME" "$KEY" )
-            curl -v -d "$JSON" "https://api.github.com/user/keys/?access_token=$USER_OAUTH_TOKEN"
-        else
-            echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
-        fi
+        # local JSON=$( printf '{"title": "%s", "key": "%s"}' "$SERVER_NAME" "$KEY" )
+        # echo "Sending Key 1"
+        # echo $JSON
+        # curl -v -H "Authorization: token ${USER_OAUTH_TOKEN}" -H "Content-Type: application/json" -X POST -d "$JSON" "https://api.github.com/user/keys/"
+        # # Upload Pushdeploy key if we havn't aleady done so while ignoring duplicate errors from git providers
+        # if [ "$USERCARGOSPACEPUBKEY" != "" ]
+        # then
+        #     KEY=$USERCARGOSPACEPUBKEY
+        #     TITLE="pushdeploy"
+        #     JSON=$( printf '{"title": "%s", "key": "%s"}' "$SERVER_NAME" "$KEY" )
+        #     echo "Sending key 2"
+        #     echo $JSON
+        #     curl -v -d "$JSON" "https://api.github.com/user/keys/?access_token=$USER_OAUTH_TOKEN"
+        # else
+        #     echo "USERCARGOSPACEPUBKEY env not set, proceeding without sending key to git provider.."
+        # fi
     elif [ "$GIT_PROVIDER" == "bitbucket" ];
     then
         local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$SERVER_NAME" "$USER_OAUTH_TOKEN" )
         curl -v $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
-        # Upload CargoSpace key if we havn't aleady done so while ignoring duplicate errors from git providers
+        # Upload Pushdeploy key if we havn't aleady done so while ignoring duplicate errors from git providers
         if [ "$USERCARGOSPACEPUBKEY" != "" ]
         then
             KEY=$USERCARGOSPACEPUBKEY
-            TITLE="CargoSpace"
+            TITLE="pushdeploy"
             data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "access_token=%s"' "$KEY" "$SERVER_NAME" "$USER_OAUTH_TOKEN" )
             curl -v $data "https://api.bitbucket.org/1.0/users/$BITBUCKET_ACCOUNT_NAME/ssh-keys"
         else
@@ -171,11 +176,11 @@ function upload_ssh_key {
         fi
         local data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "private_token=%s"' "$KEY" "$SERVER_NAME" "$USER_OAUTH_TOKEN" )
         curl -v $data "https://$GITSERVER/api/v3/user/keys?private_token=$USER_OAUTH_TOKEN"
-        # Upload CargoSpace key if we havn't aleady done so while ignoring duplicate errors from git providers
+        # Upload Pushdeploy key if we havn't aleady done so while ignoring duplicate errors from git providers
         if [ "$USERCARGOSPACEPUBKEY" != "" ]
         then
             KEY=$USERCARGOSPACEPUBKEY
-            TITLE="CargoSpace"
+            TITLE="pushdeploy"
             data=$( printf -- '--data-urlencode "key=%s" --data-urlencode "label=%s" --data-urlencode "private_token=%s"' "$KEY" "$SERVER_NAME" "$USER_OAUTH_TOKEN" )
             curl -v $data "https://$GITSERVER/api/v3/user/keys?private_token=$USER_OAUTH_TOKEN"
         else
@@ -270,7 +275,7 @@ function create_user_and_project_directories {
 	
 	if [ "$USERCARGOSPACEPUBKEY" != "" ]
     then
-        echo -e "# CargoSpace Key\n$USERCARGOSPACEPUBKEY" | tee -a /home/$HOST_USER/.ssh/authorized_keys > /dev/null
+        echo -e "# pushdeploy key\n$USERCARGOSPACEPUBKEY" | tee -a /home/$HOST_USER/.ssh/authorized_keys > /dev/null
     else
         echo "USERCARGOSPACEPUBKEY env not set, proceeding.."
     fi
@@ -304,12 +309,11 @@ function setup_server {
     eval $SUDO apt-get update -y
     eval $SUDO apt-get install curl python-pip git software-properties-common -y
 	# todo: Copy public key to user's directory
-	if [ ! -f "/etc/ssl/certs/dhparam.pem" ]; then
-	    eval $SUDO openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
-	else
-	    echo "/etc/ssl/certs/dhparam.pem previously created"
-	fi
-    # echo "" | sudo -S service php5.6-fpm reload
+	# if [ ! -f "/etc/ssl/certs/dhparam.pem" ]; then
+	#     eval $SUDO openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+	# else
+	#     echo "/etc/ssl/certs/dhparam.pem previously created"
+	# fi
     return 0
 }
 ##############NODEJS TEMPLATE########################

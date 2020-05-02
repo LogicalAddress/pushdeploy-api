@@ -40,6 +40,7 @@ var UserAuthCredentialSchema = new Schema({
 	github_token_expiry: { type: String },
 	github_scope: { type: String },
 	github_token_type: { type: String },
+	github_raw: { type: String },
 	
 	aws_secret_key: { type: String }, //for caching purpose - last used secret key
 	aws_access_key: { type: String }, //for caching purpose - last used access key
