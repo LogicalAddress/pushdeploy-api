@@ -7,6 +7,15 @@ setup = require("../../../lib/launcher/v1/appSetup"),
 notifier = require("../../../lib/launcher/notifier");
 
 module.exports = function (app, socketIO) {
+
+
+	app.get('/v1/apps', Auth, function (req, res, next) {
+		App.findAllBy({uid: req.techpool.user.uid}).then((record)=>{
+			res.status(200).json({body: { status: "success", data: record}});
+		}).catch((error)=>{
+		    res.status(500).json({status: 'failure', message: error});
+		});			
+	});
 	
 	app.post('/v1/app/create', Auth, refreshToken, Cred, (req, res, next) => {
 		Servers.findOne({
@@ -38,7 +47,11 @@ module.exports = function (app, socketIO) {
 		            	template: req.body.template,
 		            	template_variation: req.body.template_variation,
 		            	isPublic: req.body.repo_meta_data.isPublic,
-		            	git_provider: req.body.git_provider || ""
+		            	git_provider: req.body.git_provider || "",
+		            	repo_id: req.body.repo_id,
+		            	repo_node_id: req.body.repo_node_id,
+		            	repo_full_name: req.body.repo_full_name,
+		            	repo_name: req.body.repo_name,
 		            }).then((app)=>{
 		            	_app = app;
 		            	res.status(200).json({body: { status: "IN_PROGRESS", data: app }});

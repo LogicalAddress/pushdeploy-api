@@ -42,7 +42,7 @@ var UserServerSchema = new Schema({
 
 	enabled: { type: Boolean, default: true},
 	
-	state: { type: String, default: 'CREATE_IN_PROGRESS' },
+	state: { type: String, default: 'CREATE IN PROGRESS' },
 	
 	_app_counter: { type: Number, default: 0 },
 	

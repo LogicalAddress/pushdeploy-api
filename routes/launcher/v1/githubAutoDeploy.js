@@ -1,6 +1,7 @@
 var laeh = require('laeh2').leanStacks(true), _x = laeh._x,
 sshclient = require("sshclient"),
 UserApp = require('../../../lib/launcher/UserApps'),
+AppDeployLog = require('../../../lib/launcher/AppDeployLog'),
 AppConfig = require('../../../config/app'),
 breakUrl = require('parse-github-repo-url'), //[user, repo, version] = parse(url)
 userAuthCredential = require('../../../lib/launcher/UserAuthCredential'),
@@ -15,17 +16,23 @@ fs = require("fs"),
 module.exports = function (app, socketIO) {
 	
 	app.post('/webhooks/github', (req, res, next) => {
+		res.status(200).json({message: "ACK"}); //return early
+		if(req.body.hook){
+			console.log("Github AutoDeploy Registered", req.body);
+			// return;
+		}
 
-		if(!req.body.hook){
-			console.log("Github AutoDeploy Fired! But False Positive", req.body);
+		if(!req.body.repository){
+			console.log("False positive event", req.body);
 			return;
 		}
-		res.status(200).json({message: "ACK"}); //return early
-		UserApp.findOne({
-			webhook_sub_id: req.body.hook_id,
+
+		UserApp.findAllBy({
+			repo_id: req.body.repository.id,
 		}).then(async(response)=>{
-			var _app = response;
-			if(req.body.hook.active){
+			for(let i = 0; i < response.length; i++){
+				var _app = response[i];
+			// if(req.body.repository){
 				try{
 					console.log("deploying..", _app);
 					let credentials = await userAuthCredential.findByUID(_app.uid);
@@ -61,7 +68,7 @@ module.exports = function (app, socketIO) {
 						console.log("else case: continue regardless");
 					}
 					opts.session = [
-						{ op: 'exec', command: 'export REPO_PROJECT_NAME='+repoProject+' REPO_USER='+repoUser+' SERVER_NAME='+_app.server.server_name+' USER_OAUTH_TOKEN='+gitToken+' REPO_VISIBILITY='+visibility+' GIT_PROVIDER='+_app.git_provider+' SERVER_ID='+_app.server._id+' CALLBACK_TOKEN=githubwebhook CALLBACK_URL='+AppConfig.AppDomain+'/v1/server/events ACTION=deploy APP_NAME='+_app.app_name+' APP_ID='+_app._id+' NODE_VERSION='+_app.template_variation+' REPOSITORY="'+_app.app_repository+'" && /home/'+_app.server.superuser+'/.setup.sh >.app_'+_app.app_name+'.log.out 2>&1' },
+						{ op: 'exec', command: 'export REPO_PROJECT_NAME='+repoProject+' REPO_USER='+repoUser+' SERVER_NAME='+_app.server.server_name+' USER_OAUTH_TOKEN='+gitToken+' REPO_VISIBILITY='+visibility+' GIT_PROVIDER='+_app.git_provider+' SERVER_ID='+_app.server._id+' CALLBACK_URL='+AppConfig.AppDomain+'/v1/events ACTION=deploy APP_NAME='+_app.app_name+' APP_ID='+_app._id+' NODE_VERSION='+_app.template_variation+' REPOSITORY="'+_app.app_repository+'" && /home/'+_app.server.superuser+'/.setup.sh >.app_'+_app.app_name+'.log.out 2>&1' },
 				    ];
 					sshclient.session(opts, _x(function(err, response){
 						//Control Only reaches here when cargoshell returns with a non-zero EXIT_STATUS
@@ -134,15 +141,16 @@ module.exports = function (app, socketIO) {
 					});
 					return;
 				}
-			}else{
-				//Deactivated from github? set auto_deploy: false
-				UserApp.updateOne(_app, Object.assign({}, _app, {auto_deploy: false }))
-					.then((res)=>{
-					console.log("Unregistering github autodeploy success", res);
-				}).catch((err)=>{
-					console.log("Unregistering github autodeploy failed", err);
-				});
 			}
+			// }else{
+			// 	//Deactivated from github? set auto_deploy: false
+			// 	UserApp.updateOne(_app, Object.assign({}, _app, {auto_deploy: false }))
+			// 		.then((res)=>{
+			// 		console.log("Unregistering github autodeploy success", res);
+			// 	}).catch((err)=>{
+			// 		console.log("Unregistering github autodeploy failed", err);
+			// 	});
+			// }
 		}).catch((error)=>{
 			console.log("Github webhooks Issue: App Not Found");
 			console.log("FATAL ERROR", error);

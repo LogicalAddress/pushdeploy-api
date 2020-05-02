@@ -42,7 +42,7 @@ module.exports = function (app, socketIO) {
 					        }
 					        stream.on('close', function() {
 					            console.log('RETRIEVE APP_LOGS '+_app.app_name+'Stream :: close');
-					            res.status(200).json({body: { status: "success", data: logBuf.toString() }});
+					            res.status(200).json({body: { status: "success", data: logBuf.toString('utf-8') }});
 					            conn.end();
 					            return;
 					        }).on('data', function(data) {
@@ -52,7 +52,7 @@ module.exports = function (app, socketIO) {
 					            res.status(400).json({body: { status: "failure", message: data.toString }});
 					            return;
 					        });
-					        var logfile = /*(_app.app_name === "default" ? 'log.out' : */'_app_'+_app.app_name+'.log.out';//);
+					        var logfile = /*(_app.app_name === "default" ? 'log.out' : */'.app_'+_app.app_name+'.log.out';//);
 					        stream.end('tail -n 100 /home/'+_app.server.superuser+'/'+logfile+';\nexit\n');
 					  });
 					  

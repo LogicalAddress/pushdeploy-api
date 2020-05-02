@@ -42,7 +42,7 @@ module.exports = function (app, socketIO) {
 					        }
 					        stream.on('close', function() {
 					            console.log('RETRIEVE SERVER_LOGS '+_server.server_name+'Stream :: close');
-					            res.status(200).json({body: { status: "success", data: logBuf.toString() }});
+					            res.status(200).json({body: { status: "success", data: logBuf.toString('utf-8') }});
 					            conn.end();
 					            return;
 					        }).on('data', function(data) {

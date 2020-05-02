@@ -236,7 +236,7 @@ module.exports = function (app, socketIO) {
 			    app.save().then((response)=>{
     		    	console.log("UPDATE_APP", response);
     		    	notifier({
-    		    	    uid: req.techpool.user.uid,
+    		    	    uid: app.uid,
 				    	data: {
 					    	ACTION: "UPDATE_APP",
 					    	O_REQ: null,
@@ -253,6 +253,15 @@ module.exports = function (app, socketIO) {
                //TODO: Log
             });
         }else{
+            /*
+            //=====AUTO DEPLOY=====NOT-IMPLEMENTED YET
+            { type: 'DEPLOY_APP_SUCCESS',
+              superuser: 'ubuntu',
+              server_id: '5ead6a41cd89a712cd7e8c7a',
+              app_name: 'osofia.evas.com.ng',
+              app_id: '5eadd3efd88ae50df1a7c736'
+            }
+            */
             console.log("UNHANDLED EVENTS", payload);
         }
 	});

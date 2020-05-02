@@ -21,7 +21,7 @@ var UserDatabaseSchema = new Schema({
 
 	host: { type: String, default: '127.0.0.1' },
 	
-	state: { type: String, default: 'CREATE_IN_PROGRESS' },
+	state: { type: String, default: 'CREATE IN PROGRESS' },
 	
 	isPublic: {type: Boolean, default: false}, //does not listen on extenal IP
 	

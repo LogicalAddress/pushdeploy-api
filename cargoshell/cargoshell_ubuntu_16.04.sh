@@ -88,7 +88,7 @@ function notify_home_that_app_deployed {
 }
 
 function _delete_ssl {
-    certbot --nginx rollback --non-interactive -d $APP_NAME -d www.$APP_NAME
+    certbot --nginx rollback --non-interactive -d $APP_NAME
 }
 
 function _create_ssl {
@@ -100,7 +100,7 @@ function _create_ssl {
     	    eval $SUDO apt-get install python-certbot-nginx -y
     	fi
     	#eval $SUDO certbot --nginx -d $APP_NAME -d www.$APP_NAME
-        eval $SUDO certbot --nginx --redirect --agree-tos --non-interactive --email $EMAIL -d $APP_NAME -d www.$APP_NAME
+        eval $SUDO certbot --nginx --redirect --agree-tos --non-interactive --email $EMAIL -d $APP_NAME
         # TODO: Create a Crontab to renew certificate at least ones a weak for those due
         if [ $? != 0 ]; then
             echo "Certbot Didn't Work"
@@ -805,7 +805,7 @@ elif [ $ACTION == 'toggle_ssl' ]; then
         echo "toggle_ssl failed"
 	    exit 1
 	fi
-	JSON=$( printf '{"type": "TOGGLE_SSL_SUCCESS", "type": "letsencrypt", "server_id": "%s", "app_name": "%s", "app_id": "%s"}' "$SERVER_ID" "$APP_NAME" "$APP_ID" )
+	JSON=$( printf '{"type": "TOGGLE_SSL_SUCCESS", "server_id": "%s", "app_name": "%s", "app_id": "%s"}' "$SERVER_ID" "$APP_NAME" "$APP_ID" )
     curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
     exit 0
 else
