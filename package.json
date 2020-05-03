@@ -6,9 +6,7 @@
   "repository": "git@github.com:LogicalAddress/pushdeploy-api.git",
   "author": "Logical Address Ltd. <hello@logicaladdress.com>",
   "scripts": {
-    "start": "node ./server.js",
-    "build docker": "docker build -t logicaladdress/pushdeploy-api ./",
-    "push docker": "docker push logicaladdress/pushdeploy-api"
+    "start": "node ./server.js"
   },
   "dependencies": {
     "async": "~0.2.8",

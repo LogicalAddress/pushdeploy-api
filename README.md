@@ -1,4 +1,4 @@
-## Developing
+## Development
 
 ```shell
 ./ngrok http 192.168.0.100:8080
@@ -15,16 +15,12 @@ grunt
 ## Docker
 ```shell
 docker build -t logicaladdress/pushdeploy-api .
+docker push logicaladdress/pushdeploy-api
 ```
 
 ## Running Test Suites
 ```shell
 grunt test
-```
-
-## Start Mongodb on c9
-```shell
-./mongod
 ```
 
 ## Node Virtual Environment Manager
