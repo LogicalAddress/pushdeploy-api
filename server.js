@@ -21,7 +21,9 @@ var app = express();
 
 
 var io = require('socket.io').listen(app.listen(config.port, config.IP));
-io.adapter(redis(config.redis.url, {tls: { servername: new URL(config.redis.url).hostname}}));
+// io.adapter(redis(config.redis.url, {tls: { servername: new URL(config.redis.url).hostname}}));
+let caCert = fs.readFileSync("./redis-pushdeploy.cert");
+io.adapter(redis(config.redis.url, {tls: { ca: caCert}}));
 require('./config/express')(app, config, io);
 
 
