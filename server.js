@@ -20,7 +20,7 @@ var app = express();
 
 
 var io = require('socket.io').listen(app.listen(config.port, config.IP));
-io.adapter(redis(config.redis.url));
+io.adapter(redis(config.redis.url, {tls: {}}));
 require('./config/express')(app, config, io);
 
 
