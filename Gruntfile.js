@@ -17,7 +17,7 @@ module.exports = function (grunt) {
     },
     shell: {
       jasmine: {
-        command: 'jasmine --stop-on-failure',
+        command: 'jasmine',
         options: {
           stdout: true,
           stderr: true,
