@@ -37,9 +37,9 @@ jobs:
             docker push $IMAGE_NAME:latest
 workflows:
   version: 2
-  build:
+  build-test-and-deploy:
     jobs:
-      - build-and-test:
+      - build-and-test
       - build-publish-image:
-        requires:
-          - build-and-test
+          requires:
+            - build-and-test
