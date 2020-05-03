@@ -8,6 +8,10 @@
   "scripts": {
     "start": "node ./server.js"
   },
+  "engines": {
+    "node": "8.11.4",
+    "npm": "~5.6.0"
+  },
   "dependencies": {
     "async": "~0.2.8",
     "aws-sdk": "^2.168.0",
