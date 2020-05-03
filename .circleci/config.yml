@@ -3,14 +3,17 @@ orbs:
   node: circleci/node@1.1.6
 jobs:
   build-and-test:
-    executor:
-      name: node/default
+    docker:
+      - image: node:8.11.4
+      - image: mongo:4.2.1
+      - image: redis:5.0.3
     steps:
       - checkout
       - node/with-cache:
           steps:
             - run: npm install
-            - run: npm test
+            - run: npm -g install grunt-cli
+            - run: grunt test
 workflows:
     build-and-test:
       jobs:
