@@ -7,19 +7,21 @@ jobs:
       - image: node:8.11.4
       - image: mongo:4.2.1
       - image: redis:5.0.3
+    environment:
+      MONGODB_URL: mongodb://localhost:27017/pushdeploy
+      REDIS_URL: redis://localhost:6379
     steps:
       - checkout
       - node/with-cache:
           steps:
             - run: npm install
             - run: npm -g install grunt-cli jasmine
-            - run: export MONGODB_URL="mongodb://localhost:27017/pushdeploy" REDIS_URL="redis://localhost:6379"
             - run: grunt test
   build-publish-image:
     docker:
       - image: circleci/buildpack-deps:stretch
     environment:
-      IMAGE_NAME: dockerhub-username/do-kubernetes-sample-app
+      IMAGE_NAME: logicaladdress/pushdeploy-api
     working_directory: ~/app
     steps:
       - checkout
@@ -37,12 +39,6 @@ workflows:
     build:
       jobs:
         build-and-test:
-          filters:
-            branches:
-              only: master
         build-publish-image:
           requires:
             - build-and-test
-          filters:
-            branches:
-              only: master
