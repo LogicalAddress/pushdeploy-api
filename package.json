@@ -3,10 +3,12 @@
   "version": "0.0.0",
   "description": "Various Tech Integration",
   "main": "server.js",
-  "repository": "",
+  "repository": "git@github.com:LogicalAddress/pushdeploy-api.git",
   "author": "Logical Address Ltd. <hello@logicaladdress.com>",
   "scripts": {
-    "start": "node ./server.js"
+    "start": "node ./server.js",
+    "build docker": "docker build -t logicaladdress/pushdeploy-api ./",
+    "push docker": "docker push logicaladdress/pushdeploy-api"
   },
   "dependencies": {
     "async": "~0.2.8",

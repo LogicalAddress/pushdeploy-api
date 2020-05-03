@@ -12,6 +12,11 @@ export API_URL="https://7dfcfdd0.ngrok.io"
 grunt
 ```
 
+## Docker
+```shell
+docker build -t logicaladdress/pushdeploy-api .
+```
+
 ## Running Test Suites
 ```shell
 grunt test
