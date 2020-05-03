@@ -6,7 +6,7 @@ metadata:
   labels:
     app: pushdeploy-api
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - port: 80
       targetPort: http
