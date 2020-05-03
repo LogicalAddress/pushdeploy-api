@@ -21,3 +21,20 @@ spec:
           ports:
             - containerPort: 80
               name: http
+          env:
+            - name: API_URL
+              value: $API_URL
+            - name: GIT_WEB_HOOK_URL
+              value: $GIT_WEB_HOOK_URL
+            - name: BITBUCKET_PUBLIC_KEY
+              value: $BITBUCKET_PUBLIC_KEY
+            - name: BITBUCKET_SECRET_KEY
+              value: $BITBUCKET_SECRET_KEY
+            - name: GITHUB_PUBLIC_KEY
+              value: $GITHUB_PUBLIC_KEY
+            - name: GITHUB_SECRET_KEY
+              value: $GITHUB_SECRET_KEY
+            - name: MONGODB_URL
+              value: $MONGODB_URL
+            - name: REDIS_URL
+              value: $REDIS_URL

@@ -24,6 +24,12 @@ docker run --env-file ./.env -it logicaladdress/pushdeploy-api
 grunt test
 ```
 
+## PRODUCTION DB
+```shell
+# Self managed
+ssh -i /Users/retnan/.ssh/do-pushdeploy-db USER@IP
+```
+
 
 ## CircleCI, Docker, Kube and DigitalOcean
 https://www.digitalocean.com/community/tutorials/how-to-automate-deployments-to-digitalocean-kubernetes-with-circleci
