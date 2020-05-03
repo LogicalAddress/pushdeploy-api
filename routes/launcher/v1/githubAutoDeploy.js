@@ -29,8 +29,9 @@ module.exports = function (app, socketIO) {
 
 		UserApp.findAllBy({
 			repo_id: req.body.repository.id,
-		}).then(async(response)=>{
-			for(let i = 0; i < response.length; i++){
+		}).then(function async(response){
+			var i;
+			for(i = 0; i < response.length; i++){
 				var _app = response[i];
 			// if(req.body.repository){
 				try{
