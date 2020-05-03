@@ -28,7 +28,8 @@ module.exports = function (grunt) {
     jshint: {
       options: {
         multistr: true,
-        esnext: true
+        esnext: true,
+        reporterOutput: ''
       },
       all: ['routes/**/*.js', 'lib/**/*.js', 'models/**/*.js', 'middlewares/**/*.js', 'config/**/*.js','listeners/**/*.js','spec/**/*.js']
     },
