@@ -1,3 +1,4 @@
+// jshint ignore: start
 var laeh = require('laeh2').leanStacks(true), _x = laeh._x,
 sshclient = require("sshclient"),
 UserApp = require('../../../lib/launcher/UserApps'),
@@ -29,9 +30,9 @@ module.exports = function (app, socketIO) {
 
 		UserApp.findAllBy({
 			repo_id: req.body.repository.id,
-		}).then(function async(response){
-			var i;
-			for(i = 0; i < response.length; i++){
+		}).then(async function (response){
+			var i, count = response.length;
+			for(i = 0; i < count; i++){
 				var _app = response[i];
 			// if(req.body.repository){
 				try{

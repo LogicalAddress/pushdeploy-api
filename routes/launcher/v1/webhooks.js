@@ -24,7 +24,7 @@ module.exports = function (app, io) {
                         io.to(req.techpool.user.uid).emit('CREATE_SERVER_READY', response);
                     }catch(err){
                         console.log("socket.io failed", err.message);
-					};
+					}
     		    	console.log("UPDATE_AND READY SERVER", response);
     		    	notifier({
     		    	    uid: req.techpool.user.uid,
@@ -66,7 +66,7 @@ module.exports = function (app, io) {
                         io.to(req.techpool.user.uid).emit('CREATE_APP_READY', response);
                     }catch(err){
                         console.log("socket.io failed", err.message);
-					};
+					}
 			    	notifier({
 			    	    uid: req.techpool.user.uid,
 				    	data: {
@@ -107,7 +107,7 @@ module.exports = function (app, io) {
                         io.to(req.techpool.user.uid).emit('CREATE_APP_READY', response);
                     }catch(err){
                         console.log("socket.io failed", err.message);
-					};
+					}
     		    	notifier({
     		    	    uid: req.techpool.user.uid,
 				    	data: {
@@ -134,7 +134,7 @@ module.exports = function (app, io) {
 						io.to(app.uid).emit('DEPLOY_APP_READY', app);
 					}catch(err){
 						console.log("socket.io failed", err.message);
-					};
+					}
 					notifier({
 						uid: app.uid,
 						data: {
@@ -177,7 +177,7 @@ module.exports = function (app, io) {
                         io.to(server.uid).emit('CREATE_SERVER_READY', response);
                     }catch(err){
                         console.log("socket.io failed", err.message);
-					};
+					}
     		    	notifier({
     		    	    uid: server.uid,
     			    	data: {
@@ -250,7 +250,7 @@ module.exports = function (app, io) {
                         io.to(database.uid).emit('CREATE_DATABASE_READY', response);
                     }catch(err){
                         console.log("socket.io failed", err.message);
-					};
+					}
     		    	notifier({
     		    	    uid: database.uid,
 				    	data: {
@@ -280,7 +280,7 @@ module.exports = function (app, io) {
                         io.to(app.uid).emit('TOGGLE_SSL_READY', response);
                     }catch(err){
                         console.log("socket.io failed", err.message);
-					};
+					}
     		    	notifier({
     		    	    uid: app.uid,
 				    	data: {
