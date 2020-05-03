@@ -16,6 +16,7 @@ grunt
 ```shell
 docker build -t logicaladdress/pushdeploy-api .
 docker push logicaladdress/pushdeploy-api
+docker run --env-file ./.env -it logicaladdress/pushdeploy-api
 ```
 
 ## Running Test Suites

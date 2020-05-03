@@ -30,7 +30,7 @@ module.exports = function (grunt) {
         multistr: true,
         esnext: true
       },
-      all: ['routes/**/*js', 'lib/**/*.js', 'models/**/*.js', 'middlewares/**/*.js', 'config/**/*.js','listeners/**/*.js','spec/**/*.js']
+      all: ['routes/**/*.js', 'lib/**/*.js', 'models/**/*.js', 'middlewares/**/*.js', 'config/**/*.js','listeners/**/*.js','spec/**/*.js']
     },
     watch: {
       options: {

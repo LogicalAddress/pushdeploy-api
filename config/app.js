@@ -12,10 +12,10 @@ var MONGODB_URL = process.env.MONGODB_URL ||
 
 var REDIS_URL = process.env.REDIS_URL || 
       (process.env.REDIS_PASS ? 
-          `redis://${process.env.REDIS_HOST}:${process.env.MONGODB_PORT || '6379'}/${process.env.REDIS_DB || 'pushdeploy'}?password=${process.env.REDIS_PASS}` 
-            : ( process.env.REDIS_DB ? `redis://${process.env.REDIS_HOST}:${process.env.MONGODB_PORT || '6379'}/${process.env.REDIS_DB || 'pushdeploy'}?password=${process.env.REDIS_PASS}` 
-            : ( process.env.REDIS_PASS ? `redis://${process.env.REDIS_HOST}:${process.env.MONGODB_PORT || '6379'}/?password=${process.env.REDIS_PASS}` 
-            : `redis://${process.env.REDIS_HOST}:${process.env.MONGODB_PORT || '6379'}`)));
+          `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || 'pushdeploy'}?password=${process.env.REDIS_PASS}` 
+            : ( process.env.REDIS_DB ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || 'pushdeploy'}?password=${process.env.REDIS_PASS}` 
+            : ( process.env.REDIS_PASS ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}/?password=${process.env.REDIS_PASS}` 
+            : `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}`)));
 
 var config = {
   development: {
