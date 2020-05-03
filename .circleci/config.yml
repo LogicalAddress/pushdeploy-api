@@ -13,6 +13,7 @@ jobs:
           steps:
             - run: npm install
             - run: npm -g install grunt-cli jasmine
+            - run: export MONGODB_URL="mongodb://localhost:27017/pushdeploy" REDIS_URL="redis://localhost:6379"
             - run: grunt test
 workflows:
     build-and-test:

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pushdeploy-api
+  namespace: default
+  labels:
+    app: pushdeploy-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pushdeploy-api
+  template:
+    metadata:
+      labels:
+        app: pushdeploy-api
+    spec:
+      containers:
+        - name: pushdeploy-api
+          image: logicaladdress/pushdeploy-api:latest
+          ports:
+            - containerPort: 80
+              name: http
