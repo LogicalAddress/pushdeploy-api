@@ -10,7 +10,6 @@ storage = multer.memoryStorage(),
 upload = multer({ storage: storage });
 
 module.exports = function (app, io) {
-    
 	app.post('/v1/server/events', Auth, Cred, LogEvent, upload.single('file'), function (req, res, next) {
         console.log("Webhook Received: ", req.body.type);
         res.status(200).json({status: "success", message: "RECV"});
@@ -126,7 +125,31 @@ module.exports = function (app, io) {
                console.log("EVENT", payload, error);
                //TODO: Log
             });
-        }else if(payload.type == "DEPLOY_LOGS"){
+		}else if(payload.type == "DEPLOY_APP_SUCCESS"){
+				UserApp.findOne({
+					server: payload.server_id, 
+					_id: payload.app_id
+				}).then((app)=>{
+					try{
+						io.to(app.uid).emit('DEPLOY_APP_READY', app);
+					}catch(err){
+						console.log("socket.io failed", err.message);
+					};
+					notifier({
+						uid: app.uid,
+						data: {
+							ACTION: "UPDATE_APP",
+							O_REQ: null,
+							MESSAGE: 'APP DEPLOYED',
+							DATA: app
+						}
+					});
+				}).catch((error)=>{
+				   console.log("findOne DEPLOY_APP_SUCCESS App: Empty");
+				   console.log("EVENT", payload, error);
+				   //TODO: Log
+				});
+		}else if(payload.type == "DEPLOY_LOGS"){
 			console.log("=======DEPLOY_LOGS HOOKS=========");
             console.log(req.file, req.body);
         }else if(payload.type == "SERVER_LOGS"){
@@ -142,7 +165,80 @@ module.exports = function (app, io) {
         console.log("General Webhook Received: ", req.body.type);
         res.status(200).json({status: "success", message: "RECV"});
         var payload = req.body;
-        if(payload.type == "CREATE_DATABASE_SUCCESS"){
+        if(payload.type == "CREATE_SERVER_SUCCESS"){
+            UserServer.findOne({
+                _id: payload.server_id
+            }).then((server)=>{
+                server.superuser = payload.superuser;
+                server.state = 'RUNNING';
+			    server.save().then((response)=>{
+					console.log("UPDATE_AND READY SERVER", response);
+					try{
+                        io.to(server.uid).emit('CREATE_SERVER_READY', response);
+                    }catch(err){
+                        console.log("socket.io failed", err.message);
+					};
+    		    	notifier({
+    		    	    uid: server.uid,
+    			    	data: {
+    				    	ACTION: "UPDATE_SERVER",
+    				    	O_REQ: null,
+    				    	MESSAGE: 'RUNNING',
+    				    	DATA: response
+    			    	}
+    		    	});
+    		    	notifier({
+                        uid: server.uid,
+        		    	data: {
+        			    	ACTION: "CREATE_INSTANCE",
+        			    	O_REQ: null,
+        			    	MESSAGE: "READY",
+        			    	DATA: response,
+        		    	}
+        		    });
+			    }).catch((err)=>{
+			    	console.log("SUPER_SERVER_UPDATE Err", err);
+			    });
+            }).catch((error)=>{
+               console.log("findOne Server: Empty");
+               console.log("EVENT", payload, error);
+               //TODO: Log
+            });
+            
+            UserApp.findOne({
+                app_name: 'default',
+                server: payload.server_id
+            }).then((app)=>{
+                app.state = 'RUNNING';
+                app.port = payload.port;
+			    app.save().then((response)=>{
+			    	console.log("UPDATE_APP", response);
+			    	notifier({
+			    	    uid: app.uid,
+				    	data: {
+					    	ACTION: "UPDATE_APP",
+					    	O_REQ: null,
+					    	MESSAGE: "RUNNING",
+					    	DATA: response
+				    	}
+			    	});
+			    	notifier({
+                        uid: app.uid,
+        		    	data: {
+        			    	ACTION: "CREATE_APP",
+        			    	O_REQ: null,
+        			    	MESSAGE: "READY",
+        			    	DATA: response
+        		    	}
+        		    });
+			    }).catch((err)=>{
+			    	console.log("UPDATE_APP Err", err);
+			    });
+            }).catch((error)=>{
+               console.log("findOne App: Empty");
+               console.log("EVENT", payload, error);
+            });
+        }else if(payload.type == "CREATE_DATABASE_SUCCESS"){
             UserDatabase.findOne({
                 server: payload.server_id, 
                 _id: payload.db_id
@@ -202,31 +298,7 @@ module.exports = function (app, io) {
                console.log("EVENT", payload, error);
                //TODO: Log
 			});
-		}else if(payload.type == "DEPLOY_APP_SUCCESS"){
-			UserApp.findOne({
-                server: payload.server_id, 
-                _id: payload.app_id
-            }).then((app)=>{
-				try{
-					io.to(app.uid).emit('DEPLOY_APP_READY', response);
-				}catch(err){
-					console.log("socket.io failed", err.message);
-				};
-				notifier({
-					uid: app.uid,
-					data: {
-						ACTION: "UPDATE_APP",
-						O_REQ: null,
-						MESSAGE: 'SSL TOGGLED',
-						DATA: response
-					}
-				});
-            }).catch((error)=>{
-               console.log("findOne DEPLOY_APP_SUCCESS App: Empty");
-               console.log("EVENT", payload, error);
-               //TODO: Log
-			});
-        }else{
+		}else{
             console.log("UNHANDLED EVENTS", payload);
         }
 	});

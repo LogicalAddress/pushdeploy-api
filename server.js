@@ -27,8 +27,8 @@ require('./config/express')(app, config, io);
 io.on("connection", (socket) => {
   console.log(socket.user.name + " connected");
   socket.emit("connected", "Live updates from pushdeploy is available");
-  socket.join(socket.user._id);
-  // io.to("5eae9a66e3888914a8074a07").emit('CREATE_SERVER_SUCCESS',{
+  socket.join(socket.user.uid);
+  // io.to("5eae9a66e3888914a8074a07").emit('CREATE_SERVER_SUCCESS',{//81a3b76a351519ba6688504872ef8450
   //   action: 'CREATE_SERVER_SUCCESS',
   //   data: {
   //     _id: "128121821212121",
@@ -45,15 +45,12 @@ io.on("connection", (socket) => {
 
 
 // setInterval(() => {
-//   console.log("emitting..");
+//   console.log("emitting..",{io});
 //   io.to("5eae9a66e3888914a8074a07").emit('CREATE_SERVER_SUCCESS', {
-//     action: 'CREATE_SERVER_SUCCESS',
-//     data: {
 //       _id: "128121821212121",
 //       server_name: "Ubuntu System",
 //       status: "RUNNING",
 //       provider: "SOCKET",
 //       ipv4: "192.168.0.1"
-//     }
-//   });
+//     });
 // }, 4000);

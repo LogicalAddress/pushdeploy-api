@@ -5,7 +5,7 @@ var compress = require('compression');
 // var cor = require('../lib/middlewares/cor');
 var cors = require('cors');
 
-module.exports = function(app, config, socketIO) {
+module.exports = function(app, config, io) {
     var env = process.env.NODE_ENV || 'development';
 	app.locals.ENV = env;
 	app.locals.ENV_DEVELOPMENT = env == 'development';
@@ -22,15 +22,15 @@ module.exports = function(app, config, socketIO) {
 		require(middleware)(app);
 	});
 
-	socketIO.use(require('../lib/middlewares/socketAuth'));
+	io.use(require('../lib/middlewares/socketAuth'));
 	
 	var listeners = glob.sync(config.AppRoot + '/listeners/**/*.js');
 	listeners.forEach(function (listener) {
-		require(listener)(app, socketIO);
+		require(listener)(app, io);
 	});
 	
 	var controllers = glob.sync(config.AppRoot + '/routes/**/*.js');
 	controllers.forEach(function (controller) { 
-		require(controller)(app, socketIO);
+		require(controller)(app, io);
 	});
 };
