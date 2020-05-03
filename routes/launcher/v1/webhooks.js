@@ -9,7 +9,7 @@ multer  = require('multer'),
 storage = multer.memoryStorage(),
 upload = multer({ storage: storage });
 
-module.exports = function (app, socketIO) {
+module.exports = function (app, io) {
     
 	app.post('/v1/server/events', Auth, Cred, LogEvent, upload.single('file'), function (req, res, next) {
         console.log("Webhook Received: ", req.body.type);
@@ -21,14 +21,11 @@ module.exports = function (app, socketIO) {
                 server.superuser = payload.superuser;
                 server.state = 'RUNNING';
 			    server.save().then((response)=>{
-                    try{
-                        socketIO.to(req.techpool.user.uid).emit('CREATE_SERVER_SUCCESS', {
-                            action: 'CREATE_SERVER_SUCCESS',
-                            data: response
-                        });
+					try{
+                        io.to(req.techpool.user.uid).emit('CREATE_SERVER_READY', response);
                     }catch(err){
-                        console.log("Socket.IO Transmission failed: ", err.message);
-                    }
+                        console.log("socket.io failed", err.message);
+					};
     		    	console.log("UPDATE_AND READY SERVER", response);
     		    	notifier({
     		    	    uid: req.techpool.user.uid,
@@ -65,7 +62,12 @@ module.exports = function (app, socketIO) {
                 app.state = 'RUNNING';
                 app.port = payload.port;
 			    app.save().then((response)=>{
-			    	console.log("UPDATE_APP", response);
+					console.log("UPDATE_APP", response);
+					try{
+                        io.to(req.techpool.user.uid).emit('CREATE_APP_READY', response);
+                    }catch(err){
+                        console.log("socket.io failed", err.message);
+					};
 			    	notifier({
 			    	    uid: req.techpool.user.uid,
 				    	data: {
@@ -101,7 +103,12 @@ module.exports = function (app, socketIO) {
                 app.state = 'RUNNING';
                 app.port = payload.port;
 			    app.save().then((response)=>{
-    		    	console.log("UPDATE_APP", response);
+					console.log("UPDATE_APP", response);
+					try{
+                        io.to(req.techpool.user.uid).emit('CREATE_APP_READY', response);
+                    }catch(err){
+                        console.log("socket.io failed", err.message);
+					};
     		    	notifier({
     		    	    uid: req.techpool.user.uid,
 				    	data: {
@@ -120,10 +127,11 @@ module.exports = function (app, socketIO) {
                //TODO: Log
             });
         }else if(payload.type == "DEPLOY_LOGS"){
+			console.log("=======DEPLOY_LOGS HOOKS=========");
             console.log(req.file, req.body);
         }else if(payload.type == "SERVER_LOGS"){
+			console.log("=======SERVER_LOGS HOOKS=========");
             console.log(req.file, req.body);
-        
         }else{
             console.log("UNHANDLED EVENTS", payload);
         }
@@ -134,84 +142,21 @@ module.exports = function (app, socketIO) {
         console.log("General Webhook Received: ", req.body.type);
         res.status(200).json({status: "success", message: "RECV"});
         var payload = req.body;
-        if(payload.type == "CREATE_SERVER_SUCCESS"){
-            UserServer.findOne({
-                _id: payload.server_id
-            }).then((server)=>{
-                server.superuser = payload.superuser;
-                server.state = 'RUNNING';
-			    server.save().then((response)=>{
-    		    	console.log("UPDATE_AND READY SERVER", response);
-    		    	notifier({
-    		    	    uid: server.uid,
-    			    	data: {
-    				    	ACTION: "UPDATE_SERVER",
-    				    	O_REQ: null,
-    				    	MESSAGE: 'RUNNING',
-    				    	DATA: response
-    			    	}
-    		    	});
-    		    	notifier({
-                        uid: server.uid,
-        		    	data: {
-        			    	ACTION: "CREATE_INSTANCE",
-        			    	O_REQ: null,
-        			    	MESSAGE: "READY",
-        			    	DATA: response,
-        		    	}
-        		    });
-			    }).catch((err)=>{
-			    	console.log("SUPER_SERVER_UPDATE Err", err);
-			    });
-            }).catch((error)=>{
-               console.log("findOne Server: Empty");
-               console.log("EVENT", payload, error);
-               //TODO: Log
-            });
-            
-            UserApp.findOne({
-                app_name: 'default',
-                server: payload.server_id
-            }).then((app)=>{
-                app.state = 'RUNNING';
-                app.port = payload.port;
-			    app.save().then((response)=>{
-			    	console.log("UPDATE_APP", response);
-			    	notifier({
-			    	    uid: app.uid,
-				    	data: {
-					    	ACTION: "UPDATE_APP",
-					    	O_REQ: null,
-					    	MESSAGE: "RUNNING",
-					    	DATA: response
-				    	}
-			    	});
-			    	notifier({
-                        uid: app.uid,
-        		    	data: {
-        			    	ACTION: "CREATE_APP",
-        			    	O_REQ: null,
-        			    	MESSAGE: "READY",
-        			    	DATA: response
-        		    	}
-        		    });
-			    }).catch((err)=>{
-			    	console.log("UPDATE_APP Err", err);
-			    });
-            }).catch((error)=>{
-               console.log("findOne App: Empty");
-               console.log("EVENT", payload, error);
-            });
-        }else if(payload.type == "CREATE_DATABASE_SUCCESS"){
+        if(payload.type == "CREATE_DATABASE_SUCCESS"){
             UserDatabase.findOne({
                 server: payload.server_id, 
                 _id: payload.db_id
             }).then((database)=>{
                 database.state = 'CREATE_SUCCESS';
 			    database.save().then((response)=>{
-    		    	console.log("UPDATE_DATABASE", response);
+					console.log("UPDATE_DATABASE", response);
+					try{
+                        io.to(database.uid).emit('CREATE_DATABASE_READY', response);
+                    }catch(err){
+                        console.log("socket.io failed", err.message);
+					};
     		    	notifier({
-    		    	    uid: req.techpool.user.uid,
+    		    	    uid: database.uid,
 				    	data: {
 					    	ACTION: "SERVER_UPDATE",
 					    	O_REQ: null,
@@ -234,7 +179,12 @@ module.exports = function (app, socketIO) {
             }).then((app)=>{
                 app.ssl_enabled = !app.ssl_enabled;
 			    app.save().then((response)=>{
-    		    	console.log("UPDATE_APP", response);
+					console.log("UPDATE_APP", response);
+					try{
+                        io.to(app.uid).emit('TOGGLE_SSL_READY', response);
+                    }catch(err){
+                        console.log("socket.io failed", err.message);
+					};
     		    	notifier({
     		    	    uid: app.uid,
 				    	data: {
@@ -251,17 +201,32 @@ module.exports = function (app, socketIO) {
                console.log("findOne TOGGLE_SSL_SUCCESS App: Empty");
                console.log("EVENT", payload, error);
                //TODO: Log
-            });
+			});
+		}else if(payload.type == "DEPLOY_APP_SUCCESS"){
+			UserApp.findOne({
+                server: payload.server_id, 
+                _id: payload.app_id
+            }).then((app)=>{
+				try{
+					io.to(app.uid).emit('DEPLOY_APP_READY', response);
+				}catch(err){
+					console.log("socket.io failed", err.message);
+				};
+				notifier({
+					uid: app.uid,
+					data: {
+						ACTION: "UPDATE_APP",
+						O_REQ: null,
+						MESSAGE: 'SSL TOGGLED',
+						DATA: response
+					}
+				});
+            }).catch((error)=>{
+               console.log("findOne DEPLOY_APP_SUCCESS App: Empty");
+               console.log("EVENT", payload, error);
+               //TODO: Log
+			});
         }else{
-            /*
-            //=====AUTO DEPLOY=====NOT-IMPLEMENTED YET
-            { type: 'DEPLOY_APP_SUCCESS',
-              superuser: 'ubuntu',
-              server_id: '5ead6a41cd89a712cd7e8c7a',
-              app_name: 'osofia.evas.com.ng',
-              app_id: '5eadd3efd88ae50df1a7c736'
-            }
-            */
             console.log("UNHANDLED EVENTS", payload);
         }
 	});

@@ -28,13 +28,9 @@ var doit = function(server, retryAttempts, req){
             console.log("App Created", app, "setting up Server With Default App");
             setupEc2(server).then((status)=>{
                 try{
-                    req.io.to(server.uid).emit('CREATE_SERVER_SUCCESS', {
-                        action: 'CREATE_SERVER_SUCCESS',
-                        data: server,
-                        message: 'Create server success'
-                    });
+                    req.io.to(server.uid).emit('CREATE_SERVER_SUCCESS', server);
                 }catch(err){
-                    console.log("Socket.IO Transmission failed: ", err.message);
+                    console.log("socket.io failed", err.message);
                 }
     	    	notifier({
     	    	    uid: server.uid,
@@ -65,13 +61,9 @@ var doit = function(server, retryAttempts, req){
                 if(!retryAttempts){
                     console.log("You should undo everything");
                     try{
-                        req.io.to(server.uid).emit('CREATE_SERVER_FAILED', {
-                            action: 'CREATE_SERVER_FAILED',
-                            data: server,
-                            message: 'Create server failed'
-                        });
+                        req.io.to(server.uid).emit('CREATE_SERVER_FAILED', server);
                     }catch(err){
-                        console.log("Socket.IO Transmission failed in setup_server_with_defaultapp.js: ", err.message);
+                        console.log("socket.io failed", err.message);
                     };
                     return;
                 }
