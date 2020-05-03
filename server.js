@@ -2,6 +2,7 @@ var config = require('./config/app');
 var express = require('express');
 const redis = require('socket.io-redis');
 var mongoose = require('mongoose');
+const fs = require('fs'); 
 // mongoose.Promise = require('bluebird');
 
 mongoose.connect(config.mongoStorage.url, {
