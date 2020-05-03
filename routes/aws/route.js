@@ -22,8 +22,9 @@ module.exports = function (app, socketIO) {
             provider: payload.provider || 'aws',
             meta: JSON.stringify(payload)//JSON.stringify(bigPayload)
         }).then(function(server){
-        	console.log("CREATE SERVER:", server);
-			Aws.createInstance(payload, req.techpool.credentials, server).then((result)=>{
+			console.log("CREATE SERVER:", server);
+			req.io = socketIO;
+			Aws.createInstance(payload, req.techpool.credentials, server, req).then((result)=>{
 				console.log("DEBUG", "Aws.createInstance", result);
 				var response = Object.assign(server.toObject(), {instanceId: result.InstanceId, aws_reservation_id: result.raw.ReservationId});
 				console.log("Response", response);

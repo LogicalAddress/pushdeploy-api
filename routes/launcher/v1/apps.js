@@ -18,6 +18,7 @@ module.exports = function (app, socketIO) {
 	});
 	
 	app.post('/v1/app/create', Auth, refreshToken, Cred, (req, res, next) => {
+		req.io = socketIO;
 		Servers.findOne({
 			uid: req.techpool.user.uid, 
 			_id: req.body.server

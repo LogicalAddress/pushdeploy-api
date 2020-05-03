@@ -22,7 +22,7 @@ module.exports = function (app, socketIO) {
                 server.state = 'RUNNING';
 			    server.save().then((response)=>{
                     try{
-                        socketIO.to(req.techpool.user.uid).emit({
+                        socketIO.to(req.techpool.user.uid).emit('CREATE_SERVER_SUCCESS', {
                             action: 'CREATE_SERVER_SUCCESS',
                             data: response
                         });

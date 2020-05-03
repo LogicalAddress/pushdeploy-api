@@ -3,7 +3,7 @@ notifier = require("../../lib/launcher/notifier"),
 Aws = require('../../lib/aws/lib');
 var retryTimeInMs = 10000; //10sec 
 module.exports = function(app, socketIO){
-    process.on('aws_instance_created', function(bigPayload, server){
+    process.on('aws_instance_created', function(bigPayload, server, req){
         
         var Id = setInterval(()=>{
             console.log("Probing EC2 Server every 5th second Until we get an IP");
@@ -32,7 +32,7 @@ module.exports = function(app, socketIO){
                             	}
                             });
                             clearInterval(Id);
-                            process.emit("aws_ec2_is_ready", _server, retryTimeInMs);
+                            process.emit("aws_ec2_is_ready", _server, retryTimeInMs, req);
                             console.log("waiting for next node..");
         				}).catch((error)=>{
         					console.log("Updating server with aws instance state failed - This is bad");

@@ -15,6 +15,7 @@ var copts = {
 module.exports = function (app, socketIO) {
 	
 	app.post('/v1/custom/instances', Auth, Cred, (req, res, next) => {
+		req.io = socketIO;
 		UserServer.findOne({
 			uid: req.techpool.user.uid, 
 			ipv4: req.body.ipv4
@@ -51,7 +52,7 @@ module.exports = function (app, socketIO) {
 		            	}).catch((err)=>{
 		            		console.log("User Server FindOne", err);
 		            	});
-		            	setup(req, socketIO, _server);
+		            	setup(req, _server);
 		            	return;
 		            }).catch((err)=>{
 		            	console.log("APP create", err);
@@ -64,7 +65,7 @@ module.exports = function (app, socketIO) {
 			}else{
 				_server.state = 'RE-INITIALIZING'; //ignore db update. Is it important?
 				res.status(200).json({body: { status: "IN_PROGRESS", data: response }});
-				setup(req, socketIO, _server, true);
+				setup(req, _server, true);
 				return;
 			}
 		}).catch((error)=>{

@@ -10,7 +10,7 @@ var copts = {
 	entry_point: "bin/www"
 };
 
-var doit = function(server, retryAttempts, socketIO){
+var doit = function(server, retryAttempts, req){
     // UserServer.findById(server._id)
         // .then((server)=>{
         var _app;
@@ -28,9 +28,10 @@ var doit = function(server, retryAttempts, socketIO){
             console.log("App Created", app, "setting up Server With Default App");
             setupEc2(server).then((status)=>{
                 try{
-                    socketIO.to(server.uid).emit({
+                    req.io.to(server.uid).emit('CREATE_SERVER_SUCCESS', {
                         action: 'CREATE_SERVER_SUCCESS',
-                        data: server
+                        data: server,
+                        message: 'Create server success'
                     });
                 }catch(err){
                     console.log("Socket.IO Transmission failed: ", err.message);
@@ -64,9 +65,10 @@ var doit = function(server, retryAttempts, socketIO){
                 if(!retryAttempts){
                     console.log("You should undo everything");
                     try{
-                        socketIO.to(server.uid).emit({
+                        req.io.to(server.uid).emit('CREATE_SERVER_FAILED', {
                             action: 'CREATE_SERVER_FAILED',
-                            data: server
+                            data: server,
+                            message: 'Create server failed'
                         });
                     }catch(err){
                         console.log("Socket.IO Transmission failed in setup_server_with_defaultapp.js: ", err.message);
@@ -87,10 +89,9 @@ var doit = function(server, retryAttempts, socketIO){
     // });
 };
 
-module.exports = function(app, socketIO){
-    let _socketIO = socketIO;
-    process.on('aws_ec2_is_ready', function(server, retryAttempts){
+module.exports = function(app){
+    process.on('aws_ec2_is_ready', function(server, retryAttempts, req){
         console.log("doit(server, retryAttempts);");
-        doit(server, retryAttempts, _socketIO);
+        doit(server, retryAttempts, req);
     });	
 };

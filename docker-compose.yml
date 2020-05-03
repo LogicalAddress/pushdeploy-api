@@ -1,6 +1,6 @@
 version: "2"
 services:
-  web:
+  api:
     env_file:
     - .env
     build: .
@@ -8,11 +8,14 @@ services:
     - "8080:8080"
     depends_on:
     - mongo
+    - redis
   mongo:
     image: mongo
-    ports:
+    ports: 
     - "27017:27017"
     volumes:
     - data-volume:/data/db
+  redis:
+    image: "redis:latest"
 volumes:
   data-volume:
