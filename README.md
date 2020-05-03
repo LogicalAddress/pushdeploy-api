@@ -24,6 +24,10 @@ docker run --env-file ./.env -it logicaladdress/pushdeploy-api
 grunt test
 ```
 
+
+## CircleCI, Docker, Kube and DigitalOcean
+https://www.digitalocean.com/community/tutorials/how-to-automate-deployments-to-digitalocean-kubernetes-with-circleci
+
 ## Node Virtual Environment Manager
 https://github.com/ekalinin/nodeenv`
 
