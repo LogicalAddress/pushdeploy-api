@@ -30,7 +30,13 @@ grunt test
 ssh -i /Users/retnan/.ssh/do-pushdeploy-db USER@IP
 ```
 
+## Load Balancer
+```sh
+open http://$(kubectl get service pushdeploy-api --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}")
 
+# or get the external IP
+kubectl get services
+```
 ## CircleCI, Docker, Kube and DigitalOcean
 https://www.digitalocean.com/community/tutorials/how-to-automate-deployments-to-digitalocean-kubernetes-with-circleci
 

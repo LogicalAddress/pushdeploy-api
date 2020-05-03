@@ -3,6 +3,7 @@ var express = require('express');
 const redis = require('socket.io-redis');
 var mongoose = require('mongoose');
 // mongoose.Promise = require('bluebird');
+const { URL } = require('url');
 
 mongoose.connect(config.mongoStorage.url, {
   useMongoClient: true,
@@ -20,7 +21,7 @@ var app = express();
 
 
 var io = require('socket.io').listen(app.listen(config.port, config.IP));
-io.adapter(redis(config.redis.url, {tls: {}}));
+io.adapter(redis(config.redis.url, {tls: { servername: new URL(config.redis.url).hostname}}));
 require('./config/express')(app, config, io);
 
 
