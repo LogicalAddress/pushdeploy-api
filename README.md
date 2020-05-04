@@ -33,6 +33,12 @@ export FLUENT_PAPERTRAIL_HOST=logsN.papertrailapp.com FLUENT_PAPERTRAIL_PORT=NNN
 kube apply -f kube/settings/
 ```
 
+
+## DOCKET PRODUCTION
+```sh
+kubectl port-forward pods/pushdeploy-api-64458979d-shk4c 8080:8080
+```
+
 ## PRODUCTION DB
 ```shell
 # Self managed
