@@ -19,7 +19,7 @@ spec:
         - name: pushdeploy-api
           image: logicaladdress/pushdeploy-api:$COMMIT_SHA1
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: http
           env:
             - name: API_URL
