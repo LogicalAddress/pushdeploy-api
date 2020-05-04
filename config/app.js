@@ -25,7 +25,7 @@ var config = {
     AppRoot: AppRoot,
     PoolSize: 1000000000,
     port: process.env.PORT || 8080,
-    IP: process.env.IP || '127.0.0.1',
+    IP: process.env.IP || '0.0.0.0',
     mongoStorage: {
       url: MONGODB_URL,
     },
