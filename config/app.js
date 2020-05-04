@@ -69,6 +69,12 @@ var config = {
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
     },
+    payment: {
+      stripeKey: process.env.STRIPE_PUBLIC_KEY,
+      paystackKey: process.env.PAYSTACK_PUBLIC_KEY,
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+      paystackSecretKey: process.env.PAYSTACK_SECRET_KEY
+    },
     OAuth: {
       bitbucket:{
         publicKey: process.env.BITBUCKET_PUBLIC_KEY,
@@ -97,6 +103,12 @@ var config = {
     ClientSetting: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY,
       paystackKey: process.env.PAYSTACK_PUBLIC_KEY,
+    },
+    payment: {
+      stripeKey: process.env.STRIPE_PUBLIC_KEY,
+      paystackKey: process.env.PAYSTACK_PUBLIC_KEY,
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+      paystackSecretKey: process.env.PAYSTACK_SECRET_KEY
     },
     OAuth: {
       bitbucket:{
@@ -128,6 +140,12 @@ var config = {
       paystackKey: process.env.PAYSTACK_PUBLIC_KEY,
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
+    },
+    payment: {
+      stripeKey: process.env.STRIPE_PUBLIC_KEY,
+      paystackKey: process.env.PAYSTACK_PUBLIC_KEY,
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+      paystackSecretKey: process.env.PAYSTACK_SECRET_KEY
     },
     OAuth: {
       bitbucket:{
