@@ -28,7 +28,9 @@ grunt test
 ## Kube Apply General Setttings
 ```sh
 export FLUENT_PAPERTRAIL_HOST=logsN.papertrailapp.com FLUENT_PAPERTRAIL_PORT=NNNN && \
-    kube apply -f kube-settings/
+    kube apply -f kube/fluentd-daemonset-papertrail.yaml
+
+kube apply -f kube/settings/
 ```
 
 ## PRODUCTION DB
