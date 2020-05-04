@@ -22,7 +22,6 @@ if(process.env.NODE_ENV == 'development' ||
 }else{
   let caCert = fs.readFileSync("./redis-pushdeploy.cert");
   let caKey = fs.readFileSync('redis-pushdeploy.key');
-  console.log({PORT: config.port});
   io = require('socket.io').listen(app.listen(config.port));
   io.adapter(redis(config.redis.url, {tls: { cert: caCert, key: caKey}}));
 }
