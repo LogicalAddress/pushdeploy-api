@@ -21,7 +21,9 @@ var SubscriptionSchema = new Schema({
 	plan: {type: String, default: ''},
 	currency: {type: String, default: 'USD'},
 	raw: String,
-	
+	customerId: {type: String, index: true},
+	subscription_created: { type: Boolean, default: false},
+	subscriptionId: {type: String, index: true},
 	created_at: { type: Date, default: Date.now},
 	updated_at: { type: Date, default: Date.now}
 });
