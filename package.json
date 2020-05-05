@@ -47,6 +47,7 @@
     "socket.io-redis": "^5.2.0",
     "ssh2": "^0.6.1",
     "sshclient": "0.0.4",
+    "stripe": "^8.49.0",
     "underscore": "^1.8.3",
     "ursa": "^0.9.4",
     "xml2json": "^0.11.2"

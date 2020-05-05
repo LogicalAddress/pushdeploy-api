@@ -11,6 +11,14 @@ var UserSchema = new Schema({
 		unique: true,
 		required : true
 	},
+	stripeCustomerId: {
+		type: String,
+		index: true,
+	},
+	last_subscriptionId: {
+		type: String,
+		index: true,
+	},
 	userType: { type: String, default: 'customer'},
 	mobileNumber: {type: String, index: true, unique: true, required: true }, 
 	email: {type: String, index: true, unique: true, required: true }, 
@@ -18,7 +26,7 @@ var UserSchema = new Schema({
 	name: {type: String, required: true},
 	enabled: { type: Boolean, default: true},
 	currency: { type: String, default: 'USD' },
-	
+	noSubscription: { type: Boolean, default: true },
 	primaryPlan: { type: String, default: '' },
 	
 	created_at: { type: Date, default: Date.now},

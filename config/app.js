@@ -33,10 +33,16 @@ var config = {
       url: REDIS_URL,
     },
     ClientSetting: {
-      stripeKey: process.env.STRIPE_PUBLIC_KEY || 'pk_test_U5qVNRp0u0u1VxqnptEbz9WK',
+      stripeKey: process.env.STRIPE_PUBLIC_KEY || 'pk_test_XBKJelDADCVD0ApW1Cx9pK0v',
       paystackKey: process.env.PAYSTACK_PUBLIC_KEY || 'pk_test_8eb0c568b925399e7192843b4c8a20bbb80a9295',
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
+    },
+    payment: {
+      stripeKey: process.env.STRIPE_PUBLIC_KEY || 'pk_test_XBKJelDADCVD0ApW1Cx9pK0v',
+      paystackKey: process.env.PAYSTACK_PUBLIC_KEY,
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY || 'sk_test_J35O2h0MYmbkwau6JvOZTH3Y',
+      paystackSecretKey: process.env.PAYSTACK_SECRET_KEY
     },
     OAuth: {
       bitbucket:{
