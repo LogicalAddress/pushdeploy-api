@@ -38,8 +38,6 @@ spec:
               value: $MONGODB_URL
             - name: REDIS_URL
               value: $REDIS_URL
-            - name: NODE_ENV
-              value: $NODE_ENV
             - name: STRIPE_PUBLIC_KEY
               value: $STRIPE_PUBLIC_KEY
             - name: STRIPE_SECRET_KEY
