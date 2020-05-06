@@ -5,12 +5,12 @@ metadata:
   namespace: default
   labels:
     app: pushdeploy-api
-  # annotations:
-  #   service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "false"
-  #   service.beta.kubernetes.io/do-loadbalancer-protocol: "http"
-  #   service.beta.kubernetes.io/do-loadbalancer-algorithm: "round_robin"
-  #   service.beta.kubernetes.io/do-loadbalancer-tls-ports: "443"
-  #   service.beta.kubernetes.io/do-loadbalancer-certificate-id: "17099136-747f-41fc-9583-7ab665e350bc"
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "false"
+    service.beta.kubernetes.io/do-loadbalancer-protocol: "http"
+    service.beta.kubernetes.io/do-loadbalancer-algorithm: "round_robin"
+    service.beta.kubernetes.io/do-loadbalancer-tls-ports: "443"
+    service.beta.kubernetes.io/do-loadbalancer-certificate-id: "cdb9c349-3048-4377-a24e-2f14dd50d65e"
 spec:
   type: LoadBalancer
   ports:
@@ -18,9 +18,9 @@ spec:
       targetPort: 8080
       name: http
       protocol: TCP
-    # - name: https
-    #   protocol: TCP
-    #   port: 443
-    #   targetPort: 8080
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8080
   selector:
     app: pushdeploy-api
