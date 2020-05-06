@@ -16,6 +16,15 @@ module.exports = function (app, socketIO) {
 		    res.status(500).json({status: 'failure', message: error});
 		});			
 	});
+
+
+	app.get('/v1/apps/:id', Auth, function (req, res, next) {
+		App.findOne({uid: req.techpool.user.uid, _id: req.params.id}).then((record)=>{
+			res.status(200).json({body: { status: "success", data: record}});
+		}).catch((error)=>{
+		    res.status(500).json({status: 'failure', message: error});
+		});			
+	});
 	
 	app.post('/v1/app/create', Auth, refreshToken, Cred, (req, res, next) => {
 		req.io = socketIO;
@@ -61,7 +70,7 @@ module.exports = function (app, socketIO) {
 		            		data:{
 						    	ACTION: "CREATE_APP",
 						    	O_REQ: req.body,
-						    	RESPONSE: app
+								DATA: app,
 		            		}
 		            	});
 		            	console.log("calling appSetup");

@@ -37,7 +37,7 @@ module.exports = function (app, socketIO) {
 			// if(req.body.repository){
 				try{
 					console.log("deploying..", _app);
-					let credentials = await userAuthCredential._findByUID(_app.uid);
+					let credentials = await userAuthCredential.findByUID(_app.uid);
 					opts.host = _app.server.ipv4;
 					opts.username = _app.server.username || 'ubuntu';
 					// opts.privateKey = req.techpool.credentials.custom_private_key;

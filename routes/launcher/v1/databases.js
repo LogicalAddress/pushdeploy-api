@@ -47,7 +47,7 @@ module.exports = function (app, socketIO) {
             		data:{
 				    	ACTION: "CREATE_DATABASE",
 				    	O_REQ: req.body,
-				    	RESPONSE: database
+				    	DATA: database
             		}
             	});
             	setup(req, _server, database);

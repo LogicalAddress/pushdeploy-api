@@ -42,6 +42,7 @@ var UserAppSchema = new Schema({
 	auto_deploy: {type: Boolean, default: false},
 	
 	isPublic: {type: Boolean, default: true},
+	lock: { type: Boolean, default: true },
 	
 	created_at: { type: Date, default: Date.now},
 	updated_at: { type: Date, default: Date.now}

@@ -35,7 +35,7 @@ var config = {
     ClientSetting: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY || 'pk_test_XBKJelDADCVD0ApW1Cx9pK0v',
       paystackKey: process.env.PAYSTACK_PUBLIC_KEY || 'pk_test_8eb0c568b925399e7192843b4c8a20bbb80a9295',
-      stripePlanA: process.env.STRIPE_PLAN_A || 'Pushdeploy-test',
+      stripePlanA: process.env.STRIPE_PLAN_A || 'pushdeploy-test',
       stripePlanADesc: 'Deploy test $1/Month',
       stripePlanB: process.env.STRIPE_PLAN_B || 'plan_HDd9VVjQJAYNmu',
       stripePlanBDesc: 'Deploy Pro $4.99/Month',

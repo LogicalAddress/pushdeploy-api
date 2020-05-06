@@ -11,3 +11,12 @@
     - https://github.com/sanketbajoria/scullog
 - should we let git pull fail? or leave it quitely as it currently is?
 - Add support for shell-in-a-box
+
+
+
+omit these on exits
+
+- ["-custom_private_key", "-db_root_password",
+		"-github_token", "-aws_secret_key","-aws_KeyFingerprint", "-aws_KeyMaterial",
+	"-aws_KeyName", "-aws_SecurityGroupId", "-bitbucket_token", "-bitbucket_refresh_token",
+	"-digitalocean_token", "-digitalocean_refresh_token","-linode_token", "-linode_refresh_token"])
