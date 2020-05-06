@@ -22,13 +22,13 @@ module.exports = function (app, io) {
 				server.lock = false;
 			    server.save().then((response)=>{
 					try{
-                        io.to(req.techpool.user.uid).emit('CREATE_SERVER_READY', response);
+                        io.to(server.uid).emit('CREATE_SERVER_READY', response);
                     }catch(err){
                         console.log("socket.io failed", err.message);
 					}
     		    	console.log("UPDATE_AND READY SERVER", response);
     		    	notifier({
-						uid: req.techpool.user.uid,
+						uid: server.uid,
 						status: 'success',
     			    	data: {
     				    	ACTION: "UPDATE_SERVER",
@@ -38,7 +38,7 @@ module.exports = function (app, io) {
     			    	}
     		    	});
     		    	notifier({
-						uid: req.techpool.user.uid,
+						uid: server.uid,
 						status: 'success',
         		    	data: {
         			    	ACTION: "CREATE_INSTANCE",
@@ -67,12 +67,12 @@ module.exports = function (app, io) {
 			    app.save().then((response)=>{
 					console.log("UPDATE_APP", response);
 					try{
-                        io.to(req.techpool.user.uid).emit('CREATE_APP_READY', response);
+                        io.to(app.uid).emit('CREATE_APP_READY', response);
                     }catch(err){
                         console.log("socket.io failed", err.message);
 					}
 			    	notifier({
-						uid: req.techpool.user.uid,
+						uid: app.uid,
 						status: 'success',
 				    	data: {
 					    	ACTION: "UPDATE_APP",
@@ -82,7 +82,7 @@ module.exports = function (app, io) {
 				    	}
 			    	});
 			    	notifier({
-						uid: req.techpool.user.uid,
+						uid: app.uid,
 						status: 'success',
         		    	data: {
         			    	ACTION: "CREATE_APP",
@@ -111,12 +111,12 @@ module.exports = function (app, io) {
 			    app.save().then((response)=>{
 					console.log("UPDATE_APP", response);
 					try{
-                        io.to(req.techpool.user.uid).emit('CREATE_APP_READY', response);
+                        io.to(app.uid).emit('CREATE_APP_READY', response);
                     }catch(err){
                         console.log("socket.io failed", err.message);
 					}
     		    	notifier({
-						uid: req.techpool.user.uid,
+						uid: app.uid,
 						status: 'success',
 				    	data: {
 					    	ACTION: "SERVER_UPDATE",

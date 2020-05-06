@@ -38,7 +38,7 @@ module.exports = function (app, socketIO) {
 				return;
 			}
 			App.findOne({
-				uid: req.techpool.user.uid, 
+				uid: _server.uid, 
 				server: req.body.server,
 				/*differ multiple app different template to v10 if we ever get there*/
 				app_name: req.body.app_name.trim(), 
@@ -50,7 +50,7 @@ module.exports = function (app, socketIO) {
 					template_variation differ for what it's already there
 					*/
 		            App.create({
-		            	uid: req.techpool.user.uid,
+		            	uid: _server.uid,
 		            	server: req.body.server,
 		            	app_name: req.body.app_name.trim(),
 		            	app_repository: req.body.app_repository.trim(),
@@ -66,7 +66,7 @@ module.exports = function (app, socketIO) {
 		            	_app = app;
 		            	res.status(200).json({body: { status: "IN_PROGRESS", data: app }});
 		            	notifier({
-		            		uid: req.techpool.user.uid,
+		            		uid: _app.uid,
 		            		data:{
 						    	ACTION: "CREATE_APP",
 						    	O_REQ: req.body,

@@ -11,7 +11,7 @@ module.exports = function (app) {
 	// 	 .then((record)=>{
 	// 		res.status(200).json({body: { status: "success", data: "ok"}});
 	// 		subModel.create({
-	// 		    uid: req.techpool.user.uid,
+	// 		    uid: record.uid,
 	// 		    raw: JSON.stringify(req.body),
 	// 		    name: req.techpool.user.name,
 	// 		    plan: req.body.selectedPlan,
