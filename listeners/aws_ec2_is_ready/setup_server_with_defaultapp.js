@@ -33,7 +33,8 @@ var doit = function(server, retryAttempts, req){
                     console.log("socket.io failed", err.message);
                 }
     	    	notifier({
-    	    	    uid: server.uid,
+                    uid: server.uid,
+                    status: 'success',
     		    	data: {
     			    	ACTION: "INIT_AWS_SERVER_WITH_DEFAULT_APP",
     			    	O_REQ: null,
@@ -42,7 +43,8 @@ var doit = function(server, retryAttempts, req){
     		    	}
     	    	});
     	    	notifier({
-            		uid: server.uid,
+                    uid: server.uid,
+                    status: 'failed',
             		data:{
     			    	ACTION: "CREATE_APP",
     			    	O_REQ: null,

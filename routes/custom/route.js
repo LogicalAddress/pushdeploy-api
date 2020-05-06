@@ -43,10 +43,12 @@ module.exports = function (app, socketIO) {
 		            	.then((_server)=>{
 		            		res.status(200).json({body: { status: "IN_PROGRESS", data: _server }});
 		            		notifier({
+								uid: _server.uid || '',
 			            		data:{
 							    	ACTION: "CREATE_INSTANCE",
 							    	O_REQ: req.body,
-							    	MESSAGE: "INITIALIZING"
+									MESSAGE: "INITIALIZING",
+									DATA: _server
 			            		}
 			            	});
 		            	}).catch((err)=>{

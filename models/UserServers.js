@@ -33,6 +33,8 @@ var UserServerSchema = new Schema({
 	aws_region: { type: String },
 	
 	
+	lock: { type: Boolean, default: true },
+	
 	apps: [{
 	    type: Schema.ObjectId,
 	    ref: 'user_app',

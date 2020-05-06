@@ -24,6 +24,8 @@ module.exports = function(app, socketIO){
         				_server.save().then((response)=>{
         					console.log("Updating server with aws instance state");
         					notifier({
+								uid: _server.uid || '',
+								status: 'success',
                             	data: {
                         	    	ACTION: "CREATE_AWS_SERVER",
                         	    	O_REQ: bigPayload.payload,

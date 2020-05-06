@@ -28,7 +28,7 @@ module.exports = function (app, socketIO) {
 				console.log("DEBUG", "Aws.createInstance", result);
 				var response = Object.assign(server.toObject(), {instanceId: result.InstanceId, aws_reservation_id: result.raw.ReservationId});
 				console.log("Response", response);
-	    		res.status(200).json({body: { status: "IN_PROGRESS", data: response}});
+	    		res.status(200).json({body: { status: "IN_PROGRESS", data: server}});
 	    	}).catch((error)=>{
 	    		console.log("RunInstance Error DEBUG", "Aws.createInstance", error);
 	    		console.log("Undo Create Server etal");

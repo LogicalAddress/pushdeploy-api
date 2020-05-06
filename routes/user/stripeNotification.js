@@ -2,6 +2,7 @@ var User = require("../../lib/User");
 var subModel = require("../../lib/launcher/Subscriptions");
 var Payments = require("../../lib/launcher/Payments");
 var config = require("../../config/app");
+var notifier = require('../../lib/launcher/notifier');
 
 module.exports = function (app) {
 	app.post('/stripe/notification', async function (req, res, next) {
@@ -39,6 +40,16 @@ module.exports = function (app) {
                     return res.status(200).send("OK");
                 }, 3000);
             }catch(error){
+                notifier({
+					status: 'system error',
+					error: error.message,
+					file: __filename,
+					data: {
+						ACTION: "PAYMENT",
+						MESSAGE: 'SUBSCRIPTION PROBLEM',
+						DATA: req.body
+					}
+				});
                 return res.status(500).json({status: 'failure', message: error.message});
             };
         }else
@@ -55,6 +66,16 @@ module.exports = function (app) {
                 }});
                 res.status(200).send("OK");
             }catch(error){
+                notifier({
+					status: 'system error',
+					error: error.message,
+					file: __filename,
+					data: {
+						ACTION: "PAYMENT",
+						MESSAGE: 'SUBSCRIPTION PROBLEM',
+						DATA: req.body
+					}
+				});
                 return res.status(500).json({status: 'failure', message: error.message});
             }
         }else if(req.body.type === 'customer.subscription.deleted'){
@@ -64,6 +85,16 @@ module.exports = function (app) {
                 query: {stripeCustomerId: req.body.data.object.customer}});
                 return res.status(200).send("OK");
             }catch(error){
+                notifier({
+					status: 'system error',
+					error: error.message,
+					file: __filename,
+					data: {
+						ACTION: "PAYMENT",
+						MESSAGE: 'SUBSCRIPTION PROBLEM',
+						DATA: req.body
+					}
+				});
                 return res.status(500).json({status: 'failure', message: error.message});
             };
         }else if(req.body.type === 'customer.created'){
@@ -73,6 +104,16 @@ module.exports = function (app) {
                 query: {email: req.body.data.object.email}});
                 return res.status(200).send("OK");
             }catch(error){
+                notifier({
+					status: 'system error',
+					error: error.message,
+					file: __filename,
+					data: {
+						ACTION: "PAYMENT",
+						MESSAGE: 'SUBSCRIPTION PROBLEM',
+						DATA: req.body
+					}
+				});
                 return res.status(500).json({status: 'failure', message: error.message});
             };
         }else if(req.body.type === 'charge.succeeded'){
@@ -95,6 +136,16 @@ module.exports = function (app) {
                 }});
                 res.status(200).send("OK");
             }catch(error){
+                notifier({
+					status: 'system error',
+					error: error.message,
+					file: __filename,
+					data: {
+						ACTION: "PAYMENT",
+						MESSAGE: 'SUBSCRIPTION PROBLEM',
+						DATA: req.body
+					}
+				});
                 return res.status(500).json({status: 'failure', message: error.message});
             }
         }else if(req.body.type === 'charge.pending'){
@@ -136,8 +187,28 @@ module.exports = function (app) {
                     query: {
                         chargeReference: req.body.data.object.id
                 }});
+                notifier({
+					status: 'system error',
+					error: "payment problem",
+					file: __filename,
+					data: {
+						ACTION: "PAYMENT",
+						MESSAGE: 'SUBSCRIPTION PROBLEM',
+						DATA: req.body
+					}
+				});
                 res.status(200).send("OK");
             }catch(error){
+                notifier({
+					status: 'system error',
+					error: error.message,
+					file: __filename,
+					data: {
+						ACTION: "PAYMENT",
+						MESSAGE: 'SUBSCRIPTION PROBLEM',
+						DATA: req.body
+					}
+				});
                 return res.status(500).json({status: 'failure', message: error.message});
             }
         }else{

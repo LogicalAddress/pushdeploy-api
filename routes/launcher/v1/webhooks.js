@@ -18,7 +18,8 @@ module.exports = function (app, io) {
             UserServer.findOne({uid: req.techpool.user.uid, _id: payload.server_id})
             .then((server)=>{
                 server.superuser = payload.superuser;
-                server.state = 'RUNNING';
+				server.state = 'RUNNING';
+				server.lock = false;
 			    server.save().then((response)=>{
 					try{
                         io.to(req.techpool.user.uid).emit('CREATE_SERVER_READY', response);
@@ -27,7 +28,8 @@ module.exports = function (app, io) {
 					}
     		    	console.log("UPDATE_AND READY SERVER", response);
     		    	notifier({
-    		    	    uid: req.techpool.user.uid,
+						uid: req.techpool.user.uid,
+						status: 'success',
     			    	data: {
     				    	ACTION: "UPDATE_SERVER",
     				    	O_REQ: null,
@@ -36,7 +38,8 @@ module.exports = function (app, io) {
     			    	}
     		    	});
     		    	notifier({
-                        uid: req.techpool.user.uid,
+						uid: req.techpool.user.uid,
+						status: 'success',
         		    	data: {
         			    	ACTION: "CREATE_INSTANCE",
         			    	O_REQ: null,
@@ -58,7 +61,8 @@ module.exports = function (app, io) {
                 app_name: payload.app_name,
                 server: payload.server_id
             }).then((app)=>{
-                app.state = 'RUNNING';
+				app.state = 'RUNNING';
+				app.lock = false;
                 app.port = payload.port;
 			    app.save().then((response)=>{
 					console.log("UPDATE_APP", response);
@@ -68,7 +72,8 @@ module.exports = function (app, io) {
                         console.log("socket.io failed", err.message);
 					}
 			    	notifier({
-			    	    uid: req.techpool.user.uid,
+						uid: req.techpool.user.uid,
+						status: 'success',
 				    	data: {
 					    	ACTION: "UPDATE_APP",
 					    	O_REQ: null,
@@ -77,7 +82,8 @@ module.exports = function (app, io) {
 				    	}
 			    	});
 			    	notifier({
-                        uid: req.techpool.user.uid,
+						uid: req.techpool.user.uid,
+						status: 'success',
         		    	data: {
         			    	ACTION: "CREATE_APP",
         			    	O_REQ: null,
@@ -100,7 +106,8 @@ module.exports = function (app, io) {
                 _id: payload.app_id //should we want to allow multiple app name (diff template) per server
             }).then((app)=>{
                 app.state = 'RUNNING';
-                app.port = payload.port;
+				app.port = payload.port;
+				app.lock = false;
 			    app.save().then((response)=>{
 					console.log("UPDATE_APP", response);
 					try{
@@ -109,7 +116,8 @@ module.exports = function (app, io) {
                         console.log("socket.io failed", err.message);
 					}
     		    	notifier({
-    		    	    uid: req.techpool.user.uid,
+						uid: req.techpool.user.uid,
+						status: 'success',
 				    	data: {
 					    	ACTION: "SERVER_UPDATE",
 					    	O_REQ: null,
@@ -137,6 +145,7 @@ module.exports = function (app, io) {
 					}
 					notifier({
 						uid: app.uid,
+						status: 'success',
 						data: {
 							ACTION: "UPDATE_APP",
 							O_REQ: null,
@@ -170,7 +179,8 @@ module.exports = function (app, io) {
                 _id: payload.server_id
             }).then((server)=>{
                 server.superuser = payload.superuser;
-                server.state = 'RUNNING';
+				server.state = 'RUNNING';
+				server.lock = false;
 			    server.save().then((response)=>{
 					console.log("UPDATE_AND READY SERVER", response);
 					try{
@@ -179,7 +189,8 @@ module.exports = function (app, io) {
                         console.log("socket.io failed", err.message);
 					}
     		    	notifier({
-    		    	    uid: server.uid,
+						uid: server.uid,
+						status: 'success',
     			    	data: {
     				    	ACTION: "UPDATE_SERVER",
     				    	O_REQ: null,
@@ -188,7 +199,8 @@ module.exports = function (app, io) {
     			    	}
     		    	});
     		    	notifier({
-                        uid: server.uid,
+						uid: server.uid,
+						status: 'success',
         		    	data: {
         			    	ACTION: "CREATE_INSTANCE",
         			    	O_REQ: null,
@@ -209,12 +221,14 @@ module.exports = function (app, io) {
                 app_name: 'default',
                 server: payload.server_id
             }).then((app)=>{
-                app.state = 'RUNNING';
+				app.state = 'RUNNING';
+				app.lock = false;
                 app.port = payload.port;
 			    app.save().then((response)=>{
 			    	console.log("UPDATE_APP", response);
 			    	notifier({
-			    	    uid: app.uid,
+						uid: app.uid,
+						status: 'success',
 				    	data: {
 					    	ACTION: "UPDATE_APP",
 					    	O_REQ: null,
@@ -223,7 +237,8 @@ module.exports = function (app, io) {
 				    	}
 			    	});
 			    	notifier({
-                        uid: app.uid,
+						uid: app.uid,
+						status: 'success',
         		    	data: {
         			    	ACTION: "CREATE_APP",
         			    	O_REQ: null,
@@ -252,7 +267,8 @@ module.exports = function (app, io) {
                         console.log("socket.io failed", err.message);
 					}
     		    	notifier({
-    		    	    uid: database.uid,
+						uid: database.uid,
+						status: 'success',
 				    	data: {
 					    	ACTION: "SERVER_UPDATE",
 					    	O_REQ: null,
@@ -282,7 +298,8 @@ module.exports = function (app, io) {
                         console.log("socket.io failed", err.message);
 					}
     		    	notifier({
-    		    	    uid: app.uid,
+						uid: app.uid,
+						status: 'success',
 				    	data: {
 					    	ACTION: "UPDATE_APP",
 					    	O_REQ: null,
@@ -295,11 +312,25 @@ module.exports = function (app, io) {
 			    });
             }).catch((error)=>{
                console.log("findOne TOGGLE_SSL_SUCCESS App: Empty");
-               console.log("EVENT", payload, error);
-               //TODO: Log
+			   console.log("EVENT", payload, error);
+			   notifier({
+					status: 'system error',
+					error: error.message,
+					file: __filename,
+					data: {
+						ACTION: "UPDATE_APP",
+						MESSAGE: 'SSL TOGGLED',
+						DATA: payload
+					}
+				});
 			});
 		}else{
-            console.log("UNHANDLED EVENTS", payload);
+			console.log("UNHANDLED EVENTS", payload);
+			notifier({
+				status: 'system error',
+				error: "UNHANDLED EVENTS",
+				file: __filename,
+			});
         }
 	});
 };

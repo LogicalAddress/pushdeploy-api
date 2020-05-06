@@ -28,9 +28,10 @@ var UserSchema = new Schema({
 	currency: { type: String, default: 'USD' },
 	noSubscription: { type: Boolean, default: true },
 	primaryPlan: { type: String, default: '' },
+	verified_email: { type: Boolean, default: false },
 	
 	created_at: { type: Date, default: Date.now},
-	updated_at: { type: Date, default: Date.now}
+	updated_at: { type: Date, default: Date.now},
 });
 
 UserSchema.set('autoIndex', true);
