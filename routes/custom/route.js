@@ -23,7 +23,7 @@ module.exports = function (app, socketIO) {
 			var _server = response;
 			if(!response){
 				UserServer.create({
-		            uid: req.techpool.user.uid,
+		            uid: _server.uid,
 		            server_name: generate({ number: true }).dashed, // 'disgraceful-temper-7794'
 		            ipv4: req.body.ipv4,
 		            provider: 'custom',
@@ -31,7 +31,7 @@ module.exports = function (app, socketIO) {
 		            private_key: req.techpool.credentials.custom_private_key
 		        }).then(function(_server){
 		            UserApp.create({
-		            	uid: req.techpool.user.uid,
+		            	uid: _server.uid,
 		            	server: _server._id,
 		            	app_name: 'default',
 		            	app_repository: copts.example_repo,

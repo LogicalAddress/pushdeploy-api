@@ -20,7 +20,7 @@ var UserSchema = new Schema({
 		index: true,
 	},
 	userType: { type: String, default: 'customer'},
-	mobileNumber: {type: String, index: true, unique: true, required: true }, 
+	mobileNumber: {type: String }, 
 	email: {type: String, index: true, unique: true, required: true }, 
 	password: {type: String, required: true},
 	name: {type: String, required: true},

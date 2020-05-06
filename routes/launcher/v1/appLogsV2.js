@@ -12,7 +12,7 @@ opts = {
 module.exports = function (app, socketIO) {
 	
 	app.post('/v1/app/logs', Auth, Cred, (req, res, next) => {
-		console.log("checking logs..matching criteria", req.techpool.user.uid, req.body._id || req.body.app_id);
+
 		UserApps.findOne({
 			uid: req.techpool.user.uid, 
 			_id: req.body._id || req.body.app_id,
@@ -23,8 +23,6 @@ module.exports = function (app, socketIO) {
 					var conn = new Client(), _server = _app.server;
 					opts.host = _app.server.ipv4;
 					opts.username = _app.server.superuser || 'ubuntu';
-					// opts.privateKey = req.techpool.credentials.custom_private_key;
-					console.log("checkKey",_server.private_key);
 					if(_server.provider === "custom"){
 						opts.privateKey = req.techpool.credentials.custom_private_key;//TODO: Copy to _server during setup for custom
 					}else if(_server.provider === "aws"){
