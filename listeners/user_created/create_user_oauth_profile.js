@@ -24,7 +24,7 @@ module.exports = function(app, socketIO){
     	       forge.pki.publicKeyFromPem(pubkeypem), user.email),
     	}).then(function(userCredential){
             // Silence is golden
-            console.log(userCredential);
+            // console.log(userCredential);
     	}).catch(function(err) {
     	    console.log(err);
     	});

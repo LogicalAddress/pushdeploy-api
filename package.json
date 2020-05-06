@@ -38,6 +38,7 @@
     "parse-github-repo-url": "^1.4.1",
     "pg": "^6.1.2",
     "project-name-generator": "^2.1.4",
+    "recaptcha-verify": "^0.1.1",
     "redis": "^2.6.5",
     "rsa-json": "^0.2.1",
     "sequelize": "^3.30.2",
