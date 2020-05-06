@@ -46,3 +46,5 @@ spec:
               value: $STRIPE_PUBLIC_KEY
             - name: STRIPE_SECRET_KEY
               value: $STRIPE_SECRET_KEY
+            - name: RECAPTCHA_SECRET
+              value: $RECAPTCHA_SECRET
