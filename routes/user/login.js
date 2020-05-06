@@ -2,9 +2,7 @@ var User = require("../../lib/User");
 var _ = require("underscore");
 module.exports = function (app) {
 	app.post('/v1/user/login', function (req, res, next) {
-		console.log("body", req.body);
 		User.auth(req.body).then((record)=>{
-			console.log({record});
 		    var access_token = User.object2Token(record);
 		    record.access_token = access_token;
 			res.status(200).json({body: {status: "success", data: record}});
