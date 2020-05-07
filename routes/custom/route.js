@@ -7,7 +7,7 @@ setup = require("../../lib/launcher/v1/setup"),
 notifier = require("../../lib/launcher/notifier");
 
 var copts = {
-	example_repo: "https://github.com/shapeshed/express_example.git",
+	example_repo: "https://github.com/LogicalAddress/pushdeploy-nodejs-example.git",
 	node_version: "8.9.3",
 	entry_point: "bin/www"
 };

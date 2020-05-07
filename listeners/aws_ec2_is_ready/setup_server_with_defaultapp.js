@@ -5,7 +5,7 @@ setupEc2 = require("../../lib/launcher/v1/setupEc2");
 
 
 var copts = {
-	example_repo: "https://github.com/shapeshed/express_example.git",
+	example_repo: "https://github.com/LogicalAddress/pushdeploy-nodejs-example.git",
 	node_version: "8.9.3",
 	entry_point: "bin/www"
 };
