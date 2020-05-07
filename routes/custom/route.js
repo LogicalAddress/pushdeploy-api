@@ -23,7 +23,7 @@ module.exports = function (app, socketIO) {
 			var _server = response;
 			if(!response){
 				UserServer.create({
-		            uid: _server.uid,
+		            uid: req.techpool.user.uid,
 		            server_name: generate({ number: true }).dashed, // 'disgraceful-temper-7794'
 		            ipv4: req.body.ipv4,
 		            provider: 'custom',
