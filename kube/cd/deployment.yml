@@ -22,8 +22,6 @@ spec:
             - containerPort: 8080
               name: http
           env:
-            - name: NODE_ENV
-              value: production
             - name: API_URL
               value: $API_URL
             - name: GIT_WEB_HOOK_URL
