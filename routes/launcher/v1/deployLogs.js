@@ -11,7 +11,7 @@ opts = {
 
 module.exports = function (app, socketIO) {
 	
-	app.post('/v1/app/logs', Auth, Cred, (req, res, next) => {
+	app.post('/v1/app/deployLogs', Auth, Cred, (req, res, next) => {
 
 		UserApps.findOne({
 			uid: req.techpool.user.uid, 
