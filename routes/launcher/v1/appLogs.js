@@ -1,11 +1,17 @@
 var Auth = require("../../../lib/middlewares/authenticate"), 
 UserApps = require('../../../lib/launcher/UserApps'), 
 Cred = require("../../../lib/middlewares/credentials"),
-appLogs = require("../../../lib/launcher/v1/appLogs");
+fs = require("fs"),
+Client = require('ssh2').Client,
+opts = {
+    port: 22,
+    debug: true,
+    console: console,
+};
 
 module.exports = function (app, socketIO) {
 	
-	app.get('/v1/app/logs_', Auth, Cred, (req, res, next) => {
+	app.post('/v1/app/logs', Auth, Cred, (req, res, next) => {
 
 		UserApps.findOne({
 			uid: req.techpool.user.uid, 
@@ -13,14 +19,55 @@ module.exports = function (app, socketIO) {
 		}).then((response)=>{
 			var _app = response;
 			if(response){
-				res.status(200).json({body: { status: "IN_PROGRESS", data: _app }});
-				appLogs(req, _app.server, _app);
+				try{
+					var conn = new Client(), _server = _app.server;
+					opts.host = _app.server.ipv4;
+					opts.username = _app.server.superuser || 'ubuntu';
+					if(_server.provider === "custom"){
+						opts.privateKey = req.techpool.credentials.custom_private_key;//TODO: Copy to _server during setup for custom
+					}else if(_server.provider === "aws"){
+						opts.privateKey = _server.private_key;
+					}else{
+						throw new Error("Invalid Server Provider. How did we get here?");
+					}
+					var logBuf = "", count = 0;
+					conn.on('ready', function() {
+					    conn.shell(function(err, stream) {
+					        if (err) {
+					        	console.log('RETRIEVE APP_LOGS ERR '+_app.app_name+' STDERR: ', err);
+					            res.status(400).json({body: { status: "failure", message: err }});
+					        	return;
+					        }
+					        stream.on('close', function() {
+					            console.log('RETRIEVE APP_LOGS '+_app.app_name+'Stream :: close');
+					            res.status(200).json({body: { status: "success", data: logBuf.toString('utf-8') }});
+					            conn.end();
+					            return;
+					        }).on('data', function(data) {
+					            logBuf += data.toString('utf-8');
+					        }).stderr.on('data', function(data) {
+					            console.log('RETRIEVE APP_LOGS '+_app.app_name+' STDERR: ', data);
+					            res.status(400).json({body: { status: "failure", message: data.toString }});
+					            return;
+					        });
+					        var logfile = _app.app_name+'.log';//);
+					        stream.end('tail -n 100 /home/'+_app.server.superuser+'/.pushdeploy/'+logfile+';\nexit\n');
+					  });
+					  
+					}).connect(opts);
+				}catch(error){
+					console.log("Exception Thrown", error);
+					res.status(500).json({body: { status: "failure", message: "Unable to get logs" }});
+					return;
+				}
 			}else{
+				console.log("App does not exists");
 				res.status(400).json({body: { status: "failure", message: "App does not exists" }});
 				return;
 			}
 		}).catch((error)=>{
 			console.log("GET APP ERR", error);
+			res.status(500).json({body: { status: "failure", message: "Unable to get logs" }});
 			return;
 		});
 		
