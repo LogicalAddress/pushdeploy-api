@@ -48,3 +48,7 @@ spec:
               value: $STRIPE_SECRET_KEY
             - name: RECAPTCHA_SECRET
               value: $RECAPTCHA_SECRET
+            - name: LINODE_PUBLIC_KEY
+              value: $LINODE_PUBLIC_KEY
+            - name: LINODE_SECRET_KEY
+              value: $LINODE_SECRET_KEY
