@@ -6,16 +6,18 @@ var _ = require('underscore');
  
 module.exports = function (req, res, next)
 {
-    var access_token = (req.body && req.body.access_token) || 
-	(req.query && req.query.access_token) || 
-	req.headers['x-access-token'] || req.headers['x-auth-token'];    
-    if (_.isEmpty(access_token)) {
-        return res.status(500).json({message: "Access Toke is required"});
-    }else{
-        if(!_.isObject(req.body)){
-            _.extend(req, {body: {}});
-        }
-        _.extend(req.body, {token: access_token});
-        next();
-    }
+   //check if linode_token is expired and use referesh token to 
+   // re-authorize also if user has required scope for pushd
+   var credential = req.techpool.credentials; //TODO:
+   /*
+   with credential
+    .linode_token
+    .linode_username
+    .linode_scope
+    .linode_refresh_token
+    .linode_token_expiry
+    .linode_token_type
+    .linode_raw
+   */
+   next();
 };

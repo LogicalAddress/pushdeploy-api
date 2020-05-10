@@ -13,6 +13,10 @@ var UserServerSchema = new Schema({
 
 	server_name: { type: String, default: 'userspace'},
 	provider: { type: String, default: 'linode'},
+	linode_root_password: { type: String },
+	linode_stackscript_id: { type: Number },
+	linode_id: { type: Number },
+
 	private_key: { type: String },
 	public_key: { type: String },
 	root_passwd: { type: String },

@@ -24,12 +24,14 @@ module.exports = function (app, socketIO) {
 				try{
 					console.log("toggling SSL..", _app);
 					opts.host = _app.server.ipv4;
-					opts.username = _app.server.username || 'ubuntu';
+					opts.username = _app.server.superuser || 'ubuntu';
 					// opts.privateKey = req.techpool.credentials.custom_private_key;
 					// opts.privateKey = fs.readFileSync(__dirname + '/../../launcher.pem');
 					if(_app.server.provider === "custom"){
 						opts.privateKey = req.techpool.credentials.custom_private_key;//TODO: use server.private_key
 					}else if(_app.server.provider === "aws"){
+						opts.privateKey = _app.server.private_key;
+					}else if(_app.server.provider === "linode"){
 						opts.privateKey = _app.server.private_key;
 					}else{
 						throw new Error("Invalid Server Provider. How did we get here?");
