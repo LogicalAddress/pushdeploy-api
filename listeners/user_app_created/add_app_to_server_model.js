@@ -11,7 +11,7 @@ module.exports = function(_app, socketIO){
             // server.apps.push(app);
             // server.apps.concat([app._id]);
             // server.save().then((updatedServer)=>{
-                console.log("Add_app_to_server_model:update", server);
+                // console.log("Add_app_to_server_model:update", server);
             // }).catch((err)=>{
             //     console.log("Add_app_to_server_model:update", err);    
             // });

@@ -2,12 +2,12 @@ var env = process.env.NODE_ENV || 'development';
 
 var config = {
   development: {
-    END_POINT: "https://api.alpha.linode.com/v4",
+    END_POINT: "https://api.linode.com/v4",
     DEFAULT_SOA_VALUES: {
         "dnszone": "example.com",
         "type": "master",
-        "soa_email": "admin@cargospace.co",
-        "description": "created by cargospace",
+        "soa_email": "admin@pushdeploy.xyz",
+        "description": "Created by pushdeploy.io",
         "refresh_sec": 14400,
         "retry_sec": 3600,
         "expire_sec": 604800,
@@ -24,12 +24,12 @@ var config = {
     },
   },
   test: {
-    END_POINT: "https://api.alpha.linode.com/v4",
+    END_POINT: "https://api.linode.com/v4",
     DEFAULT_SOA_VALUES: {
         "dnszone": "example.com",
         "type": "master",
-        "soa_email": "admin@cargospace.co",
-        "description": "created by cargospace",
+        "soa_email": "admin@pushdeploy.xyz",
+        "description": "Created by pushdeploy.io",
         "refresh_sec": 14400,
         "retry_sec": 3600,
         "expire_sec": 604800,
@@ -46,12 +46,12 @@ var config = {
     },
   },
   production: {
-    END_POINT: process.env.LINODE_API_ENDPOINT || "https://api.alpha.linode.com/v4",
+    END_POINT: process.env.LINODE_API_ENDPOINT || "https://api.linode.com/v4",
     DEFAULT_SOA_VALUES: {
         "dnszone": "example.com",
         "type": "master",
-        "soa_email": "admin@cargospace.co",
-        "description": "created by cargospace",
+        "soa_email": "admin@pushdeploy.xyz",
+        "description": "Created by pushdeploy.io",
         "refresh_sec": 14400,
         "retry_sec": 3600,
         "expire_sec": 604800,

@@ -28,6 +28,8 @@ module.exports = function (app, socketIO) {
 						opts.privateKey = req.techpool.credentials.custom_private_key;//TODO: Copy to _server during setup for custom
 					}else if(_server.provider === "aws"){
 						opts.privateKey = _server.private_key;
+					}else if(_server.provider === "linode"){
+						opts.privateKey = _server.private_key;
 					}else{
 						throw new Error("Invalid Server Provider. How did we get here?");
 					}

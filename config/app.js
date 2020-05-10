@@ -43,6 +43,7 @@ var config = {
       stripePlanBAmount: '499',
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
+      linodePublicKey: process.env.LINODE_PUBLIC_KEY || "30b8582270f3e13b1510",
     },
     payment: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY || 'pk_test_XBKJelDADCVD0ApW1Cx9pK0v',
@@ -58,6 +59,10 @@ var config = {
       github:{
         publicKey: process.env.GITHUB_PUBLIC_KEY,
         secretKey: process.env.GITHUB_SECRET_KEY
+      },
+      linode: {
+        publicKey: process.env.LINODE_PUBLIC_KEY || "30b8582270f3e13b1510",
+        secretKey: process.env.LINODE_SECRET_KEY || "e1b4094b436523b7d578dd84d1bfc572bc1a336d73305acf9b6aab0c6afac8e2",
       }
     }
   },
@@ -86,6 +91,7 @@ var config = {
       stripePlanBAmount: '499',
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
+      linodePublicKey: process.env.LINODE_PUBLIC_KEY
     },
     payment: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY,
@@ -101,6 +107,10 @@ var config = {
       github:{
         publicKey: process.env.GITHUB_PUBLIC_KEY,
         secretKey: process.env.GITHUB_SECRET_KEY
+      },
+      linode: {
+        publicKey: process.env.LINODE_PUBLIC_KEY,
+        secretKey: process.env.LINODE_SECRET_KEY
       }
     }
   },
@@ -129,6 +139,7 @@ var config = {
       stripePlanBAmount: '499',
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
+      linodePublicKey: process.env.LINODE_PUBLIC_KEY
     },
     payment: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY,
@@ -144,6 +155,10 @@ var config = {
       github:{
         publicKey: process.env.GITHUB_PUBLIC_KEY,
         secretKey: process.env.GITHUB_SECRET_KEY
+      },
+      linode: {
+        publicKey: process.env.LINODE_PUBLIC_KEY,
+        secretKey: process.env.LINODE_SECRET_KEY
       }
     }
   },
@@ -172,6 +187,7 @@ var config = {
       stripePlanBAmount: '499',
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
+      linodePublicKey: process.env.LINODE_PUBLIC_KEY
     },
     payment: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY,
@@ -187,6 +203,10 @@ var config = {
       github:{
         publicKey: process.env.GITHUB_PUBLIC_KEY,
         secretKey: process.env.GITHUB_SECRET_KEY
+      },
+      linode: {
+        publicKey: process.env.LINODE_PUBLIC_KEY,
+        secretKey: process.env.LINODE_SECRET_KEY
       }
     }
   }
