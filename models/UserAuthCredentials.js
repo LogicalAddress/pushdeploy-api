@@ -20,6 +20,7 @@ var UserAuthCredentialSchema = new Schema({
 	linode_scope: { type: String },
 	linode_refresh_token: { type: String },
 	linode_token_expiry: { type: String },
+	linode_token_expiry_date: { type: Date },
 	linode_token_type: { type: String },
 	linode_raw: { type: String },
 	

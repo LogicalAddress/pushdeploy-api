@@ -2,7 +2,7 @@ var UserAuthCredential = require("../../lib/launcher/UserAuthCredential");
 var Auth = require("../../lib/middlewares/authenticate");
 var request = require("request");
 var AppConfig = require("../../config/app");
-
+var moment = require("moment");
 
 function getUserProfile(linode){
 	return new Promise((resolve, reject)=>{
@@ -18,17 +18,21 @@ function getUserProfile(linode){
         	json: {},
         },
         (error, response, body) => {
-            console.log(url);
+ 
             if (error){
-        	  return reject(error);
+				console.log("Linode getUserProfile", {error});
+        	  	return reject(error);
         	}
         	if(body && body.uid){
-        	  console.log("linode UserProfile", body);
+				let expiryDate = moment(new Date());
+				expiryDate = expiryDate.add(moment.duration(linode.expires_in, 'seconds'));
+				let linode_token_expiry_date = expiryDate.toDate();
         	  return resolve({
                 linode_username: body.username,
                 linode_email: body.email || "",
                 linode_token: linode.access_token,
-                linode_token_expiry: linode.expires_in,  
+				linode_token_expiry: linode.expires_in,
+				linode_token_expiry_date,
                 linode_scope: linode.scope,
                 linode_refresh_token: linode.refresh_token || '',  
         	  	linode_token_type: linode.token_type,

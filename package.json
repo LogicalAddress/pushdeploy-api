@@ -51,7 +51,8 @@
     "stripe": "^8.49.0",
     "underscore": "^1.8.3",
     "ursa": "^0.9.4",
-    "xml2json": "^0.11.2"
+    "xml2json": "^0.11.2",
+    "moment": "*"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
