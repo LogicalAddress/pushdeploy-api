@@ -39,9 +39,9 @@ spec:
             - name: REDIS_URL
               value: $REDIS_URL
             - name: STRIPE_PLAN_A
-              value: plan_HDfzkKEuGMYgs3
+              value: plan_HGGoRNT75B6QnB
             - name: STRIPE_PLAN_B
-              value: plan_HDg0oNkzkvikaq
+              value: plan_HGGsscfPKLUKRJ
             - name: STRIPE_PUBLIC_KEY
               value: $STRIPE_PUBLIC_KEY
             - name: STRIPE_SECRET_KEY

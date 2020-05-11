@@ -26,8 +26,13 @@ var UserAuthCredentialSchema = new Schema({
 	
 	digitalocean_token: { type: String },
 	digitalocean_username: { type: String },
+	digitalocean_email: { type: String },
+	digitalocean_scope: { type: String },
 	digitalocean_refresh_token: { type: String },
 	digitalocean_token_expiry: { type: String },
+	digitalocean_token_expiry_date: { type: String },
+	digitalocean_token_type: { type: String },
+	digitalocean_raw: { type: String },
 	
 	
 	bitbucket_username: { type: String },
