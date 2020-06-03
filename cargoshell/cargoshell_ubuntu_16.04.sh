@@ -482,6 +482,7 @@ function nodejs_app_setup {
 	    echo "npm install failed"
 	    return 1
 	fi
+    npm run build
     # Get SERVER_ENTRY_POINT HERE
     startScript=$(node -p "require('/home/$HOST_USER/$APP_NAME/package.json').scripts.start")
     spaceStrip=${startScript##* }
@@ -557,6 +558,7 @@ function nodejs_deploy {
         echo "npm install changes.. failed"
 	    exit 1
 	fi
+    npm run build
     eval $SUDO systemctl is-enabled $TEMPLATE-$APP_NAME.service
     if [ $? == 0 ]; then
         echo "App already enabled"
