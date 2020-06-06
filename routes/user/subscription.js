@@ -49,4 +49,22 @@ module.exports = function (app) {
 
 	});
 
+	app.post('/v1/tryFree', Auth, async function (req, res, next) {
+
+		try{
+			let user = await User.findOne({email: req.techpool.user.email});
+
+			await User.update({update: { tryFree: true }, 
+				query: {email: req.techpool.user.email}});
+
+			user = await User.findById(req.techpool.user._id); //returnable user object TODO: uptimize
+
+			return res.status(200).json({body: { status: "success", data: user}});
+		}catch(error){
+			console.log("unable to cancel subscription manualy, die silently..", error.message);
+			res.status(500).json({status: 'failure', message: error});
+		}
+
+	});
+
 };
