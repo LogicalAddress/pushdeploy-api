@@ -6,14 +6,14 @@ module.exports = function(_app, socketIO){
         console.log("EVENT", "user_app_deleted", "LISTNER", "decrement_server_app_count");
         AppCounter.decrementAppCounter(app).then(function(response){
             // Silence is golden
-            console.log("AppCounter", response);
+            console.log("AppCounter", app);
     	}).catch(function(err) {
     	    console.log(err);
     	});
     	
     	Server.appminusminus(app).then(function(response){
             // Silence is golden
-            console.log("Server:AppMinusMinus", response);
+            console.log("Server:AppMinusMinus", app);
     	}).catch(function(err) {
     	    console.log("Server:AppMinusMinus", err);
     	});
