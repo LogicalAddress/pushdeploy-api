@@ -28,7 +28,6 @@ SUDO=''
 # $REPOSITORY, $PORT, $GITUSERNAME
 
 export BRANCH="master"
-export TEMPLATE="nodejs"
 export CERT_TYPE="letsencrypt"
 export REPOSITORY_TYPE="private" # default
 export APP_GIT=$REPOSITORY
@@ -419,11 +418,19 @@ function nodejs_app_setup {
     	    echo "Setting up node environment for this user's selected configuration $TEMPLATE-$VERSION failed"
     	    return 1
     	fi
-    	#TODO rm Last Line 
-    	sed -i -n -e :a -e '1,1!{P;N;D;};N;ba' /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim
-    	echo -e "exec /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/node \"\$@\"" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
+    	sed -i -n -e :a -e '1,1!{P;N;D;};N;ba' /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim #TODO rm Last Line in this file and replace with the following
+    	# echo -e "exec /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/node \"\$@\"" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
+        echo -e ". /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/activate" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
+        echo -e "cd /home/$PROJECT/$APP_NAME" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
+        echo -e "exec npm start" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
+
+        # echo ". /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/activate" >> /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim
+        # echo "cd /home/$PROJECT/$APP_NAME" >> /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim
+        # echo "exec npm start" >> /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim
     fi
-        
+    export NODE_PATH=/usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/lib/node_modules
+    export NPM_CONFIG_PREFIX=/usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME
+    export npm_config_prefix=/usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME
     . $APP_NAME/bin/activate
     cd /home/$HOST_USER
     if [ ! -d "$APP_NAME" ]; then
@@ -483,12 +490,6 @@ function nodejs_app_setup {
 	    return 1
 	fi
     npm run build
-    # Get SERVER_ENTRY_POINT HERE
-    startScript=$(node -p "require('/home/$HOST_USER/$APP_NAME/package.json').scripts.start")
-    spaceStrip=${startScript##* }
-    SERVER_ENTRY_POINT=${spaceStrip##*.\/}
-    echo "SERVER_ENTRY_POINT found.."
-    echo $SERVER_ENTRY_POINT
     deactivate_node
 if [ ! -f "/usr/share/$PROJECT/startup_scripts/$APP_NAME.sh" ]; then    
 echo -e "#!/bin/sh
@@ -498,7 +499,7 @@ export PORT="$PORT"
 export NODE_ENV='production'
 export IP="0.0.0.0"
 # Call node directly or use foreverjs
-/usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim /home/$HOST_USER/$APP_NAME/$SERVER_ENTRY_POINT
+/usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim
 " > /usr/share/$PROJECT/startup_scripts/$APP_NAME.sh && chmod 755 /usr/share/$PROJECT/startup_scripts/$APP_NAME.sh
 
     if [ $? != 0 ]; then
@@ -648,6 +649,293 @@ function nodejs_delete_nginx_entry_with_ssl {
     _restart_nginx
 }
 ##############END NODEJS TEMPLATE########################
+
+
+##############LARAVEL TEMPLATE########################
+function laravel_create_app {
+    
+    if [ ! -f "/home/$HOST_USER/.$PROJECT/$APP_NAME.sh" ]; then
+	    eval $SUDO touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+	    if [ $? != 0 ]; then
+	        echo "touch /home/$HOST_USER/.$PROJECT/$APP_NAME.sh failed"
+	        return 1
+	    fi
+	else
+	    echo "/home/$HOST_USER/.$PROJECT/$APP_NAME.sh previously created"
+	fi
+	
+	if [ ! -f "/home/$HOST_USER/.$PROJECT/$APP_NAME.log" ]; then
+	    eval $SUDO touch /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+	    if [ $? != 0 ]; then
+	        echo "touch /home/$HOST_USER/.$PROJECT/$APP_NAME.log failed"
+	        return 1
+	    fi
+	else
+	    echo "/home/$HOST_USER/.$PROJECT/$APP_NAME.log previously created"
+	fi
+	
+    # eval $SUDO chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.sh  # User exported variables
+	# eval $SUDO chown www-data:www-data /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+	
+	eval $SUDO chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+	eval $SUDO chown www-data:www-data /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+
+    if [ ! -d "/usr/bin/composer" ]; then
+        sudo apt-get -y install php-cli
+        # Install Composer
+        EXPECTED_CHECKSUM="$(wget -q -O - https://composer.github.io/installer.sig)"
+        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+        ACTUAL_CHECKSUM="$(php -r "echo hash_file('sha384', 'composer-setup.php');")"
+
+        if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]
+        then
+            >&2 echo 'ERROR: Invalid installer checksum'
+            rm composer-setup.php
+            exit 1
+        fi
+
+        php composer-setup.php --quiet
+        RESULT=$?
+        rm composer-setup.php
+        eval $SUDO mv composer.phar /usr/bin/composer
+        # End Install Composer
+    else
+	    echo "/usr/bin/composer previous created"
+	fi
+}
+
+function laravel_app_is_running {
+    echo "Not Implemented laravel_app_is_running"
+	exit 1
+}
+
+function laravel_app_failed {
+    echo "Not Implemented laravel_app_failed"
+	exit 1
+}
+
+
+# template_setup family of functions
+function laravel_app_setup {
+
+    if [ ! -d "/usr/bin/$NODE_VERSION" ]; then
+        echo "Installing user-selected PHP version"
+        if [ "$NODE_VERSION" == "php5.6" ]
+        then
+            sudo apt install python-software-properties -y #Ubuntu 16.04 - careless about install failure
+            sudo add-apt-repository ppa:ondrej/php -y
+            sudo apt update -y
+            sudo apt install php5.6 php5.6-fpm php5.6-mbstring php5.6-xmlrpc php5.6-soap php5.6-gd php5.6-xml php5.6-cli php5.6-zip php5.6-mysql php5.6-curl -y #and friends
+        elif [ "$NODE_VERSION" == "php7.0" ]; then
+            sudo apt install python-software-properties -y #Ubuntu 16.04 - careless about install failure
+            sudo add-apt-repository ppa:ondrej/php -y
+            sudo apt update -y
+            sudo apt install php7.0 php7.0-fpm php7.0-mbstring php7.0-xmlrpc php7.0-soap php7.0-gd php7.0-xml php7.0-cli php7.0-zip php7.0-mysql php7.0-curl -y #and friends
+        elif [ "$NODE_VERSION" == "php7.1" ]; then
+            sudo apt install python-software-properties -y #Ubuntu 16.04 - careless about install failure
+            sudo add-apt-repository ppa:ondrej/php -y
+            sudo apt update -y
+            sudo apt install php7.1 php7.1-fpm php7.1-mbstring php7.1-xmlrpc php7.1-soap php7.1-gd php7.1-xml php7.1-cli php7.1-zip php7.1-mysql php7.1-curl -y #and friends
+        elif [ "$NODE_VERSION" == "php7.2" ]; then
+            sudo apt install python-software-properties -y #Ubuntu 16.04 - careless about install failure
+            sudo add-apt-repository ppa:ondrej/php -y
+            sudo apt update -y
+            sudo apt install php7.2 php7.2-fpm php7.2-mbstring php7.2-xmlrpc php7.2-soap php7.2-gd php7.2-xml php7.2-cli php7.2-zip php7.2-mysql php7.2-curl -y #and friends
+        elif [ "$NODE_VERSION" == "php7.3" ]; then
+            sudo apt install python-software-properties -y #Ubuntu 16.04 - careless about install failure
+            sudo add-apt-repository ppa:ondrej/php -y
+            sudo apt update -y
+            sudo apt install php7.3 php7.3-fpm php7.3-mbstring php7.3-xmlrpc php7.3-soap php7.3-gd php7.3-xml php7.3-cli php7.3-zip php7.3-mysql php7.3-curl -y #and friends
+        elif [ "$NODE_VERSION" == "php7.4" ]; then
+            sudo apt install python-software-properties -y #Ubuntu 16.04 - careless about install failure
+            sudo add-apt-repository ppa:ondrej/php -y
+            sudo apt update -y
+            sudo apt install php7.4 php7.4-fpm php7.4-mbstring php7.4-xmlrpc php7.4-soap php7.4-gd php7.4-xml php7.4-cli php7.4-zip php7.4-mysql php7.4-curl -y #and friends
+        else
+            # Most recent LTS
+            sudo apt install php php-fpm php-mbstring php-xmlrpc php-soap php-gd php-xml php-cli php-zip php-mysql php-curl -y #and friends
+        fi
+        sudo update-alternatives --set php /usr/bin/$NODE_VERSION
+    else
+        echo "$NODE_VERSION previously installed"
+    fi 
+    cd /home/$HOST_USER
+    if [ ! -d "$APP_NAME" ]; then
+        
+        if [ "$REPO_VISIBILITY" == "private" ]; then
+             if [ $GIT_PROVIDER == "github" ]; then
+                # https://blog.github.com/2012-09-21-easier-builds-and-deployments-using-git-over-https-and-oauth/
+                #################
+                eval $SUDO -H -u $HOST_USER mkdir $APP_NAME
+                cd $APP_NAME
+                eval $SUDO -H -u $HOST_USER git init
+                eval $SUDO -H -u $HOST_USER git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
+                if [ $? != 0 ]; then
+            	    echo "cloning user repository failed. Did you set public key"
+            	    return 1
+        	    fi
+        	    cd ..
+        	    ##################
+        	  elif [ $GIT_PROVIDER == "bitbucket" ]; then
+        	        # https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html
+                    # git clone $REPOSITORY $APP_NAME
+                    #################
+                    eval $SUDO -H -u $HOST_USER mkdir $APP_NAME
+                    cd $APP_NAME
+                    eval $SUDO -H -u $HOST_USER git init
+                    eval $SUDO -H -u $HOST_USER git pull https://x-token-auth:$USER_OAUTH_TOKEN@bitbucket.org/$REPO_USER/$REPO_PROJECT_NAME.git
+                    if [ $? != 0 ]; then
+                        echo "cloning user repository failed. Did you set public key"
+                        return 1
+                    fi
+                    cd ..
+                    ##################
+        	  else
+        	        eval $SUDO -H -u $HOST_USER git clone $REPOSITORY $APP_NAME
+        	  fi
+	    else
+	        eval $SUDO -H -u $HOST_USER git clone $REPOSITORY $APP_NAME #TODO Run this command as $HOST_USER
+	    fi
+	    cd $APP_NAME && eval $SUDO -H -u $HOST_USER git checkout $BRANCH
+    else
+        if [ "$REPO_VISIBILITY" == "private" ]; then
+             if [ "$GIT_PROVIDER" == "github" ]; then
+                cd $APP_NAME && eval $SUDO -H -u $HOST_USER git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
+             elif [ "$GIT_PROVIDER" == "bitbucket" ]; then
+                cd $APP_NAME && eval $SUDO -H -u $HOST_USER git pull https://x-token-auth:$USER_OAUTH_TOKEN@bitbucket.org/$REPO_USER/$REPO_PROJECT_NAME.git
+        	 else
+        	     cd $APP_NAME && eval $SUDO -H -u $HOST_USER git pull origin $BRANCH
+        	  fi
+        else
+            cd $APP_NAME && eval $SUDO -H -u $HOST_USER git pull origin $BRANCH
+        fi
+    fi
+    
+    ln -s /home/$HOST_USER/.$PROJECT/$APP_NAME.sh .env
+    composer install
+    # if [ $? != 0 ]; then
+	#     echo "composer install failed"
+	#     return 1
+	# fi
+    php artisan key:gen
+    eval $SUDO chmod -R 777 /home/$HOST_USER/$APP_NAME  # User exported variables
+	eval $SUDO chown -R www-data:www-data /home/$HOST_USER/$APP_NAME/bootstrap
+    eval $SUDO chown -R www-data:www-data /home/$HOST_USER/$APP_NAME/storage
+    _return_to_script_dir
+}
+
+# template_deploy family of functions
+function laravel_deploy {
+    echo "Deploying..."
+    cd /home/$HOST_USER/$APP_NAME
+    if [ "$REPO_VISIBILITY" == "private" ]; then
+             if [ "$GIT_PROVIDER" == "github" ]; then
+                eval $SUDO -H -u $HOST_USER git pull https://$USER_OAUTH_TOKEN@github.com/$REPO_USER/$REPO_PROJECT_NAME.git
+             elif [ "$GIT_PROVIDER" == "bitbucket" ]; then
+                eval $SUDO -H -u $HOST_USER git pull
+                eval $SUDO -H -u $HOST_USER git checkout $APP_BRANCH #just incase
+             else
+                eval $SUDO -H -u $HOST_USER git pull
+                eval $SUDO -H -u $HOST_USER git checkout $APP_BRANCH #just incase
+             fi
+    else
+        eval $SUDO -H -u $HOST_USER git pull    
+    fi
+    eval $SUDO -H -u $HOST_USER git checkout $APP_BRANCH #just incase
+    if [ $? != 0 ]; then
+        echo "pulling changes.. failed"
+	    exit 1
+	fi
+    composer install
+    if [ $? != 0 ]; then
+        echo "composer install.. failed"
+	    exit 1
+	fi
+    composer dump-autoload
+    if [ $? != 0 ]; then
+        echo "composer dump-autoload.. failed"
+	    exit 1
+	fi
+    php artisan migrate
+    if [ $? != 0 ]; then
+        echo "php artisan migrate.. failed continue regardless"
+	fi
+    eval $SUDO chown -R www-data:www-data /home/$HOST_USER/$APP_NAME/bootstrap
+    eval $SUDO chown -R www-data:www-data /home/$HOST_USER/$APP_NAME/storage
+    _return_to_script_dir
+}
+
+
+# template_create_nginx_entry family of functions
+function laravel_create_nginx_entry {
+    echo "nginx ...."
+    local appConfig="/etc/nginx/sites-available/$APP_NAME"
+    # if [ ! -f "$appConfig" ]; then
+        local SERVER_INFO=""
+        if [ "$APP_NAME" == 'default' ]; then
+            SERVER_INFO=`echo -e "
+            listen 80 default_server;
+            listen [::]:80 default_server;
+            root /home/$HOST_USER/$APP_NAME/public;
+            index index.html index.htm index.php;"`
+            eval $SUDO touch /etc/nginx/sites-available/$APP_NAME
+            eval $SUDO ln -s $appConfig /etc/nginx/sites-enabled/00-$APP_NAME
+        else
+            SERVER_INFO=`echo -e "
+            listen 80;
+            listen [::]:80;
+            server_name $APP_NAME www.$APP_NAME;
+            root /home/$HOST_USER/$APP_NAME/public;
+            index index.html index.htm index.php;"`
+            eval $SUDO touch /etc/nginx/sites-available/$APP_NAME
+            eval $SUDO ln -s $appConfig /etc/nginx/sites-enabled/$APP_NAME
+        fi
+        
+        echo -e "
+        server{
+            $SERVER_INFO
+            
+            access_log off;
+            error_log  /home/$HOST_USER/.$PROJECT/$APP_NAME.log;
+        
+            location / {
+                try_files \$uri /index.php?\$args;
+            }
+
+            location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:/run/php/$NODE_VERSION-fpm.sock;
+                fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+	        }
+        }
+        " | sudo tee $appConfig > /dev/null
+        
+        _restart_nginx
+    # else
+        # echo "$appConfig previously done"
+    # fi
+}
+
+# template_add_nginx_entry_with_ssl family of functions
+function laravel_add_nginx_entry_with_ssl {
+    # Redirect all http to https
+    if [ "$APP_NAME" == 'default' ]; then
+        exit 1 #Sorry, only for valid domain names ssl is allocated.
+    fi
+    _create_ssl
+    _restart_nginx
+}
+
+
+# template_delete_nginx_entry_with_ssl family of functions
+function laravel_delete_nginx_entry_with_ssl {
+    if [ "$APP_NAME" == 'default' ]; then
+        exit 1 #Sorry, only for valid domain names ssl is allocated.
+    fi
+    _delete_ssl
+    _restart_nginx
+}
+##############END LARAVEL TEMPLATE########################
 
 
 if [ $ACTION == 'init' ]; then

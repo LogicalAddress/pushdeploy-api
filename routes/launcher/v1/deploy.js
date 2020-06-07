@@ -59,7 +59,7 @@ module.exports = function (app, socketIO) {
 					console.log("else case: continue regardless");
 				}
 				opts.session = [
-					{ op: 'exec', command: 'export REPO_PROJECT_NAME='+repoProject+' REPO_USER='+repoUser+' SERVER_NAME='+_app.server.server_name+' USER_OAUTH_TOKEN='+gitToken+' REPO_VISIBILITY='+visibility+' GIT_PROVIDER='+_app.git_provider+' SERVER_ID='+_app.server._id+' CALLBACK_TOKEN='+req.techpool.user.access_token+' CALLBACK_URL='+AppConfig.AppDomain+'/v1/server/events ACTION=deploy APP_NAME='+_app.app_name+' APP_ID='+_app._id+' NODE_VERSION='+_app.template_variation+' REPOSITORY="'+_app.app_repository+'" && /home/'+_app.server.superuser+'/.setup.sh >.app_'+_app.app_name+'.log.out 2>&1' },
+					{ op: 'exec', command: 'export REPO_PROJECT_NAME='+repoProject+' REPO_USER='+repoUser+' SERVER_NAME='+_app.server.server_name+' USER_OAUTH_TOKEN='+gitToken+' REPO_VISIBILITY='+visibility+' GIT_PROVIDER='+_app.git_provider+' SERVER_ID='+_app.server._id+' CALLBACK_TOKEN='+req.techpool.user.access_token+' CALLBACK_URL='+AppConfig.AppDomain+'/v1/server/events ACTION=deploy APP_NAME='+_app.app_name+' APP_ID='+_app._id+' TEMPLATE='+_app.template + ' NODE_VERSION='+_app.template_variation+' REPOSITORY="'+_app.app_repository+'" && /home/'+_app.server.superuser+'/.setup.sh >.app_'+_app.app_name+'.log.out 2>&1' },
 			    ];
 				sshclient.session(opts, _x(function(err, response){
 					//Control Only reaches here when cargoshell returns with a non-zero EXIT_STATUS

@@ -53,7 +53,7 @@ module.exports = function (app, socketIO) {
 		            	uid: _server.uid,
 		            	server: req.body.server,
 		            	app_name: req.body.app_name.trim(),
-		            	app_repository: req.body.app_repository.trim(),
+		            	app_repository: req.body.clone_url || req.body.app_repository.trim(),
 		            	template: req.body.template,
 		            	template_variation: req.body.template_variation,
 		            	isPublic: req.body.repo_meta_data.isPublic,
