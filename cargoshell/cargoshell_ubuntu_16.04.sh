@@ -6,6 +6,7 @@
 # <UDF name="ACTION" label="Action" example="What to do" />
 # <UDF name="APP_NAME" label="Pushdeploy APP name" />
 # <UDF name="PORT" label="Default app PORT" example=3000 />
+# <UDF name="TEMPLATE" label="Template/Platform" example="nodejs" />
 # <UDF name="NODE_VERSION" label="Node Version" default="8.9.3" />
 # <UDF name="REPOSITORY" label="Repository" default="https://github.com/LogicalAddress/pushdeploy-nodejs-example.git" />
 # <UDF name="USERCARGOSPACEPUBKEY" label="Pushdeploy SSH" />
