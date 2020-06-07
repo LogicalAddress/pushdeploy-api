@@ -121,6 +121,7 @@ module.exports = function (app) {
 			});
 
 			let linode = await Linode.createInstance(req, _server);
+			console.log({linode: JSON.stringify(linode)});
 			_server = await UserServer.findOne({_id: _server._id});
 			_server.ipv4 = linode.data.ipv4[0];
 			_server.ipv6 = linode.data.ipv6;
