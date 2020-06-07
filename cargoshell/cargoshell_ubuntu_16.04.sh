@@ -489,7 +489,14 @@ function nodejs_app_setup {
 	    echo "npm install failed"
 	    return 1
 	fi
-    npm run build
+    startScript=$(node -p "require('/home/$HOST_USER/$APP_NAME/package.json').scripts.build")
+    echo "checking if we should npm run build...$startScript"
+    if [ "$startScript" != "undefined" ]
+        then
+        npm run build
+    else
+        echo "Nothing to build. Continue..."
+    fi
     deactivate_node
 if [ ! -f "/usr/share/$PROJECT/startup_scripts/$APP_NAME.sh" ]; then    
 echo -e "#!/bin/sh
@@ -559,7 +566,14 @@ function nodejs_deploy {
         echo "npm install changes.. failed"
 	    exit 1
 	fi
-    npm run build
+    startScript=$(node -p "require('/home/$HOST_USER/$APP_NAME/package.json').scripts.build")
+    echo "checking if we should npm run build...$startScript"
+    if [ "$startScript" != "undefined" ]
+        then
+        npm run build
+    else
+        echo "Nothing to build. Continue..."
+    fi
     eval $SUDO systemctl is-enabled $TEMPLATE-$APP_NAME.service
     if [ $? == 0 ]; then
         echo "App already enabled"
