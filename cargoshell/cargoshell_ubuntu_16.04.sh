@@ -695,7 +695,7 @@ function laravel_create_app {
 	eval $SUDO chmod 777 /home/$HOST_USER/.$PROJECT/$APP_NAME.log
 	eval $SUDO chown www-data:www-data /home/$HOST_USER/.$PROJECT/$APP_NAME.log
 
-    if [ ! -d "/usr/bin/composer" ]; then
+    if [ ! -f "/usr/bin/composer" ]; then
         sudo apt-get -y install php-cli
         # Install Composer
         EXPECTED_CHECKSUM="$(wget -q -O - https://composer.github.io/installer.sig)"
@@ -733,7 +733,7 @@ function laravel_app_failed {
 # template_setup family of functions
 function laravel_app_setup {
 
-    if [ ! -d "/usr/bin/$NODE_VERSION" ]; then
+    if [ ! -f "/usr/bin/$NODE_VERSION" ]; then
         echo "Installing user-selected PHP version"
         if [ "$NODE_VERSION" == "php5.6" ]
         then
@@ -826,7 +826,12 @@ function laravel_app_setup {
         fi
     fi
     
-    ln -s /home/$HOST_USER/.$PROJECT/$APP_NAME.sh .env
+    if [ ! -f "/home/$HOST_USER/$APP_NAME/.env" ]; then
+        if [ -f "/home/$HOST_USER/$APP_NAME/.env.example" ]; then
+            cp /home/$HOST_USER/$APP_NAME/.env.example /home/$HOST_USER/$APP_NAME/.env
+        fi
+    fi
+
     composer install
     # if [ $? != 0 ]; then
 	#     echo "composer install failed"
@@ -950,8 +955,20 @@ function laravel_delete_nginx_entry_with_ssl {
     _delete_ssl
     _restart_nginx
 }
+
+# Not your regular template function
+function laravel_cli {
+    cd $APP_NAME
+    eval $COMMAND
+}
 ##############END LARAVEL TEMPLATE########################
 
+function get_dot_env {
+    if [ -f "/home/$HOST_USER/$APP_NAME/.env" ]; then
+        curl -F "app_id=$APP_ID" -F "dotEnv=@/home/$HOST_USER/$APP_NAME/.env" --header "x-access-token: $CALLBACK_TOKEN" "$CALLBACK_URL"
+    fi
+    exit 0
+}
 
 if [ $ACTION == 'init' ]; then
     # TODO: Validate Exported Variables
@@ -1125,6 +1142,6 @@ elif [ $ACTION == 'toggle_ssl' ]; then
     curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
     exit 0
 else
-    echo "Invalid Action Sent"
-    exit 1
+    $ACTION
+    exit 0
 fi
