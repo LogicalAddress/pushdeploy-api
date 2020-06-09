@@ -21,6 +21,8 @@ var config = {
   development: {
     AppName: 'pushdeploy-api',
     AppDomain: process.env.API_URL,
+    emailManagement: process.env.EMAIL_MANAGEMENT_URL || 'http://localhost:5000',
+    dashboardURL:  process.env.DASHBOARD_URL || 'http://localhost:3000',
     GitWebHookUrl: process.env.GIT_WEB_HOOK_URL,
     AppRoot: AppRoot,
     PoolSize: 1000000000,
@@ -75,6 +77,8 @@ var config = {
   test: {
     AppName: 'pushdeploy-api',
     AppDomain: process.env.API_URL,
+    emailManagement: process.env.EMAIL_MANAGEMENT_URL,
+    dashboardURL:  process.env.DASHBOARD_URL,
     GitWebHookUrl: process.env.GIT_WEB_HOOK_URL,
     AppRoot: AppRoot,
     PoolSize: 1000000000,
@@ -129,6 +133,8 @@ var config = {
   staging: {
     AppName: 'pushdeploy-api',
     AppDomain: process.env.API_URL,
+    emailManagement: process.env.EMAIL_MANAGEMENT_URL,
+    dashboardURL:  process.env.DASHBOARD_URL,
     GitWebHookUrl: process.env.GIT_WEB_HOOK_URL,
     AppRoot: AppRoot,
     PoolSize: 1000000000,
@@ -183,6 +189,8 @@ var config = {
   production: {
     AppName: 'pushdeploy-api',
     AppDomain: process.env.API_URL,
+    emailManagement: process.env.EMAIL_MANAGEMENT_URL,
+    dashboardURL:  process.env.DASHBOARD_URL,
     GitWebHookUrl: process.env.GIT_WEB_HOOK_URL,
     AppRoot: AppRoot,
     PoolSize: 1000000000,
