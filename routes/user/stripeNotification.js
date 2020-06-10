@@ -119,7 +119,8 @@ module.exports = function (app) {
         }else if(req.body.type === 'charge.succeeded'){
             console.log('charge.succeeded');
             try{
-                let user = await User.findOne({email: req.body.data.object.billing_details.email});
+                // let user = await User.findOne({email: req.body.data.object.billing_details.email});
+                let user = await User.update({update: { chargeFailed: false}, query: {email: req.body.data.object.billing_details.email}});
                 await Payments.upsert({
                     update: {
                         status: "success",
@@ -205,7 +206,8 @@ module.exports = function (app) {
         }else if(req.body.type === 'charge.failed'){
             console.log('charge.failed');
             try{
-                let user = await User.findOne({email: req.body.data.object.billing_details.email});
+                // let user = await User.findOne({email: req.body.data.object.billing_details.email});
+                let user = await User.update({update: { chargeFailed: true}, query: {email: req.body.data.object.billing_details.email}});
                 await Payments.upsert({
                     update: {
                         status: "failed",
