@@ -2,6 +2,7 @@ var User = require("../../lib/User");
 var subModel = require("../../lib/launcher/Subscriptions");
 var Payments = require("../../lib/launcher/Payments");
 var config = require("../../config/app");
+var emailManagement = require('../../lib/emailManagement');
 var notifier = require('../../lib/launcher/notifier');
 
 module.exports = function (app) {
@@ -56,7 +57,7 @@ module.exports = function (app) {
         if(req.body.type === 'customer.subscription.created'){
             console.log('customer.subscription.created');
             try{
-                await subModel.update({
+                let user = await subModel.update({
                     update: {
                         subscription_created: true
                     },
@@ -65,6 +66,7 @@ module.exports = function (app) {
                         subscriptionId: req.body.data.object.id
                 }});
                 res.status(200).send("OK");
+                return;
             }catch(error){
                 notifier({
 					status: 'system error',
@@ -81,9 +83,7 @@ module.exports = function (app) {
         }else if(req.body.type === 'customer.subscription.deleted'){
             console.log('customer.subscription.deleted');
             try{
-                await User.update({update: { noSubscription: true, primaryPlan: ''}, 
-                query: {stripeCustomerId: req.body.data.object.customer}});
-                return res.status(200).send("OK");
+                res.status(200).send("OK");
             }catch(error){
                 notifier({
 					status: 'system error',
@@ -135,6 +135,38 @@ module.exports = function (app) {
                         chargeReference: req.body.data.object.id
                 }});
                 res.status(200).send("OK");
+
+                try{
+                    let emailMeta = {
+                        "templateName": "SubscriptionPaymentSuccess",
+                        "transport" : "sendgrid",
+                        "from" : "no-reply@pushdeploy.io", 
+                        "to" : user.email,
+                        "subject":"Pushdeploy Payment Success",
+                        "emailbody" : {
+                            Username: user.name,
+                            amount: req.body.data.object.amount,
+                            receipt_url: req.body.data.object.receipt_url,      
+                        }
+                    }     
+                    let result = await emailManagement.sendEmail(emailMeta);
+                    if(!result){
+                        let retryTimes = 0;
+                        let tiid = setInterval(async function(){
+                            result = await emailManagement.sendEmail(emailMeta);
+                            if(result || retryTimes >= 10){
+                                clearInterval(tiid);
+                                console.log("emailManagement", {result, retryTimes});
+                                return;
+                            }
+                            retryTimes++;
+                        }, 10000);
+                    }
+                    console.log("emailManagement", {result});
+                }catch(error){
+                    console.log("emailManagement", {error});
+                }
+
             }catch(error){
                 notifier({
 					status: 'system error',
@@ -173,7 +205,7 @@ module.exports = function (app) {
         }else if(req.body.type === 'charge.failed'){
             console.log('charge.failed');
             try{
-                let user = await User.findOne({email: req.body.data.object.email});
+                let user = await User.findOne({email: req.body.data.object.billing_details.email});
                 await Payments.upsert({
                     update: {
                         status: "failed",
@@ -198,6 +230,39 @@ module.exports = function (app) {
 					}
 				});
                 res.status(200).send("OK");
+
+                try{
+                    let emailMeta = {
+                        "templateName": "SubscriptionPaymentFailure",
+                        "transport" : "sendgrid",
+                        "from" : "no-reply@pushdeploy.io", 
+                        "to" : user.email,
+                        "subject":"Pushdeploy Subscription Failure",
+                        "emailbody" : {
+                            Username: user.name,
+                            plan: user.primaryPlan,
+                            description: req.body.data.object.statement_descriptor,
+                            amount: req.body.data.object.amount,
+                        }
+                    }     
+                    let result = await emailManagement.sendEmail(emailMeta);
+                    if(!result){
+                        let retryTimes = 0;
+                        let tiid = setInterval(async function(){
+                            result = await emailManagement.sendEmail(emailMeta);
+                            if(result || retryTimes >= 10){
+                                clearInterval(tiid);
+                                console.log("emailManagement", {result, retryTimes});
+                                return;
+                            }
+                            retryTimes++;
+                        }, 10000);
+                    }
+                    console.log("emailManagement", {result});
+                }catch(error){
+                    console.log("emailManagement", {error});
+                }
+                return;
             }catch(error){
                 notifier({
 					status: 'system error',

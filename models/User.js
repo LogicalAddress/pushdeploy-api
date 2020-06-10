@@ -29,7 +29,6 @@ var UserSchema = new Schema({
 	noSubscription: { type: Boolean, default: true },
 	primaryPlan: { type: String, default: '' },
 	verified_email: { type: Boolean, default: false },
-	activationToken: String,
 	tryFree: { type: Boolean, default: false },
 	
 	created_at: { type: Date, default: Date.now},

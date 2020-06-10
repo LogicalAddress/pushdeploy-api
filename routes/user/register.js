@@ -18,15 +18,16 @@ module.exports = function (app) {
 					res.status(500).json({status: 'failure', message: "Unable to register"});
 				}
 				if(response.success){
-					req.body.activationToken = hat();
+					req.body.token = hat();
 					User.create(req.body).then(async (record)=>{
 						var access_token = User.object2Token(record);
 						record.access_token = access_token;
 						res.status(200).json({body: {status: "success", data: record}});
 						try{
-							activate = await Activation.create({
+							let activate = await Activation.create({
 								uid: record.uid,
-								activationToken: req.body.activationToken,
+								email: record.email,
+								activation_token: req.body.token,
 							});
 							let emailMeta = {
 								"templateName": "verificationEmail",
@@ -34,7 +35,7 @@ module.exports = function (app) {
 								"from" : "no-reply@pushdeploy.io", 
 								"to" : record.email,
 								"subject":"Pushdeploy Email Verification",
-								"emailbody" : `${AppConfig.dashboardURL}/confirmAccount/${req.body.activationToken}`,
+								"emailbody" : `${AppConfig.dashboardURL}/confirmAccount/${req.body.token}`,
 								"firstname" : record.name
 							};     
 							let result = await emailManagement.sendEmail(emailMeta);
@@ -62,15 +63,17 @@ module.exports = function (app) {
 				}
 			});
 		}else{
-			req.body.activationToken = hat();
+			req.body.token = hat();
 			User.create(req.body).then(async(record)=>{
 				var access_token = User.object2Token(record);
 				record.access_token = access_token;
+				console.log({body: {status: "success", data: record}});
 				res.status(200).json({body: {status: "success", data: record}});
 				try{
-					activate = await Activation.create({
+					let activate = await Activation.create({
 						uid: record.uid,
-						activationToken: req.body.activationToken,
+						email: record.email,
+						activation_token: req.body.token,
 					});
 					let emailMeta = {
 						"templateName": "verificationEmail",
@@ -78,7 +81,7 @@ module.exports = function (app) {
 						"from" : "no-reply@pushdeploy.io", 
 						"to" : record.email,
 						"subject":"Pushdeploy Email Verification",
-						"emailbody" : `${AppConfig.dashboardURL}/confirmAccount/${req.body.activationToken}`,
+						"emailbody" : `${AppConfig.dashboardURL}/confirmAccount/${req.body.token}`,
 						"firstname" : record.name
 					};     
 					let result = await emailManagement.sendEmail(emailMeta);
@@ -99,6 +102,7 @@ module.exports = function (app) {
 					console.log("emailManagement:", err.message);
 				}
 			}).catch((error)=>{
+				console.log({error});
 				res.status(500).json({status: 'failure', message: "Unable to register"});
 			});
 		}

@@ -13,7 +13,7 @@ fs = require("fs"),
 },
 multer  = require('multer'),
 storage = multer.memoryStorage(),
-upload = multer({ storage: storage });;
+upload = multer({ storage: storage });
 
 
 module.exports = function (app, io) {
