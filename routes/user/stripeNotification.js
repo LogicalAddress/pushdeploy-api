@@ -207,7 +207,7 @@ module.exports = function (app) {
             console.log('charge.failed');
             try{
                 // let user = await User.findOne({email: req.body.data.object.billing_details.email});
-                let user = await User.update({update: { chargeFailed: true}, query: {email: req.body.data.object.billing_details.email}});
+                let user = await User.update({update: { chargeFailed: true, chargeFailedDate: new Date()}, query: {email: req.body.data.object.billing_details.email}});
                 await Payments.upsert({
                     update: {
                         status: "failed",

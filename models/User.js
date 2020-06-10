@@ -31,7 +31,7 @@ var UserSchema = new Schema({
 	verified_email: { type: Boolean, default: false },
 	tryFree: { type: Boolean, default: false },
 	chargeFailed: { type: Boolean, default: false }, //must always be set to set to false when payment succeed. Payments that previously succeeded and failed here after. User must be warned on the UI to try and fix.
-	
+	chargeFailedDate: { type: Date }, //use this to provide trials if chargeFailed: true
 	created_at: { type: Date, default: Date.now},
 	updated_at: { type: Date, default: Date.now},
 });
