@@ -5,7 +5,7 @@ var config = require("../../config/app");
 var emailManagement = require('../../lib/emailManagement');
 var notifier = require('../../lib/launcher/notifier');
 
-module.exports = function (app) {
+module.exports = function (app, io) {
 	app.post('/stripe/notification', async function (req, res, next) {
 
         if(req.body.type === 'checkout.session.completed'){
@@ -168,6 +168,12 @@ module.exports = function (app) {
                     console.log("emailManagement", {error});
                 }
 
+                try{
+                    io.to(user.uid).emit('PAYMENT_SUCCESS', req.body.data.object.amount);
+                }catch(err){
+                    console.log("socket.io failed", err.message);
+                }
+
             }catch(error){
                 notifier({
 					status: 'system error',
@@ -263,6 +269,12 @@ module.exports = function (app) {
                     console.log("emailManagement", {result});
                 }catch(error){
                     console.log("emailManagement", {error});
+                }
+
+                try{
+                    io.to(user.uid).emit('PAYMENT_FAILED', req.body.data.object.amount);
+                }catch(err){
+                    console.log("socket.io failed", err.message);
                 }
                 return;
             }catch(error){
