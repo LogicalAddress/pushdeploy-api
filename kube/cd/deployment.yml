@@ -56,3 +56,7 @@ spec:
               value: $LINODE_PUBLIC_KEY
             - name: LINODE_SECRET_KEY
               value: $LINODE_SECRET_KEY
+            - name: DASHBOARD_URL
+              value: $DASHBOARD_URL
+            - name: EMAIL_MANAGEMENT_URL
+              value: $EMAIL_MANAGEMENT_URL

@@ -2,6 +2,7 @@ var Auth = require("../../lib/middlewares/authenticate");
 var User = require("../../lib/User");
 var subModel = require("../../lib/launcher/Subscriptions");
 var config = require("../../config/app");
+var emailManagement = require('../../lib/emailManagement');
 
 module.exports = function (app) {
 	// app.post('/v1/subscribe', Auth, function (req, res, next) {
@@ -41,7 +42,36 @@ module.exports = function (app) {
 
 			user = await User.findById(req.techpool.user._id); //returnable user object TODO: uptimize
 
-			return res.status(200).json({body: { status: "success", data: user}});
+			res.status(200).json({body: { status: "success", data: user}});
+			try{
+				let emailMeta = {
+					"templateName": "SubscriptionDeleted",
+					"transport" : "sendgrid",
+					"from" : "no-reply@pushdeploy.io", 
+					"to" : user.email,
+					"subject":"Pushdeploy Subscription Deletion",
+					"emailbody" : {
+						Username: user.name,    
+					}
+				}     
+				let result = await emailManagement.sendEmail(emailMeta);
+				if(!result){
+					let retryTimes = 0;
+					let tiid = setInterval(async function(){
+						result = await emailManagement.sendEmail(emailMeta);
+						if(result || retryTimes >= 10){
+							clearInterval(tiid);
+							console.log("emailManagement", {result, retryTimes});
+							return;
+						}
+						retryTimes++;
+					}, 10000);
+				}
+				console.log("emailManagement", {result});
+            }catch(error){
+                    console.log("emailManagement", {error});
+            }
+            return;
 		}catch(error){
 			console.log("unable to cancel subscription manualy, die silently..", error.message);
 			res.status(500).json({status: 'failure', message: error});
