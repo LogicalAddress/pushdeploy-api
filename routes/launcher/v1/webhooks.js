@@ -133,6 +133,22 @@ module.exports = function (app, io) {
                console.log("EVENT", payload, error);
                //TODO: Log
             });
+		}else if(payload.type == "DELETE_APP_SUCCESS"){
+			try{
+				io.to(app.uid).emit('DELETE_APP_SUCCESS', payload.app_name);
+			}catch(err){
+				console.log("socket.io failed", err.message);
+			}
+			notifier({
+				uid: req.techpool.user.uid,
+				status: 'success',
+				data: {
+					ACTION: "DELETE_APP_SUCCESS",
+					O_REQ: null,
+					MESSAGE: payload.app_name,
+					DATA: payload
+				}
+			});
 		}else if(payload.type == "DEPLOY_APP_SUCCESS"){
 				UserApp.findOne({
 					server: payload.server_id, 

@@ -89,6 +89,15 @@ function notify_home_that_app_added {
     fi
 }
 
+function notify_home_that_app_deleted {
+    local JSON=$( printf '{"type": "DELETE_APP_SUCCESS", "app_name": "%s", "app_id": "%s"}' "$APP_NAME" "$APP_ID")
+    if [ -n "$CALLBACK_TOKEN" ]; then
+        curl -X POST --header "Content-Type: application/json" --header "x-access-token: $CALLBACK_TOKEN" -d "$JSON" "$CALLBACK_URL"
+    else
+        curl -X POST --header "Content-Type: application/json" -d "$JSON" "$CALLBACK_URL"
+    fi
+}
+
 function notify_home_that_app_deployed {
     local JSON=$( printf '{"type": "DEPLOY_APP_SUCCESS", "superuser": "%s", "server_id": "%s", "app_name": "%s", "app_id": "%s"}' "$HOST_USER" "$SERVER_ID" "$APP_NAME" "$APP_ID")
     if [ -n "$CALLBACK_TOKEN" ]; then
@@ -99,7 +108,7 @@ function notify_home_that_app_deployed {
 }
 
 function _delete_ssl {
-    certbot --nginx rollback --non-interactive -d $APP_NAME
+    eval $SUDO certbot --nginx rollback --non-interactive -d $APP_NAME
 }
 
 function _create_ssl {
@@ -663,6 +672,29 @@ function nodejs_delete_nginx_entry_with_ssl {
     _delete_ssl
     _restart_nginx
 }
+
+# template_delete_delete_app family of functions
+function nodejs_delete_app {
+    if [ "$APP_NAME" == 'default' ]; then
+        exit 1 #Sorry, only for valid domain names ssl is allocated.
+    fi
+    # Remove nginx data
+    _delete_ssl
+    sudo rm /etc/nginx/sites-enabled/$APP_NAME
+    sudo rm /etc/nginx/sites-available/$APP_NAME
+    # Remove systemd
+    sudo systemctl stop $TEMPLATE-$APP_NAME.service
+    sudo systemctl disable $TEMPLATE-$APP_NAME.service
+    sudo rm /lib/systemd/system/$TEMPLATE-$APP_NAME.service
+    # Remove virtual environment
+    sudo rm -Rf /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME
+    sudo rm /usr/share/$PROJECT/startup_scripts/$APP_NAME.sh
+    # Delete repo files
+    sudo rm -Rf /home/$HOST_USER/$APP_NAME
+    sudo rm /home/$HOST_USER/.$PROJECT/$APP_NAME.sh
+    sudo rm /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+    _restart_nginx
+}
 ##############END NODEJS TEMPLATE########################
 
 
@@ -956,6 +988,19 @@ function laravel_delete_nginx_entry_with_ssl {
     _restart_nginx
 }
 
+# template_delete_delete_app family of functions
+function laravel_delete_app {
+    if [ "$APP_NAME" == 'default' ]; then
+        exit 1 #Sorry, only for valid domain names ssl is allocated.
+    fi
+    _delete_ssl
+    sudo rm /etc/nginx/sites-enabled/$APP_NAME
+    sudo rm /etc/nginx/sites-available/$APP_NAME
+    sudo rm -Rf /home/$HOST_USER/$APP_NAME
+    sudo rm /home/$HOST_USER/.$PROJECT/$APP_NAME.log
+    _restart_nginx
+}
+
 # Not your regular template function
 function laravel_cli {
     cd $APP_NAME
@@ -1079,6 +1124,10 @@ elif [ $ACTION == 'add_app' ]; then
 	    exit 1
 	fi
 	notify_home_that_app_added
+    exit 0
+elif [ $ACTION == 'delete_app' ]; then
+    ${TEMPLATE}_delete_app
+	notify_home_that_app_deleted
     exit 0
 elif [ $ACTION == 'deploy' ]; then
     # Check if template is set or fire an error. This shellscript doesn't remember and the server had better send a correct one
