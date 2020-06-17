@@ -1,7 +1,7 @@
-var NameServer = require("../../lib/dns/lib");
+var NameServer = require("../../lib/dns/atomiadns");
 var _ = require("underscore");
 
-module.exports = function(app, socketIO){
+module.exports = function(){
     process.on('cloneZone', function(to, from){
         NameServer.GetZoneBinary(from).then((result) => {
             if(_.has(result.status != "succcess") || 

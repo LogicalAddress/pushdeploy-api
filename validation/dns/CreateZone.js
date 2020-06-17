@@ -6,7 +6,7 @@ var _ = require('underscore');
  
 module.exports = function (req, res, next)
 {
-    if(!_.has(req.body, 'name')){
+    if(!_.has(req.body, 'name') || !_.has(req.body, 'app')){
         return res.status(500).json({message: "name is required and must be a valid domain name"});
     }else{
         // Todo Check that it's a valid domain before calling next
