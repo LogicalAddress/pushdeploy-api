@@ -72,9 +72,41 @@ module.exports = function (app, io) {
 			return NameServer.AddZone(req.body, newZone);
 		}).then((zoneInfo)=>{
 			console.log(`${provider}.AddZone`, {zoneInfo: zoneInfo});
+			return NameServer.nameservers(req.body);
+		}).then(async (nameservers)=>{
+			let presults = [], promises = [];
+			for(let i = 0; i < nameservers.length; i++){
+				promises.push(NameServer.AddDnsRecord({
+					entries: [{
+						label: '@', 
+						'class': 'IN', 
+						ttl: 1800, 
+						type: 'NS', 
+						rdata: nameservers[i].trim()}]
+				}, zoneMeta))
+			}
+			presults = await Promise.all(promises);
+			promises = [];
+			for(let i = 0; i < presults.length; i++){
+				console.log(`${provider}.AddDnsRecord`, {result: presults[i]});
+				promises.push(DNS.createDNSRecord({
+					id: presults[i].id,
+					name: zoneMeta.name,
+					uid: req.techpool.user.uid,
+					zone: zoneMeta._id,
+					label: '@', 
+					'class': 'IN', 
+					ttl: 1800, 
+					type: 'NS', 
+					rdata: nameservers[i]
+				}));
+			}
+			presults = await Promise.all(promises);
 			return res.status(200).json({body: { status: "success", data: zoneMeta}});
 		}).catch(async (error)=>{
 			await DNS.deleteZone({_id: zoneMeta._id});
+			await DNS.deleteDNSRecord({ name: zoneMeta.name });
+			await NameServer.DeleteZone(zoneMeta);
     		return res.status(400).json({status: 'failure', message: error.message});
     	});
 	});
@@ -91,7 +123,7 @@ module.exports = function (app, io) {
 			_id: req.params.id
 		}).then((zone)=>{
 			zoneMeta = zone;
-			return NameServer.DeleteZone(zone.name);
+			return NameServer.DeleteZone(zone);
 		}).then((zone)=>{
 			deletedZone = zone;
 			return DNS.deleteZone({
@@ -186,7 +218,7 @@ module.exports = function (app, io) {
 	app.post('/v1/dns/zonerecord', checkCreateZone, checkAddRecordEntry, Auth, Cred, (req, res, next) => {
 		let NameServer = NameServers[provider];
 		let owner = 'pushdpeloy';
-		let zoneMeta;
+		let zoneMeta, nameservers;
 		return DNS.findOneZone({
 			uid: req.techpool.user.uid, 
 			name: req.body.name
@@ -215,16 +247,49 @@ module.exports = function (app, io) {
 					return res.status(400).json({status: 'failure', message: error.message});
 				});	
 			}else{
-				DNS.createZone({
-					name: req.body.name,
-					uid: req.techpool.user.uid,
-					app: req.body.app,
-					provider,
-					owner,
+
+				NameServer.nameservers(req.body)
+				.then((_nameservers)=>{
+					nameservers = _nameservers;
+					return DNS.createZone({
+						name: req.body.name,
+						uid: req.techpool.user.uid,
+						app: req.body.app,
+						provider,
+						owner,
+					});
 				}).then((newZone)=>{
 					zoneMeta = newZone
 					return NameServer.AddZone(req.body, newZone); 
 				}).then((result)=>{
+					let presults = [], promises = [];
+					for(let i = 0; i < nameservers.length; i++){
+						promises.push(NameServer.AddDnsRecord({
+							entries: [{
+								label: '@', 
+								'class': 'IN', 
+								ttl: 1800, 
+								type: 'NS', 
+								rdata: nameservers[i].trim()}]
+						}, zoneMeta))
+					}
+					presults = await Promise.all(promises);
+					promises = [];
+					for(let i = 0; i < presults.length; i++){
+						console.log(`${provider}.AddDnsRecord`, {result: presults[i]});
+						promises.push(DNS.createDNSRecord({
+							id: presults[i].id,
+							name: zoneMeta.name,
+							uid: req.techpool.user.uid,
+							zone: zoneMeta._id,
+							label: '@', 
+							'class': 'IN', 
+							ttl: 1800, 
+							type: 'NS', 
+							rdata: nameservers[i]
+						}));
+					}
+					presults = await Promise.all(promises);
 					console.log(`${provider}.AddZone`, {result});
 					return NameServer.AddDnsRecord(req.body, zoneMeta);
 				}).then((result)=>{
@@ -235,6 +300,8 @@ module.exports = function (app, io) {
 					return res.status(200).json({body: { status: "success", data: {record, zone: zoneMeta}}});
 				}).catch(async (error)=>{
 					await DNS.deleteZone({_id: zoneMeta._id});
+					await DNS.deleteDNSRecord({ name: zoneMeta.name });
+					await NameServer.DeleteZone(zoneMeta);
 					return res.status(400).json({status: 'failure', message: error.message});
 				});
 			}
