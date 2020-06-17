@@ -15,6 +15,8 @@ var DNSSchema = new Schema({
 	
 	provider: {type: String, default: 'Route53'},
 
+	nameservers: { type: String, default: ''},
+
 	id: { type: String, index: true },
 
 	owner: {type: String, default: 'pushdeploy'},

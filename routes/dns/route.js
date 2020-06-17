@@ -3,7 +3,8 @@ var Route53 = require('../../lib/dns/Route53.js');
 var DNS = require('../../lib/dns/index.js');
 var _ = require('underscore');
 var checkCreateZone = require("../../validation/dns/CreateZone");
-var checkAddRecordEntry = require("../../validation/dns/AddRecordEntry")
+var checkAddRecordEntry = require("../../validation/dns/AddRecordEntry");
+var checkDNSPass = require("../../validation/dns/checkDNSPass");
 
 var Auth = require("../../lib/middlewares/authenticate"),
 Cred = require("../../lib/middlewares/credentials");
@@ -41,12 +42,13 @@ module.exports = function (app, io) {
 		let zoneMeta;
 		return DNS.findOneZone({
 			uid: req.techpool.user.uid, 
-			_id: req.params.id
+			$or: [{_id: req.params.id},{app: req.params.id}]
 		}).then((record)=>{
 			zoneMeta = record;
 			return NameServer.getZone(zoneMeta.name);
 		}).then((zoneInfo)=>{
-			console.log(`${provider}.getZone`, {zoneInfo: zoneInfo});
+			console.log(`${provider}.getZone`, {zoneInfo: JSON.stringify(zoneInfo)});
+			zoneMeta.zoneInfo = zoneInfo;
 			return res.status(200).json({body: { status: "success", data: zoneMeta }});
 		}).catch((error)=>{
     		return res.status(400).json({status: 'failure', message: error.message});
@@ -57,16 +59,22 @@ module.exports = function (app, io) {
 	* Creat a new zone
 	*/
 	
-	app.post('/v1/dns/zone', checkCreateZone, Auth, Cred, (req, res, next) => {
+	app.post('/v1/dns/zone', checkCreateZone, Auth, checkDNSPass, Cred, (req, res, next) => {
 		let NameServer = NameServers[provider];
 		let owner = 'pushdpeloy';
 		let zoneMeta;
-		return DNS.createZone({
-			name: req.body.name,
-			uid: req.techpool.user.uid,
-			app: req.body.app,
-			provider,
-			owner,
+
+		NameServer.nameservers(req.body)
+		.then((_nameservers)=>{
+			nameservers = _nameservers;
+			return DNS.createZone({
+				name: req.body.name,
+				uid: req.techpool.user.uid,
+				app: req.body.app,
+				provider: NameServers[provider].provider || 'pushdeploy.io',
+				owner,
+				nameservers: nameservers.join(", "),
+			});
 		}).then((newZone)=>{
 			zoneMeta = newZone
 			return NameServer.AddZone(req.body, newZone);
@@ -131,7 +139,7 @@ module.exports = function (app, io) {
 				uid: req.techpool.user.uid
 			});
 		}).then((result)=>{
-			console.log('wipe of associated dns records:', {result})
+			console.log('wipe all associated dns records:', "Done.")
 			return DNS.deleteDNSRecord({
 				zone: zoneMeta._id,
 				uid: req.techpool.user.uid
@@ -215,7 +223,7 @@ module.exports = function (app, io) {
 	* Add Zone and A record in one single pass
 	*/
 	
-	app.post('/v1/dns/zonerecord', checkCreateZone, checkAddRecordEntry, Auth, Cred, (req, res, next) => {
+	app.post('/v1/dns/zonerecord', checkCreateZone, checkAddRecordEntry, Auth, checkDNSPass, Cred, (req, res, next) => {
 		let NameServer = NameServers[provider];
 		let owner = 'pushdpeloy';
 		let zoneMeta, nameservers;
@@ -255,13 +263,14 @@ module.exports = function (app, io) {
 						name: req.body.name,
 						uid: req.techpool.user.uid,
 						app: req.body.app,
-						provider,
+						provider:  NameServers[provider].provider || 'pushdeploy.io',
 						owner,
+						nameservers: nameservers.join(", "),
 					});
 				}).then((newZone)=>{
 					zoneMeta = newZone
 					return NameServer.AddZone(req.body, newZone); 
-				}).then((result)=>{
+				}).then(async(result)=>{
 					let presults = [], promises = [];
 					for(let i = 0; i < nameservers.length; i++){
 						promises.push(NameServer.AddDnsRecord({
