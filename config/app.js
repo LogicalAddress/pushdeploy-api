@@ -52,7 +52,7 @@ var config = {
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
       linodePublicKey: process.env.LINODE_PUBLIC_KEY || "30b8582270f3e13b1510",
-      enableDns: process.env.DNS_SUPPORT === "yes" ? true : false,
+      enableDns: process.env.ENABLE_DNS === "yes" ? true : false,
       dnsFramework: process.env.DNS_FRAMEWORK || "Atomia"
     },
     payment: {
@@ -110,7 +110,7 @@ var config = {
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
       linodePublicKey: process.env.LINODE_PUBLIC_KEY,
-      enableDns: process.env.DNS_SUPPORT === "yes" ? true : false,
+      enableDns: process.env.ENABLE_DNS === "yes" ? true : false,
       dnsFramework: process.env.DNS_FRAMEWORK || "Atomia"
     },
     payment: {
@@ -168,7 +168,7 @@ var config = {
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
       linodePublicKey: process.env.LINODE_PUBLIC_KEY,
-      enableDns: process.env.DNS_SUPPORT === "yes" ? true : false,
+      enableDns: process.env.ENABLE_DNS === "yes" ? true : false,
       dnsFramework: process.env.DNS_FRAMEWORK || "Atomia"
     },
     payment: {
@@ -226,7 +226,7 @@ var config = {
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
       linodePublicKey: process.env.LINODE_PUBLIC_KEY,
-      enableDns: process.env.DNS_SUPPORT === "yes" ? true : false,
+      enableDns: process.env.ENABLE_DNS === "yes" ? true : false,
       dnsFramework: process.env.DNS_FRAMEWORK || "Atomia"
     },
     payment: {

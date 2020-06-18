@@ -60,5 +60,5 @@ spec:
               value: $DASHBOARD_URL
             - name: EMAIL_MANAGEMENT_URL
               value: $EMAIL_MANAGEMENT_URL
-            - name: DNS_SUPPORT
-              value: $DNS_SUPPORT
+            - name: ENABLE_DNS
+              value: $ENABLE_DNS
