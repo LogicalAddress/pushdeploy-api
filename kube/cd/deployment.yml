@@ -60,3 +60,17 @@ spec:
               value: $DASHBOARD_URL
             - name: EMAIL_MANAGEMENT_URL
               value: $EMAIL_MANAGEMENT_URL
+            - name: DNS_API
+              value: $DNS_API
+            - name: DNS_ADMIN_USER
+              value: $DNS_ADMIN_USER
+            - name: DNS_ADMIN_PASS
+              value: $DNS_ADMIN_PASS
+            - name: DNS_SUPPORT
+              value: $DNS_SUPPORT
+            - name: DNS_FRAMEWORK
+              value: $DNS_FRAMEWORK
+            - name: DNS_DEFAUL_SOA_VALUES
+              value: $DNS_DEFAUL_SOA_VALUES
+            - name: DEFAULT_NAMESERVERS
+              value: $DEFAULT_NAMESERVERS

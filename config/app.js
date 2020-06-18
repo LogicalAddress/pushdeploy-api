@@ -52,6 +52,8 @@ var config = {
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
       linodePublicKey: process.env.LINODE_PUBLIC_KEY || "30b8582270f3e13b1510",
+      enableDns: process.env.DNS_SUPPORT === "yes" ? true : false,
+      dnsFramework: process.env.DNS_FRAMEWORK || "Atomia"
     },
     payment: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY || 'pk_test_XBKJelDADCVD0ApW1Cx9pK0v',
@@ -107,7 +109,9 @@ var config = {
       stripePlanBBAmount: '19990',
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
-      linodePublicKey: process.env.LINODE_PUBLIC_KEY
+      linodePublicKey: process.env.LINODE_PUBLIC_KEY,
+      enableDns: process.env.DNS_SUPPORT === "yes" ? true : false,
+      dnsFramework: process.env.DNS_FRAMEWORK || "Atomia"
     },
     payment: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY,
@@ -163,7 +167,9 @@ var config = {
       stripePlanBBAmount: '19990',
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
-      linodePublicKey: process.env.LINODE_PUBLIC_KEY
+      linodePublicKey: process.env.LINODE_PUBLIC_KEY,
+      enableDns: process.env.DNS_SUPPORT === "yes" ? true : false,
+      dnsFramework: process.env.DNS_FRAMEWORK || "Atomia"
     },
     payment: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY,
@@ -219,7 +225,9 @@ var config = {
       stripePlanBBAmount: '19990',
       githubPublicKey: process.env.GITHUB_PUBLIC_KEY,
       bitbucketPublicKey: process.env.BITBUCKET_PUBLIC_KEY,
-      linodePublicKey: process.env.LINODE_PUBLIC_KEY
+      linodePublicKey: process.env.LINODE_PUBLIC_KEY,
+      enableDns: process.env.DNS_SUPPORT === "yes" ? true : false,
+      dnsFramework: process.env.DNS_FRAMEWORK || "Atomia"
     },
     payment: {
       stripeKey: process.env.STRIPE_PUBLIC_KEY,

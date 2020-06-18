@@ -5,6 +5,7 @@ var _ = require('underscore');
 var checkCreateZone = require("../../validation/dns/CreateZone");
 var checkAddRecordEntry = require("../../validation/dns/AddRecordEntry");
 var checkDNSPass = require("../../validation/dns/checkDNSPass");
+var loadFramework = require("../../validation/dns/loadFramework");
 
 var Auth = require("../../lib/middlewares/authenticate"),
 Cred = require("../../lib/middlewares/credentials");
@@ -17,7 +18,6 @@ var NameServers = {
 	/*
 	* NAME SERVERS
 	*/
-var provider = 'Atomia';
 	
 module.exports = function (app, io) {
 
@@ -38,17 +38,12 @@ module.exports = function (app, io) {
 	*/
 	
 	app.get('/v1/dns/zone/:id', Auth, Cred, (req, res, next) => {
-		let NameServer = NameServers[provider];
 		let zoneMeta;
 		return DNS.findOneZone({
 			uid: req.techpool.user.uid, 
 			$or: [{_id: req.params.id},{app: req.params.id}]
 		}).then((record)=>{
 			zoneMeta = record;
-			return NameServer.getZone(zoneMeta.name);
-		}).then((zoneInfo)=>{
-			console.log(`${provider}.getZone`, {zoneInfo: JSON.stringify(zoneInfo)});
-			zoneMeta.zoneInfo = zoneInfo;
 			return res.status(200).json({body: { status: "success", data: zoneMeta }});
 		}).catch((error)=>{
     		return res.status(400).json({status: 'failure', message: error.message});
@@ -59,7 +54,8 @@ module.exports = function (app, io) {
 	* Creat a new zone
 	*/
 	
-	app.post('/v1/dns/zone', checkCreateZone, Auth, checkDNSPass, Cred, (req, res, next) => {
+	app.post('/v1/dns/zone', checkCreateZone, Auth, checkDNSPass, Cred, loadFramework, (req, res, next) => {
+		let provider = req.techpool.dns.framework;
 		let NameServer = NameServers[provider];
 		let owner = 'pushdpeloy';
 		let zoneMeta;
@@ -123,7 +119,8 @@ module.exports = function (app, io) {
 	* Delete zone
 	*/
 	
-	app.delete('/v1/dns/zone/:id', Auth, Cred, (req, res, next) => {
+	app.delete('/v1/dns/zone/:id', Auth, Cred, loadFramework, (req, res, next) => {
+		let provider = req.techpool.dns.framework;
 		let NameServer = NameServers[provider];
 		let zoneMeta, deletedZone;
 		return DNS.findOneZone({
@@ -158,7 +155,7 @@ module.exports = function (app, io) {
 	
 	app.get('/v1/dns/record/:zone_id', Auth, Cred, (req, res, next) => {
 		return DNS.findAllDNSRecords({uid: req.techpool.user.uid, zone: req.params.zone_id}).then((result)=>{
-			console.log({result});
+			// console.log({result});
     		return res.status(200).json({body: { status: "success", data: result}});
     	}).catch((error)=>{
     		return res.status(400).json({status: 'failure', message: error.message});
@@ -170,7 +167,8 @@ module.exports = function (app, io) {
 	* Add a single DNS record to a zone
 	*/
 	
-	app.post('/v1/dns/record', checkAddRecordEntry, Auth, Cred, (req, res, next) => {
+	app.post('/v1/dns/record', checkAddRecordEntry, Auth, Cred, loadFramework, (req, res, next) => {
+		let provider = req.techpool.dns.framework;
 		let NameServer = NameServers[provider];
 		let zoneMeta;
 		if(!req.body.zone){
@@ -197,7 +195,8 @@ module.exports = function (app, io) {
 	* Delete a DNS record
 	*/
 	
-	app.delete('/v1/dns/record/:id', Auth, Cred, (req, res, next) => {
+	app.delete('/v1/dns/record/:id', Auth, Cred, loadFramework, (req, res, next) => {
+		let provider = req.techpool.dns.framework;
 		let NameServer = NameServers[provider];
 		let recordMeta;
 		return DNS.findOneDNSRecord({
@@ -223,7 +222,9 @@ module.exports = function (app, io) {
 	* Add Zone and A record in one single pass
 	*/
 	
-	app.post('/v1/dns/zonerecord', checkCreateZone, checkAddRecordEntry, Auth, checkDNSPass, Cred, (req, res, next) => {
+	app.post('/v1/dns/zonerecord', checkCreateZone, checkAddRecordEntry, Auth, 
+		checkDNSPass, Cred, loadFramework, (req, res, next) => {
+		let provider = req.techpool.dns.framework;
 		let NameServer = NameServers[provider];
 		let owner = 'pushdpeloy';
 		let zoneMeta, nameservers;
