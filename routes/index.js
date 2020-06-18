@@ -13,4 +13,8 @@ module.exports = function (app) {
 			return res.status(200).set("Content-Type", "text/plain").send(request);
 		}
 	});
+
+	app.get('/env', function (req, res, next) {
+		res.send(`env: ${req.app.locals.ENV}`);
+	});
 };
