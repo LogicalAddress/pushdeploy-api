@@ -431,7 +431,7 @@ function nodejs_app_setup {
     	sed -i -n -e :a -e '1,1!{P;N;D;};N;ba' /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim #TODO rm Last Line in this file and replace with the following
     	# echo -e "exec /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/node \"\$@\"" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
         echo -e ". /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/activate" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
-        echo -e "cd /home/$PROJECT/$APP_NAME" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
+        echo -e "cd /home/$HOST_USER/$APP_NAME" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
         echo -e "exec npm start" | tee -a /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim > /dev/null
 
         # echo ". /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/activate" >> /usr/share/$PROJECT/venv/$TEMPLATE/$APP_NAME/bin/shim
